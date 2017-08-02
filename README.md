@@ -7,6 +7,8 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Implement Section Header
     [ ] Implement Program Data
     [ ] Implement Section Data
+    [ ] Better way to convert a char value to int?
+    [ ] What about multi-byte char values?
 
 ## NOTES TO THE WORLD (and future Hark)
 ### Implementing new members of the Elf_Details struct involves updating the following:
@@ -21,5 +23,10 @@ This extremely light repository is made of very fine ELF links. This project is 
     gcc -c Harklehash.c
     gcc -o Elf_Scout Elf_Details.o Elven_Chain.o Harklehash.o
     ./Elf_Scout Elf_Scout
+
+```
+-or-
+```
+    clear; gcc -o Elf_Scout Elf_Details.c Elven_Chain.c Harklehash.c; ./Elf_Scout Elf_Scout
 
 ```
