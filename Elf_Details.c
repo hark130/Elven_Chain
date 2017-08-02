@@ -17,7 +17,7 @@ struct Elf_Details* read_elf(char* elvenFilename)
 	FILE* elfFile = NULL;				// File pointer of elvenFilename
 	size_t elfSize = 0;					// Size of the file in bytes
 	char* elfGuts = NULL;				// Holds contents of binary file
-	char* tmpPtr = NULL;				// Holds return value from strstr()
+	char* tmpPtr = NULL;				// Holds return value from strstr()/strncpy()
 	int tmpRetVal = 0;					// Holds return value from parse_elf()
 
 	/* INPUT VALIDATION */
@@ -91,8 +91,24 @@ struct Elf_Details* read_elf(char* elvenFilename)
 	}
 
 	/* PARSE ELF GUTS INTO STRUCT */
-	// Initialize Filename
+	// Allocate Filename
 	retVal->fileName = gimme_mem(strlen(elvenFilename) + 1, sizeof(char));
+	// Copy Filename
+	if (retVal->fileName)
+	{
+		tmpPtr = strncpy(retVal->fileName, elvenFilename, strlen(elvenFilename));
+		if(tmpPtr != retVal->fileName)
+		{
+			PERROR(errno);
+			fprintf(stderr, "ERROR: strncpy of filename into Elf_Details struct failed!\n");
+		}
+		else
+		{
+#ifdef DEBUGLEROAD
+			puts(retVal->fileName);  // DEBUGGING
+#endif // DEBUGLEROAD
+		}
+	}
 	// Initialize Remaining Struct Members
 	tmpRetVal = parse_elf(retVal, elfGuts);
 
@@ -139,7 +155,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	if (tmpPtr != elven_contents)
 	{
 		PERROR(errno);
-		printf("This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elven_contents, ELF_H_MAGIC_NUM, tmpPtr);
+		fprintf(stderr, "This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elven_contents, ELF_H_MAGIC_NUM, tmpPtr);
 		retVal = ERROR_ORC_FILE;
 		return retVal;
 	}
@@ -212,11 +228,11 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		// Class
 		if (elven_file->elfClass)
 		{
-			fprintf(stream, "Class:\t%s\n", elven_file->elfClass);
+			fprintf(stream, "Class:\t\t%s\n", elven_file->elfClass);
 		}
 		else
 		{
-			fprintf(stream, "Class:\t%s\n", notConfigured);	
+			fprintf(stream, "Class:\t\t%s\n", notConfigured);	
 		}
 		// Endianess
 		if (elven_file->endianess)
