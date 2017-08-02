@@ -3,6 +3,15 @@
 #include <string.h>
 
 
+// Purpose: Open and parse an ELF file.  Allocate, configure and return Elf_Details pointer.
+// Input:	Filename, relative or absolute, to an ELF file
+// Output:	A dynamically allocated Elf_Details struct that contains information about elvenFilename
+struct Elf_Details* parse_elf(char* elvenFilename)
+{
+	
+}
+
+
 // Purpose:	Print human-readable details about an ELF file
 // Input:
 //			elven_file - A Elf_Details struct that contains data about an ELF file
@@ -15,7 +24,7 @@
 void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPrint, FILE* stream)
 {
 	/* LOCAL VARIABLES */
-	
+	const char notConfigured[] = { "!NOT CONFIGURED!"};
 
 	/* INPUT VALIDATION */
 	if (!stream)
@@ -39,8 +48,51 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	/* ELF HEADER */
 	if (sectionsToPrint & PRINT_ELF_HEADER || sectionsToPrint & PRINT_EVERYTHING)
 	{
+		// Header
 		print_fancy_header("ELF HEADER");
-
+		// Filename
+		if (elven_file->fileName)
+		{
+			fprint(stream, "Filename:\t%s\n", elven_file->fileName);
+		}
+		else
+		{
+			fprint(stream, "Filename:\t%s\n", notConfigured);	
+		}
+		// Class
+		if (elven_file->class)
+		{
+			fprint(stream, "Class:\t%s\n", elven_file->class);
+		}
+		else
+		{
+			fprint(stream, "Class:\t%s\n", notConfigured);	
+		}
+		// Endianess
+		if (elven_file->endianess)
+		{
+			fprint(stream, "Endianess:\t%s\n", elven_file->endianess);
+		}
+		else
+		{
+			fprint(stream, "Endianess:\t%s\n", notConfigured);	
+		}
+		// ELF Version
+		fprintf(stream, "ELF Version:\t%d\n", elven_file->version);
+		// Target OS ABI
+		if (elven_file->targetOS)
+		{
+			fprint(stream, "Target OS ABI:\t%s\n", elven_file->targetOS);
+		}
+		else
+		{
+			fprint(stream, "Target OS ABI:\t%s\n", notConfigured);	
+		}
+		// Version of the ABI
+		fprintf(stream, "ABI Version:\t%d\n", elven_file->ABIversion);
+		// Type of ELF File
+		// IMPLEMENT THIS LATER
+		// Section delineation
 		fprintf(stream, "\n\n");
 	}
 
