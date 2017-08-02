@@ -3,7 +3,9 @@
 
 /*
  *	USAGE:
- *		Start - 	
+ *		Start - add_entry() to build a list
+ *		Step - Use lookup_*() functions to find data
+ *		Stop - destroy_a_list() to free allocated memory
  */
 
 struct HarkleDict 
