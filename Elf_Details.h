@@ -11,8 +11,9 @@ struct Elf_Details
 	int type;			// The type of ELF file
 }
 
-
-/* ELF HEADER */
+/****************************/
+/***** ELF HEADER START *****/
+/****************************/
 // Magic Number 0x00 - 0x03
 #define ELF_H_MAGIC_NUM		"\x7f\x45\x4c\x46"	// 7F E L F
 // Class 0x04
@@ -51,4 +52,35 @@ struct Elf_Details
 #define ELF_H_TYPE_EXECUTABLE	"\x2"			// 2
 #define ELF_H_TYPE_SHARED		"\x3"			// 3
 #define ELF_H_TYPE_CORE			"\x4"			// 4
+/****************************/
+/***** ELF HEADER STOP ******/
+/****************************/
 
+/* sectionsToPrint Flags for print_elf_details() */
+#define PRINT_EVERYTHING		((unsigned int)1)			// Print everything
+#define PRINT_ELF_HEADER		(((unsigned int)1) << 1)	// Print the ELF header
+#define PRINT_ELF_PRGRM_HEADER	(((unsigned int)1) << 2)	// Print the Program header
+#define PRINT_ELF_SECTN_HEADER	(((unsigned int)1) << 3)	// Print the Section header
+#define PRINT_ELF_PRGRM_DATA	(((unsigned int)1) << 4)	// Print the Program header data
+#define PRINT_ELF_SECTN_DATA	(((unsigned int)1) << 5)	// Print the Section header data 
+
+
+// Purpose:	Print human-readable details about an ELF file
+// Input:
+//			elven_file - A Elf_Details struct that contains data about an ELF file
+//			sectionsToPrint - Bitwise AND the "PRINT_*" macros into this variable
+//				to control what the function actually prints.
+//			stream - A stream to send the information to (e.g., stdout, A file)
+// Output:	None
+// Note:	This function will print the relevant data from elven_file into stream
+//				based on the flags found in sectionsToPrint
+void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPrint, FILE* stream);
+
+// Purpose:	Prints an uppercase title surrounded by delimiters
+// Input:
+//			stream - Stream to print the header to
+//			title - Title to print
+//			delimiter - Single character to create the box
+// Output:	None
+// Note:	Automatically sizes the box
+void print_fancy_header(FILE* stream, char* title, unsigned char delimiter);
