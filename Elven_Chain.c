@@ -1,5 +1,8 @@
+#define ERROR_SUCCESS	((int)0)
 #define ERROR_BAD_ARGS 	((int)-1)
+#define ERROR_NOT_ELF	((int)-2)
 
+#include "Elf_Constans.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +25,11 @@ do { if (errno) { printf("Error Number:\t%d\nError Description:\t%s\n", errno, s
 #endif // PERROR
 #endif // DEBUGLEROAD
 
+struct Elf_Info
+{
+
+};
+
 
 size_t file_len(FILE* openFile);
 size_t print_it(char* buff, size_t size);
@@ -29,10 +37,11 @@ size_t print_it(char* buff, size_t size);
 int main(int argc, char *argv[])
 {
 	/* 1. LOCAL VARIABLES */
-	int retVal = 0;
+	int retVal = ERROR_SUCCESS;
 	FILE* elfFile = NULL;
 	size_t elfSize = 0;
 	char* elfGuts = NULL;
+	char* tmpPtr = NULL;
 
 	/* 2. INPUT VALIDATTION */
 	if (argc != 2)
@@ -41,7 +50,7 @@ int main(int argc, char *argv[])
 		return ERROR_BAD_ARGS;
 	}
 
-	/* READ ELF FILE */
+	/* 3. READ ELF FILE */
 	// OPEN FILE
 	elfFile = fopen(argv[1], "rb");
 	PERROR(errno);  // DEBUGGING
@@ -69,13 +78,21 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* PARSE BUFFER */
+	/* 4. PARSE BUFFER */
 	if (elfGuts)
 	{
-
+		// 4.1. Find the beginning of the ELF Header
+		tmpPtr = strstr(elfGuts, ELF_MAGIC_NUM);
+		// printf("elfGuts:\t%p\nMagic Num:\t%p\n", elfGuts, tmpPtr);  // DEBUGGING
+		if (tmpPtr != elfGuts)
+		{
+			PERROR(errno);
+			printf("This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elfGuts, ELF_MAGIC_NUM, tmpPtr);
+			retVal = ERROR_NOT_ELF;
+		}
 	}
 
-	/* CLEAN UP */
+	/* 5. CLEAN UP */
 	// CLOSE FILE
 	if (elfFile)
 	{
