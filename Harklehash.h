@@ -1,4 +1,4 @@
-#indnef __HARKLEDICT_H__
+#ifndef __HARKLEDICT_H__
 #define __HARKLEDICT_H__
 
 /*

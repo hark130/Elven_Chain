@@ -1,4 +1,6 @@
 #include "Harklehash.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -36,7 +38,8 @@ struct HarkleDict* lookup_name(struct HarkleDict* headNode, char* needle)
 
             retVal = retVal->next;
         } while(retVal->next);
-
+    }
+    
     return NULL;  // Didn't find it
 }
 
@@ -61,7 +64,8 @@ struct HarkleDict* lookup_hash(struct HarkleDict* headNode, unsigned int needle)
 
             retVal = retVal->next;
         } while(retVal->next);
-
+    }
+    
     return NULL;  // Didn't find it
 }
 
@@ -86,6 +90,7 @@ struct HarkleDict* lookup_value(struct HarkleDict* headNode, int needle)
 
             retVal = retVal->next;
         } while(retVal->next);
+    }
 
     return NULL;  // Didn't find it
 }
@@ -142,7 +147,7 @@ struct HarkleDict* build_a_node(char* name, int value)
     {
         stringLength = strlen(name);
         // Allocate struct memory
-        retVal = (struct HarkleDict*)calloc(1, sizeof(HarkleDict));
+        retVal = (struct HarkleDict*)calloc(1, sizeof(struct HarkleDict));
 
         if (retVal)
         {
