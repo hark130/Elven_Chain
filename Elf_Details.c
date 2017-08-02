@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// #define SUPER_STR_ME(str) #str
+// #define EXTRA_STR_ME(str) SUPER_STR_ME(str)
+// #define STR_ME(str) EXTRA_STR_ME(str)
 
 // Purpose: Open and parse an ELF file.  Allocate, configure and return Elf_Details pointer.
 // Input:	Filename, relative or absolute, to an ELF file
@@ -137,8 +140,11 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	/* LOCAL VARIABLES */
 	int retVal = ERROR_SUCCESS;	// parse_elf() return value
 	char* tmpPtr = NULL;		// Holds return values from string functions
+	int tmpInt = 0;				// Holds various temporary return values
 	int dataOffset = 0;			// Used to offset into elven_contents
-	struct HarkleDict* elfHeaderClassDict = init_elf_header_class_dict();
+	char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
+	struct HarkleDict* elfHeaderClassDict = NULL;
+	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
 
 	/* INPUT VALIDATION */
 	if (!elven_struct || !elven_contents)
@@ -164,11 +170,46 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		return retVal;
 	}
 
+	/* PREPARE DYNAMICALLY ALLOCATED VARIABLES */
+	// Peformed here to avoid memory leak if elven_contents turns out to be an ORC File
+	tmpBuff = gimme_mem(strlen(elven_contents) + 1, sizeof(char));
+	elfHeaderClassDict = init_elf_header_class_dict();
+
 	// 2. Begin initializing the struct
 	// 2.1. Filename should already be initialized in calling function
 	// 2.2. ELF Class
 	dataOffset = 4;
-	fprintf(stdout, "ELF Class:\t%d\n", (*(elven_contents + dataOffset)));
+	// fprintf(stdout, "ELF Class:\t%d\n", (*(elven_contents + dataOffset)));  // DEBUGGING
+	// Unecessary?
+	// strncpy(tmpBuff, elven_contents + dataOffset, 1);  // Copy one byte from the data offset to tmpBuff
+	// fprintf(stdout, "tmpBuff now holds:\t%c (%d)\n", *tmpBuff, *tmpBuff);  // DEBUGGING
+	// tmpInt = atoi(tmpBuff);  // THIS DOESN'T WORK!
+	// tmpInt = (int)tmpBuff[0];  // Better way to do this?
+	tmpInt = (int)(*(elven_contents + dataOffset));
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	tmpNode = lookup_value(elfHeaderClassDict, tmpInt);
+	if (tmpNode)  // Found it
+	{
+		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
+		elven_struct->elfClass = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->elfClass)
+		{
+			if (strncpy(elven_struct->elfClass, tmpNode->name, strlen(tmpNode->name)) != elven_struct->elfClass)
+			{
+				fprintf(stderr, "ELF Class string '%s' not copied into ELF Struct!\n", tmpNode->name);
+			}
+// 			else
+// 			{
+// #ifdef DEBUGLEROAD
+// 				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->elfClass);
+// #endif // DEBUGLEROAD
+// 			}
+		} 
+	}
+	else
+	{
+		fprintf(stderr, "ELF Class %d not found in HarkleDict!\n", tmpInt);
+	}
 	// 2.3. Endianess
 	// IMPLEMENT NOW!
 	// 2.4. Version
@@ -179,6 +220,18 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// IMPLEMENT NOW!
 	// 2.7. Type
 	// Implement this later
+
+	/* CLEAN UP */
+	// Zeroize/Free/NULLify tempBuff
+	if (tmpBuff)
+	{
+		take_mem_back((void**)&tmpBuff, strlen(elven_contents) + 1, sizeof(char));
+	}
+	// Zeroize/Free/NULLify elfHeaderClassDict
+	if (elfHeaderClassDict)
+	{
+		tmpInt = destroy_a_list(&elfHeaderClassDict);
+	}
 
 	return retVal;
 }
@@ -578,10 +631,8 @@ struct HarkleDict* init_elf_header_class_dict(void)
 {
 	/* LOCAL VARIABLES */
 	struct HarkleDict* retVal = NULL;
-	char* arrayOfNames[] = {
-		STR_ME(ELF_H_CLASS_32),
-		STR_ME(ELF_H_CLASS_64)
-	};
+	char* arrayOfNames[] = { "32-bit format", "64-bit format" };
+	// fprintf(stdout, "ELF_H_CLASS_32:\t%s\n", STR_ME(ELF_H_CLASS_32));  // DEBUGGING
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
 	int arrayOfValues[] = { ELF_H_CLASS_32, ELF_H_CLASS_64 };
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);

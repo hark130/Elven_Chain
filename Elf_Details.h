@@ -13,7 +13,7 @@
 #define MAX_RETRIES		((int)10)	// Number of times to retry a function call before giving up
 #define ZEROIZE_CHAR	((char)'H') // Character used to memset free()'d memory
 #define HEADER_DELIM	((char)'#')	// Character used to print fance output headers
-#define DEBUGLEROAD					// No IDEs were harmed during the coding of this project
+// #define DEBUGLEROAD					// No IDEs were harmed during the coding of this project
 
 #ifndef DEBUGLEROAD
 #ifndef PERROR
@@ -26,8 +26,10 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #endif // PERROR
 #endif // DEBUGLEROAD
 
-#define STR_ME(str) SUPER_STR_ME(str)
-#define SUPER_STR_ME(str) #str
+// #define SUPER_STR_ME(str) #str
+// #define EXTRA_STR_ME(str) SUPER_STR_ME(str)
+// #define STR_ME(str) SUPER_STR_ME(#str)
+#define STR_ME(str) #str
 
 /****************************/
 /***** ELF HEADER START *****/

@@ -65,7 +65,7 @@ struct HarkleDict* lookup_hash(struct HarkleDict* headNode, unsigned int needle)
             retVal = retVal->next;
         } while(retVal->next);
     }
-    
+
     return NULL;  // Didn't find it
 }
 
@@ -83,13 +83,14 @@ struct HarkleDict* lookup_value(struct HarkleDict* headNode, int needle)
     {
         do
         {
+            // fprintf(stdout, "lookup_value()... retVal->value:\t%d\n", retVal->value);  // DEBUGGING
             if (needle == retVal->value)
             {
                     return retVal;  // Found it
             }
 
             retVal = retVal->next;
-        } while(retVal->next);
+        } while(retVal);
     }
 
     return NULL;  // Didn't find it
