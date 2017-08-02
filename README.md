@@ -14,11 +14,11 @@ This extremely light repository is made of very fine ELF links. This project is 
 * print_elf_details()
 * kill_elf()
 ### Compilation
-'''
-	clear
+```
+    clear
     gcc -c Elf_Details.c
     gcc -c Elven_Chain.c
     gcc -o Elf_Scout Elf_Details.o Elven_Chain.o
     ./Elf_Scout Elf_Scout
 
-'''
+```
