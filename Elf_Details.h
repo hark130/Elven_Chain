@@ -1,4 +1,7 @@
 // https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
+#ifndef __ELF_DETAILS_H__
+#define __ELF_DETAILS_H__
+
 #include <errno.h>
 #include <stdio.h>
 
@@ -8,6 +11,7 @@
 #define ERROR_ORC_FILE	((int)-3)	// Indicates this is not an ELF file
 #define MAX_RETRIES		((int)10)	// Number of times to retry a function call before giving up
 #define ZEROIZE_CHAR	((char)'H') // Character used to memset free()'d memory
+#define HEADER_DELIM	((char)'#')	// Character used to print fance output headers
 #define DEBUGLEROAD					// No IDEs were harmed during the coding of this project
 
 #ifndef DEBUGLEROAD
@@ -157,3 +161,5 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem);
 // Output:	ERROR_* as specified in Elf_Details.h
 // Note:	This function will modify the original variable in the calling function
 int kill_elf(struct Elf_Details** old_struct);
+
+#endif // __ELF_DETAILS_H__

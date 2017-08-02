@@ -1,5 +1,6 @@
 #include "Elf_Details.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -46,7 +47,7 @@ struct Elf_Details* read_elf(char* elvenFilename)
 			if (fread(elfGuts, sizeof(char), elfSize, elfFile) != elfSize)
 			{
 				PERROR(errno);  // DEBUGGING
-				take_mem_back(&elfGuts, strlen(elfGuts), sizeof(char));
+				take_mem_back((void**)&elfGuts, strlen(elfGuts), sizeof(char));
 				// memset(elfGuts, 0, elfSize);
 				// free(elfGuts);
 				// elfGuts = NULL;
@@ -73,7 +74,7 @@ struct Elf_Details* read_elf(char* elvenFilename)
 	if (!retVal)
 	{
 		PERROR(errno);
-		take_mem_back(&elfGuts)
+		take_mem_back((void**)&elfGuts, elfSize, sizeof(char));
 		// memset(elfGuts, 0, elfSize);
 		// free(elfGuts);
 		// elfGuts = NULL;
@@ -98,7 +99,7 @@ struct Elf_Details* read_elf(char* elvenFilename)
 	/* FINAL CLEAN UP */
 	if (elfGuts)
 	{
-		take_mem_back(&elfGuts, elfSize + 1, sizeof(char));
+		take_mem_back((void**)&elfGuts, elfSize + 1, sizeof(char));
 		// memset(elfGuts, 0, elfSize);
 		// free(elfGuts);
 		// elfGuts = NULL;
@@ -133,12 +134,12 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 
 	/* PARSE ELF FILE CONTENTS */
 	// 1. Find the beginning of the ELF Header
-	tmpPtr = strstr(elven_contents, ELF_MAGIC_NUM);
+	tmpPtr = strstr(elven_contents, ELF_H_MAGIC_NUM);
 	// printf("elven_contents:\t%p\nMagic Num:\t%p\n", elven_contents, tmpPtr);  // DEBUGGING
 	if (tmpPtr != elven_contents)
 	{
 		PERROR(errno);
-		printf("This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elven_contents, ELF_MAGIC_NUM, tmpPtr);
+		printf("This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elven_contents, ELF_H_MAGIC_NUM, tmpPtr);
 		retVal = ERROR_ORC_FILE;
 		return retVal;
 	}
@@ -198,44 +199,44 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	if (sectionsToPrint & PRINT_ELF_HEADER || sectionsToPrint & PRINT_EVERYTHING)
 	{
 		// Header
-		print_fancy_header("ELF HEADER");
+		print_fancy_header(stream, "ELF HEADER", HEADER_DELIM);
 		// Filename
 		if (elven_file->fileName)
 		{
-			fprint(stream, "Filename:\t%s\n", elven_file->fileName);
+			fprintf(stream, "Filename:\t%s\n", elven_file->fileName);
 		}
 		else
 		{
-			fprint(stream, "Filename:\t%s\n", notConfigured);	
+			fprintf(stream, "Filename:\t%s\n", notConfigured);	
 		}
 		// Class
 		if (elven_file->elfClass)
 		{
-			fprint(stream, "Class:\t%s\n", elven_file->elfClass);
+			fprintf(stream, "Class:\t%s\n", elven_file->elfClass);
 		}
 		else
 		{
-			fprint(stream, "Class:\t%s\n", notConfigured);	
+			fprintf(stream, "Class:\t%s\n", notConfigured);	
 		}
 		// Endianess
 		if (elven_file->endianess)
 		{
-			fprint(stream, "Endianess:\t%s\n", elven_file->endianess);
+			fprintf(stream, "Endianess:\t%s\n", elven_file->endianess);
 		}
 		else
 		{
-			fprint(stream, "Endianess:\t%s\n", notConfigured);	
+			fprintf(stream, "Endianess:\t%s\n", notConfigured);	
 		}
 		// ELF Version
 		fprintf(stream, "ELF Version:\t%d\n", elven_file->version);
 		// Target OS ABI
 		if (elven_file->targetOS)
 		{
-			fprint(stream, "Target OS ABI:\t%s\n", elven_file->targetOS);
+			fprintf(stream, "Target OS ABI:\t%s\n", elven_file->targetOS);
 		}
 		else
 		{
-			fprint(stream, "Target OS ABI:\t%s\n", notConfigured);	
+			fprintf(stream, "Target OS ABI:\t%s\n", notConfigured);	
 		}
 		// Version of the ABI
 		fprintf(stream, "ABI Version:\t%d\n", elven_file->ABIversion);
@@ -248,6 +249,8 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	/* PROGRAM HEADER */
 	if (sectionsToPrint & PRINT_ELF_PRGRM_HEADER || sectionsToPrint & PRINT_EVERYTHING)
 	{
+		// Header
+		print_fancy_header(stream, "PROGRAM HEADER", HEADER_DELIM);
 		// Implement later
 		fprintf(stream, "\n\n");
 	}
@@ -255,6 +258,8 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	/* SECTION HEADER */
 	if (sectionsToPrint & PRINT_ELF_SECTN_HEADER || sectionsToPrint & PRINT_EVERYTHING)
 	{
+		// Header
+		print_fancy_header(stream, "SECTION HEADER", HEADER_DELIM);
 		// Implement later
 		fprintf(stream, "\n\n");
 	}
@@ -262,6 +267,8 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	/* PROGRAM DATA */
 	if (sectionsToPrint & PRINT_ELF_PRGRM_DATA || sectionsToPrint & PRINT_EVERYTHING)
 	{
+		// Header
+		print_fancy_header(stream, "PROGRAM DATA", HEADER_DELIM);
 		// Implement later
 		fprintf(stream, "\n\n");
 	}
@@ -269,6 +276,8 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	/* SECTION DATA */
 	if (sectionsToPrint & PRINT_ELF_SECTN_DATA || sectionsToPrint & PRINT_EVERYTHING)
 	{
+		// Header
+		print_fancy_header(stream, "SECTION DATA", HEADER_DELIM);
 		// Implement later
 		fprintf(stream, "\n\n");
 	}
@@ -306,7 +315,7 @@ void print_fancy_header(FILE* stream, char* title, unsigned char delimiter)
 	fputc(0xA, stream);
 
 	// Second line
-	fprintf("%c%c%c %s %c%c%c\n", delimiter, delimiter, delimiter, title, delimiter, delimiter, delimiter);
+	fprintf(stream, "%c%c%c %s %c%c%c\n", delimiter, delimiter, delimiter, title, delimiter, delimiter, delimiter);
 
 	// Third line
 	for (i = 0; i < headerWidth; i++)
@@ -469,7 +478,7 @@ int kill_elf(struct Elf_Details** old_struct)
 			// char* fileName;		// Absolute or relative path
 			if ((*old_struct)->fileName)
 			{
-				retVal += take_mem_back(&((*old_struct)->fileName), strlen((*old_struct)->fileName), sizeof(char));
+				retVal += take_mem_back((void**)&((*old_struct)->fileName), strlen((*old_struct)->fileName), sizeof(char));
 				if (retVal)
 				{
 					PERROR(errno);
@@ -480,7 +489,7 @@ int kill_elf(struct Elf_Details** old_struct)
 			// char* elfClass;		// 32 or 64 bit
 			if ((*old_struct)->elfClass)
 			{
-				retVal += take_mem_back(&((*old_struct)->elfClass), strlen((*old_struct)->elfClass), sizeof(char));
+				retVal += take_mem_back((void**)&((*old_struct)->elfClass), strlen((*old_struct)->elfClass), sizeof(char));
 				if (retVal)
 				{
 					PERROR(errno);
@@ -491,7 +500,7 @@ int kill_elf(struct Elf_Details** old_struct)
 			// char* endianess;	// Little or Big
 			if ((*old_struct)->endianess)
 			{
-				retVal += take_mem_back(&((*old_struct)->endianess), strlen((*old_struct)->endianess), sizeof(char));
+				retVal += take_mem_back((void**)&((*old_struct)->endianess), strlen((*old_struct)->endianess), sizeof(char));
 				if (retVal)
 				{
 					PERROR(errno);
@@ -504,7 +513,7 @@ int kill_elf(struct Elf_Details** old_struct)
 			// char* targetOS;		// Target OS ABI
 			if ((*old_struct)->targetOS)
 			{
-				retVal += take_mem_back(&((*old_struct)->targetOS), strlen((*old_struct)->targetOS), sizeof(char));
+				retVal += take_mem_back((void**)&((*old_struct)->targetOS), strlen((*old_struct)->targetOS), sizeof(char));
 				if (retVal)
 				{
 					PERROR(errno);
@@ -518,7 +527,7 @@ int kill_elf(struct Elf_Details** old_struct)
 			(*old_struct)->type = 0;
 
 			/* FREE THE STRUCT ITSELF */
-			retVal += take_mem_back(old_struct, 1, sizeof(struct Elf_Details));
+			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
 			if (retVal)
 			{
 				PERROR(errno);
