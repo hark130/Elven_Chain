@@ -15,6 +15,7 @@ This extremely light repository is made of very fine ELF links. This project is 
 * kill_elf()
 ### Compilation
 '''
+	clear
     gcc -c Elf_Details.c
     gcc -c Elven_Chain.c
     gcc -o Elf_Scout Elf_Details.o Elven_Chain.o
