@@ -2,6 +2,7 @@
 #ifndef __ELF_DETAILS_H__
 #define __ELF_DETAILS_H__
 
+#include "Harklehash.h"
 #include <errno.h>
 #include <stdio.h>
 
@@ -25,14 +26,17 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #endif // PERROR
 #endif // DEBUGLEROAD
 
+#define STR_ME(str) SUPER_STR_ME(str)
+#define SUPER_STR_ME(str) #str
+
 /****************************/
 /***** ELF HEADER START *****/
 /****************************/
 // Magic Number 0x00 - 0x03
 #define ELF_H_MAGIC_NUM		"\x7f\x45\x4c\x46"	// 7F E L F
 // Class 0x04
-#define ELF_H_CLASS_32		"\x1"				// 1
-#define ELF_H_CLASS_64		"\x2"				// 2
+#define ELF_H_CLASS_32		0x01				// 1
+#define ELF_H_CLASS_64		0x02				// 2
 // Endianess 0x05
 #define ELF_H_DATA_LITTLE	"\x1"				// 1
 #define ELF_H_DATA_BIG		"\x2"				// 2
@@ -161,5 +165,11 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem);
 // Output:	ERROR_* as specified in Elf_Details.h
 // Note:	This function will modify the original variable in the calling function
 int kill_elf(struct Elf_Details** old_struct);
+
+// Purpose:	Build a HarkleDict of Elf Header Class definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_class_dict(void);
 
 #endif // __ELF_DETAILS_H__

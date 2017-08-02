@@ -1,4 +1,6 @@
 #include "Elf_Details.h"
+#include "Harklehash.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -133,8 +135,10 @@ struct Elf_Details* read_elf(char* elvenFilename)
 int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 {
 	/* LOCAL VARIABLES */
-	int retVal = ERROR_SUCCESS;
-	char* tmpPtr = NULL;
+	int retVal = ERROR_SUCCESS;	// parse_elf() return value
+	char* tmpPtr = NULL;		// Holds return values from string functions
+	int dataOffset = 0;			// Used to offset into elven_contents
+	struct HarkleDict* elfHeaderClassDict = init_elf_header_class_dict();
 
 	/* INPUT VALIDATION */
 	if (!elven_struct || !elven_contents)
@@ -161,9 +165,10 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2. Begin initializing the struct
-	// 2.1. Filename should be initialized in calling function
+	// 2.1. Filename should already be initialized in calling function
 	// 2.2. ELF Class
-	// IMPLEMENT NOW!
+	dataOffset = 4;
+	fprintf(stdout, "ELF Class:\t%d\n", (*(elven_contents + dataOffset)));
 	// 2.3. Endianess
 	// IMPLEMENT NOW!
 	// 2.4. Version
@@ -559,6 +564,42 @@ int kill_elf(struct Elf_Details** old_struct)
 	else
 	{
 		retVal = ERROR_NULL_PTR;
+	}
+
+	return retVal;
+}
+
+
+// Purpose:	Build a HarkleDict of Elf Header Class definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_class_dict(void)
+{
+	/* LOCAL VARIABLES */
+	struct HarkleDict* retVal = NULL;
+	char* arrayOfNames[] = {
+		STR_ME(ELF_H_CLASS_32),
+		STR_ME(ELF_H_CLASS_64)
+	};
+	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
+	int arrayOfValues[] = { ELF_H_CLASS_32, ELF_H_CLASS_64 };
+	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
+	int i = 0;
+
+	/* INPUT VALIDATION */
+	// Verify the parallel arrays are the same length
+	assert(numNames == numValues);
+
+	for (i = 0; i < numNames; i++)
+	{
+		retVal = add_entry(retVal, (*(arrayOfNames + i)), (*(arrayOfValues + i)));
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
+			break;
+		}
 	}
 
 	return retVal;
