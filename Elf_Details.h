@@ -20,18 +20,6 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #endif // PERROR
 #endif // DEBUGLEROAD
 
-struct Elf_Details
-{
-	char* fileName;		// Absolute or relative path
-	char* elfClass;		// 32 or 64 bit
-	char* endianess;	// Little or Big
-	int version;		// ELF version
-	char* targetOS;		// Target OS ABI
-	int ABIversion;		// Version of the ABI
-	int type;			// The type of ELF file
-}
-// All char* members should be dynamically allocated and later free()'d
-
 /****************************/
 /***** ELF HEADER START *****/
 /****************************/
@@ -84,6 +72,18 @@ struct Elf_Details
 #define PRINT_ELF_SECTN_HEADER	(((unsigned int)1) << 3)	// Print the Section header
 #define PRINT_ELF_PRGRM_DATA	(((unsigned int)1) << 4)	// Print the Program header data
 #define PRINT_ELF_SECTN_DATA	(((unsigned int)1) << 5)	// Print the Section header data 
+
+struct Elf_Details
+{
+	char* fileName;		// Absolute or relative path
+	char* elfClass;		// 32 or 64 bit
+	char* endianess;	// Little or Big
+	int version;		// ELF version
+	char* targetOS;		// Target OS ABI
+	int ABIversion;		// Version of the ABI
+	int type;			// The type of ELF file
+};
+// All char* members should be dynamically allocated and later free()'d
 
 
 // Purpose: Open and parse an ELF file.  Allocate, configure and return Elf_Details pointer.
