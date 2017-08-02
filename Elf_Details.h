@@ -1,5 +1,6 @@
 // https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
 #include <errno.h>
+#include <stdio.h>
 
 #define ERROR_SUCCESS	((int)0)	// EUREKA!
 #define ERROR_NULL_PTR	((int)-1)	// NULL pointer
