@@ -7,3 +7,17 @@ This extremely light repository is made of very fine ELF links. This project is 
 [ ] Implement Section Header
 [ ] Implement Program Data
 [ ] Implement Section Data
+
+## NOTES TO THE WORLD (and future Hark)
+### Implementing new members of the Elf_Details struct involves updating the following:
+* parse_elf()
+* print_elf_details()
+* kill_elf()
+### Compilation
+'''
+    gcc -c Elf_Details.c
+    gcc -c Elven_Chain.c
+    gcc -o Elf_Scout Elf_Details.o Elven_Chain.o
+    ./Elf_Scout Elf_Scout
+
+'''
