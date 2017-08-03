@@ -87,6 +87,19 @@ struct Elf_Details* read_elf(char* elvenFilename)
 		elfFile = NULL;
 		return retVal;
 	}
+	else  // Set struct bigEndian member to something other than 0
+	{
+		// We don't want the program mistakenly thinking the architecture is little Endian
+		//	by default
+		if (ZEROIZE_VALUE != TRUE && ZEROIZE_VALUE != FALSE)
+		{
+			retVal->bigEndian = ZEROIZE_VALUE;
+		}
+		else
+		{
+			retVal->bigEndian = -1;
+		}
+	}
 
 	/* CLOSE ELF FILE */
 	if (elfFile)
@@ -708,8 +721,23 @@ int kill_elf(struct Elf_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
-			// int type;			// The type of ELF file
-			(*old_struct)->type = 0;  // FIX THIS... IT'S NOT AN INT ANYMORE!
+			// char* type;			// The type of ELF file
+			if ((*old_struct)->type)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->type), strlen((*old_struct)->type), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->type free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->type.\n");
+#endif // DEBUGLEROAD
+				}
+			}
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
@@ -916,6 +944,42 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem)
 }
 
 
+// Purpose:	Convert consecutive characters into a single int IAW the specified endianess
+// Input:
+//			buffToConvert - Pointer to the buffer that holds the bytes in question
+//			numBytesToConvert - Number of bytes to add together from buffToConvert
+//			bigEndian - If True, bigEndian byte ordering
+// Output:	The sum of the raw values found in the first numBytesToConvert bytes in
+//				buffToConvert on success
+//			ERROR_* as specified in Elf_Details.h on failure
+int convert_char_to_int(char* buffToConvert, int numBytesToConvert, int bigEndian)
+{
+	/* LOCAL VARIABLES */
+	int retVal = 0;
+
+	/* INPUT VALIDATION */
+	if (!buffToConvert)
+	{
+		retVal = ERROR_NULL_PTR;
+		return retVal;
+	}
+	else if (numBytesToConvert < 1)
+	{
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
+	else if (bigEndian != TRUE && bigEndian != FALSE)
+	{
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
+
+
+
+	return retVal;
+}
+
+
 // Purpose:	Build a HarkleDict of Elf Header Class definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
@@ -1039,13 +1103,15 @@ struct HarkleDict* init_elf_header_elf_type_dict(void)
 	/* LOCAL VARIABLES */
 	struct HarkleDict* retVal = NULL;
 	char* arrayOfNames[] = { \
-		"Relocatable", "Executable", \
-		"Shared", "Core",\
+		"No file type", "Relocatable file", \
+		"Executable file", "Shared object file", \
+		"Core file", \
 	};
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
 	int arrayOfValues[] = { \
-		ELF_H_TYPE_RELOCATABLE, ELF_H_TYPE_EXECUTABLE, \
-		ELF_H_TYPE_SHARED, ELF_H_TYPE_CORE, \
+		ELF_H_TYPE_NONE, ELF_H_TYPE_RELOCATABLE, \
+		ELF_H_TYPE_EXECUTABLE, ELF_H_TYPE_SHARED, \
+		ELF_H_TYPE_CORE, \
 	};
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
 	int i = 0;
@@ -1061,6 +1127,28 @@ struct HarkleDict* init_elf_header_elf_type_dict(void)
 		{
 			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
 				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
+			break;
+		}
+	}
+
+	for (i = ELF_H_TYPE_LO_OS; i <= ELF_H_TYPE_HI_OS, i++)
+	{
+		retVal = add_entry(retVal, "Operating system-specific", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Operating system-specific", i);
+			break;
+		}
+	}
+
+	for (i = ELF_H_TYPE_LO_PROC; i <= ELF_H_TYPE_HI_PROC, i++)
+	{
+		retVal = add_entry(retVal, "Processor-specific", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Processor-specific", i);
 			break;
 		}
 	}

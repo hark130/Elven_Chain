@@ -1,4 +1,6 @@
 // https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
+// Additional macros gleaned from:
+//	http://www.sco.com/developers/gabi/2000-07-17/ch4.eheader.html
 #ifndef __ELF_DETAILS_H__
 #define __ELF_DETAILS_H__
 
@@ -77,10 +79,15 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 // Pad 0x09 - 0x0F
 // 		Currently unused
 // Type 0x10 - 0x11
+#define ELF_H_TYPE_NONE			0x00			// 0
 #define ELF_H_TYPE_RELOCATABLE	0x01			// 1
 #define ELF_H_TYPE_EXECUTABLE	0x02			// 2
 #define ELF_H_TYPE_SHARED		0x03			// 3
 #define ELF_H_TYPE_CORE			0x04			// 4
+#define ELF_H_TYPE_LO_OS		0xFE00			// 65024
+#define ELF_H_TYPE_HI_OS		0xFEFF			// 65279
+#define ELF_H_TYPE_LO_PROC		0xFF00			// 65280
+#define ELF_H_TYPE_HI_PROC		0xFFFF			// 65535
 /****************************/
 /***** ELF HEADER STOP ******/
 /****************************/
