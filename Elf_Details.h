@@ -93,6 +93,7 @@ struct Elf_Details
 	int version;		// ELF version
 	char* targetOS;		// Target OS ABI
 	int ABIversion;		// Version of the ABI
+	char* pad;			// Unused portion
 	int type;			// The type of ELF file
 };
 // All char* members should be dynamically allocated and later free()'d

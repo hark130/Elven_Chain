@@ -225,7 +225,11 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->elfClass);
 #endif // DEBUGLEROAD
 			}
-		} 
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct elfClass!\n");
+		}
 	}
 	else
 	{
@@ -258,7 +262,11 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->endianess);
 #endif // DEBUGLEROAD
 			}
-		} 
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct Endianess!\n");
+		}
 	}
 	else
 	{
@@ -296,7 +304,11 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->targetOS);
 #endif // DEBUGLEROAD
 			}
-		} 
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct Target OS ABI!\n");
+		}
 	}
 	else
 	{
@@ -312,6 +324,30 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	dataOffset += 1;  // 8
 	elven_struct->ABIversion = (int)(*(elven_contents + dataOffset));
 	// fprintf(stdout, "elven_struct->ABIversion now holds:\t%d\n", elven_struct->ABIversion);  // DEBUGGING
+
+	// 2.6. Pad
+	// char* pad;			// Unused portion
+	// Not dynamically sized.  Statically sized.  Also, not performing a lookup.  Merely storing
+	//	whatever was found in the Pad.
+	dataOffset += 1;  // 9
+	elven_struct->pad = gimme_mem(0x7 + 0x1, sizeof(char));
+	if (elven_struct->pad)
+	{
+		if (memcpy(elven_struct->pad, elven_contents + dataOffset, 7) != elven_struct->pad)
+		{
+			fprintf(stderr, "ELF Pad not mem copied into ELF Struct!\n");
+		}
+		else
+		{
+#ifdef DEBUGLEROAD
+			fprintf(stdout, "Successfully mem copied Pad into ELF Struct!\n");
+#endif // DEBUGLEROAD
+		}
+	}
+	else
+	{
+		fprintf(stderr, "Error allocating memory for Elf Struct Pad!\n");
+	}
 
 	// 2.7. Type
 	// Implement this later
@@ -338,7 +374,8 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPrint, FILE* stream)
 {
 	/* LOCAL VARIABLES */
-	const char notConfigured[] = { "¡NOT CONFIGURED!"};
+	const char notConfigured[] = { "¡NOT CONFIGURED!"};	// Standard error output
+	int i = 0;  										// Iterating variable
 
 	/* INPUT VALIDATION */
 	if (!stream)
@@ -428,6 +465,20 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		}
 		// Version of the ABI
 		fprintf(stream, "ABI Version:\t%d\n", elven_file->ABIversion);
+		// Pad
+		if (elven_file->pad)
+		{
+			fprintf(stream, "Pad:\t\t");
+			for (i = 0; i < 7; i++)
+			{
+				fprintf(stream, "%c(%d) ", (*(elven_file->pad + i)), (*(elven_file->pad + i)));
+			}
+			fprintf(stream, "\n");
+		}
+		else
+		{
+			fprintf(stream, "Pad:\t%s\n", notConfigured);	
+		}
 		// Type of ELF File
 		// IMPLEMENT THIS LATER
 		// Section delineation
@@ -754,6 +805,24 @@ int kill_elf(struct Elf_Details** old_struct)
 			}
 			// int ABIversion;		// Version of the ABI
 			(*old_struct)->ABIversion = 0;
+			// char* pad;			// Unused portion
+			// NOTE: This char* member is statically sized based on ELF Header specifications
+			if ((*old_struct)->pad)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->pad), 0x7, sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->pad free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->pad.\n");
+#endif // DEBUGLEROAD
+				}
+			}
 			// int type;			// The type of ELF file
 			(*old_struct)->type = 0;
 
