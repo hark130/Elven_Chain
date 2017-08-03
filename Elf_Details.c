@@ -256,14 +256,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrClassDict);
 	}
 
-	// 2.3. Endianess (OFFSET: 0x05)
+	// 2.3. Endianness (OFFSET: 0x05)
 	dataOffset += 1;  // 5
 	tmpInt = (int)(*(elven_contents + dataOffset));
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
 	tmpNode = lookup_value(elfHdrEndianDict, tmpInt);
 	if (tmpNode)  // Found it
 	{
-		// Set endianess bool (bigEndian)
+		// Set endianness bool (bigEndian)
 		if (tmpInt == 2)
 		{
 			elven_struct->bigEndian = TRUE;
@@ -273,28 +273,28 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 			elven_struct->bigEndian = FALSE;
 		}
 		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
-		elven_struct->endianess = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
-		if (elven_struct->endianess)
+		elven_struct->endianness = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->endianness)
 		{
-			if (strncpy(elven_struct->endianess, tmpNode->name, strlen(tmpNode->name)) != elven_struct->endianess)
+			if (strncpy(elven_struct->endianness, tmpNode->name, strlen(tmpNode->name)) != elven_struct->endianness)
 			{
-				fprintf(stderr, "ELF Endianess string '%s' not copied into ELF Struct!\n", tmpNode->name);
+				fprintf(stderr, "ELF Endianness string '%s' not copied into ELF Struct!\n", tmpNode->name);
 			}
 			else
 			{
 #ifdef DEBUGLEROAD
-				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->endianess);
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->endianness);
 #endif // DEBUGLEROAD
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Error allocating memory for Elf Struct Endianess!\n");
+			fprintf(stderr, "Error allocating memory for Elf Struct Endianness!\n");
 		}
 	}
 	else
 	{
-		fprintf(stderr, "ELF Endianess %d not found in HarkleDict!\n", tmpInt);
+		fprintf(stderr, "ELF Endianness %d not found in HarkleDict!\n", tmpInt);
 	}
 	// Zeroize/Free/NULLify elfHdrEndianDict
 	if (elfHdrEndianDict)
@@ -504,18 +504,18 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Class:\t\t%s\n", notConfigured);	
 		}
-		// Endianess
-		if (elven_file->endianess)
+		// Endianness
+		if (elven_file->endianness)
 		{
-			fprintf(stream, "Endianess:\t%s\n", elven_file->endianess);
+			fprintf(stream, "Endianness:\t%s\n", elven_file->endianness);
 		}
 		else if (elven_file->bigEndian == TRUE)
 		{
-			fprintf(stream, "Endianess:\t%s\n", "Big Endian");
+			fprintf(stream, "Endianness:\t%s\n", "Big Endian");
 		}
 		else
 		{
-			fprintf(stream, "Endianess:\t%s\n", notConfigured);	
+			fprintf(stream, "Endianness:\t%s\n", notConfigured);	
 		}
 		// ELF Version
 		fprintf(stream, "ELF Version:\t%d\n", elven_file->version);
@@ -663,20 +663,20 @@ int kill_elf(struct Elf_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
-			// char* endianess;	// Little or Big
-			if ((*old_struct)->endianess)
+			// char* endianness;	// Little or Big
+			if ((*old_struct)->endianness)
 			{
-				retVal += take_mem_back((void**)&((*old_struct)->endianess), strlen((*old_struct)->endianess), sizeof(char));
+				retVal += take_mem_back((void**)&((*old_struct)->endianness), strlen((*old_struct)->endianness), sizeof(char));
 				if (retVal)
 				{
 					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->endianess free!\n", retVal);
+					fprintf(stderr, "take_mem_back() returned %d on struct->endianness free!\n", retVal);
 					retVal = ERROR_SUCCESS;
 				}
 				else
 				{
 #ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->endianess.\n");
+					fprintf(stdout, "take_mem_back() successfully freed struct->endianness.\n");
 #endif // DEBUGLEROAD
 				}
 			}
@@ -944,7 +944,7 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem)
 }
 
 
-// Purpose:	Convert consecutive characters into a single int IAW the specified endianess
+// Purpose:	Convert consecutive characters into a single int IAW the specified endianness
 // Input:
 //			buffToConvert - Pointer to the buffer that holds the bytes in question
 //			dataOffset - Starting location in buffToConvert

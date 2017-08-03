@@ -51,7 +51,7 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 // Class 0x04
 #define ELF_H_CLASS_32			0x01			// 1
 #define ELF_H_CLASS_64			0x02			// 2
-// Endianess 0x05
+// Endianness 0x05
 #define ELF_H_DATA_LITTLE		0x01			// 1
 #define ELF_H_DATA_BIG			0x02			// 2
 // Version 0x06
@@ -106,7 +106,7 @@ struct Elf_Details
 	char* fileName;		// Absolute or relative path
 	char* magicNum;		// First four bytes of file
 	char* elfClass;		// 32 or 64 bit
-	char* endianess;	// Little or Big
+	char* endianness;	// Little or Big
 	int bigEndian;		// If TRUE, bigEndian
 	int version;		// ELF version
 	char* targetOS;		// Target OS ABI
@@ -188,7 +188,7 @@ void* gimme_mem(size_t numElem, size_t sizeElem);
 // Note:	Modifies the pointer to *buf by making it NULL
 int take_mem_back(void** buff, size_t numElem, size_t sizeElem);
 
-// Purpose:	Convert consecutive characters into a single int IAW the specified endianess
+// Purpose:	Convert consecutive characters into a single int IAW the specified endianness
 // Input:
 //			buffToConvert - Pointer to the buffer that holds the bytes in question
 //			dataOffset - Starting location in buffToConvert

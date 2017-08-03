@@ -32,6 +32,8 @@ int main(void)
 {
 	/* LOCAL VARIABLES */
 	char buff[BUFF_SIZE + 1] = { 0 };			// Reusable buffer
+	// Buffer that contains UINT_MAX, UINT_MAX + 1, and UINT_MIN for all endianness
+	char uintMax[] = { "FFFFFFFFFFFFFFFFFF0000000000001000000000000FFFFFFFFFFFFFFFF" };	
 	unsigned int i = 0;							// Iterating variable
 	struct cctiTestGroup** tstGrpArr = NULL;	// Array of test group pointers
 	struct cctiTestGroup* currTstGrp = NULL;	// Current test group pointer
@@ -91,8 +93,12 @@ int main(void)
 
 	// BOUNDARY
 	//// Boundary1 - Normal input, start of buff (pass)
+	struct cctiTest Boundary1 = { "Boundary1", buff, 0, 5, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0001020304, NULL };
 	//// Boundary2 - Normal input, end of buff (pass)
+	struct cctiTest Boundary2 = { "Boundary2", buff, BUFF_SIZE, 2, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x7F7E, NULL };
 	//// Boundary3 - Normal input, one char to convert (pass)
+	struct cctiTest Boundary3a = { "Boundary3a", buff, 13, 1, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0D, NULL };
+	struct cctiTest Boundary3b = { "Boundary3b", buff, 13, 1, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0D, NULL };
 	//// Boundary4 - Value equates to UINT_MAX (pass)
 	//// Boundary5 - Value equates to UINT_MAX + 1 (fail)
 	//// Boundary6 - Value equates to UINT_MIN (pass)
@@ -100,16 +106,8 @@ int main(void)
 	//// Boundary8 - numBytesToConvert == 8 (pass)
 
 	// SPECIAL
-	//// Verify translation value is not zeroized on Error input
-	////// Special1 - NULL buff
-	////// Special2 - NULL translation
-	////// Special3 - negative dataOffset
-	////// Special4 - negative numBytesToConvert
-	////// Special5 - zero numBytesToConvert
-	////// Special6 - invalid bigEndian
-	////// Special7 - Value too large for an unsigned int
-	////// Special8 - zero numBytesToConvert
-	////// Special9 - Value equates to UINT_MAX + 1
+	//// Special1 - Start of buff, numBytes > 1, bigEndian == FALSE (fail)
+	//// Special2 - End of buff, numBytes > 1, bigEndian == TRUE (fail)
 
 	// Run this test separate in order to avoid redefining the struct
 	// Pass NULL as the unsigned int* in the function call
@@ -188,7 +186,7 @@ int main(void)
 // int convert_char_to_int(char* buffToConvert, int dataOffset, \
 // 	                    int numBytesToConvert, int bigEndian, \
 // 	                    unsigned int* translation);
-// Purpose:	Convert consecutive characters into a single int IAW the specified endianess
+// Purpose:	Convert consecutive characters into a single int IAW the specified endianness
 // Input:
 //			buffToConvert - Pointer to the buffer that holds the bytes in question
 //			dataOffset - Starting location in buffToConvert
