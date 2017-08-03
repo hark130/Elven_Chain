@@ -12,6 +12,7 @@
 #define ERROR_NULL_PTR	((int)-1)	// NULL pointer
 #define ERROR_BAD_ARG	((int)-2)	// Bad arguments
 #define ERROR_ORC_FILE	((int)-3)	// Indicates this is not an ELF file
+#define ERROR_OVERFLOW	((int)-4)	// The given data type will overflow
 #define MAX_RETRIES		((int)10)	// Number of times to retry a function call before giving up
 #define ZEROIZE_VALUE	((int)42)	// Value used to 'clear' int values
 #define ZEROIZE_CHAR	((char)'H') // Character used to memset free()'d memory

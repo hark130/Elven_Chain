@@ -947,20 +947,39 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem)
 // Purpose:	Convert consecutive characters into a single int IAW the specified endianess
 // Input:
 //			buffToConvert - Pointer to the buffer that holds the bytes in question
-//			numBytesToConvert - Number of bytes to add together from buffToConvert
+//			dataOffset - Starting location in buffToConvert
+//			numBytesToConvert - Number of bytes to translate starting at buffToConvert[dataOffset]
 //			bigEndian - If True, bigEndian byte ordering
-// Output:	The sum of the raw values found in the first numBytesToConvert bytes in
+//			translation [out] - Pointer to memory space to hold the translated value
+// Output:	The translation of the raw values found in the first numBytesToConvert bytes in
 //				buffToConvert on success
 //			ERROR_* as specified in Elf_Details.h on failure
-int convert_char_to_int(char* buffToConvert, int numBytesToConvert, int bigEndian)
+// Note:	Behavior is as follows:
+//			If bigEndian == TRUE:
+//				Addr + 0x0:	0xFE
+//				Addr + 0x1:	0xFF
+//				Returns:	0xFEFF == 65279
+//			If bigEndian == FALSE:
+//				Addr + 0x0:	0xFE
+//				Addr + 0x1:	0xFF
+//				Returns:	0xFFFE == 65534
+//			Also, translation will always be zeroized if input validation is passed
+int convert_char_to_int(char* buffToConvert, int dataOffset, int numBytesToConvert, int bigEndian, unsigned int* translation)
 {
 	/* LOCAL VARIABLES */
-	int retVal = 0;
+	int retVal = ERROR_SUCCESS;	// Function return value
+	unsigned int value = 0;		// Holds the current translated value prior to return
+	int i = 0;					// Iterating variable
 
 	/* INPUT VALIDATION */
-	if (!buffToConvert)
+	if (!buffToConvert || !translation)
 	{
 		retVal = ERROR_NULL_PTR;
+		return retVal;
+	}
+	else if (dataOffset < 0)
+	{
+		retVal = ERROR_BAD_ARG;
 		return retVal;
 	}
 	else if (numBytesToConvert < 1)
@@ -973,9 +992,44 @@ int convert_char_to_int(char* buffToConvert, int numBytesToConvert, int bigEndia
 		retVal = ERROR_BAD_ARG;
 		return retVal;
 	}
+	else if (numBytesToConvert > sizeof(value))
+	{
+		retVal = ERROR_OVERFLOW;
+		return retVal;
+	}
+	else
+	{
+		// Zeroize translation
+		*translation = value;
+	}
 
+	if (bigEndian == TRUE)
+	{
+		for (i = dataOffset; i < (dataOffset + numBytesToConvert); i++)
+		{
+			value |= (int)(*(buffToConvert + i));
+			value << 8;
+		}
+		// We started at the top and now we're here
+	}
+	else if (bigEndian == FALSE)
+	{
+		for (i = (dataOffset + numBytesToConvert - 1); i >= dataOffset ; i--)
+		{
+			value |= (int)(*(buffToConvert + i));
+			value << 8;
+		}
+		// We started at the top and now we're here
+	}
+	else
+	{
+		// How did we get here?!
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
 
-
+	// Done
+	*translation = value;
 	return retVal;
 }
 
