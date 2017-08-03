@@ -67,12 +67,27 @@ int main(void)
 
 	// ERROR
 	//// Error1 - NULL buff
+	struct cctiTest Error1 = { "Error1", NULL, 1, 3, TRUE, DEFAULT_INT, ERROR_NULL_PTR, DEFAULT_UINT, DEFAULT_UINT, NULL };
 	//// Error2 - negative dataOffset
+	struct cctiTest Error2 = { "Error2", buff, -455, 3, FALSE, DEFAULT_INT, ERROR_BAD_ARG, DEFAULT_UINT, DEFAULT_UINT, NULL };
 	//// Error3 - negative numBytesToConvert
+	struct cctiTest Error3 = { "Error3", buff, 126, -455, TRUE, DEFAULT_INT, ERROR_BAD_ARG, DEFAULT_UINT, DEFAULT_UINT, NULL };
 	//// Error4 - zero numBytesToConvert
+	struct cctiTest Error4 = { "Error4", buff, 126, 0, FALSE, DEFAULT_INT, ERROR_BAD_ARG, DEFAULT_UINT, DEFAULT_UINT, NULL };
 	//// Error5 - invalid bigEndian
-	//// Error6 - NULL translation
-	//// Error7 - Value too large for an unsigned int
+	struct cctiTest Error5a = { "Error5a", buff, 1, 3, TRUE + 1, DEFAULT_INT, ERROR_BAD_ARG, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	struct cctiTest Error5b = { "Error5b", buff, 1, 3, FALSE - 1, DEFAULT_INT, ERROR_BAD_ARG, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	//// Error6 - Value too large for an unsigned int
+	struct cctiTest Error6 = { "Error6", buff, 120, 10, TRUE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	//// Link Tests
+	Error1.nextTest = &Error2;
+	Error2.nextTest = &Error3;
+	Error3.nextTest = &Error4;
+	Error4.nextTest = &Error5a;
+	Error5a.nextTest = &Error5b;
+	Error5b.nextTest = &Error6;
+	//// Create Test Group
+	struct cctiTestGroup ErrorUnitTests = { "Error Unit Tests", &Error1 };
 
 	// BOUNDARY
 	//// Boundary1 - Normal input, start of buff (pass)
@@ -96,8 +111,13 @@ int main(void)
 	////// Special8 - zero numBytesToConvert
 	////// Special9 - Value equates to UINT_MAX + 1
 
+	// Run this test separate in order to avoid redefining the struct
+	// Pass NULL as the unsigned int* in the function call
+	//// Error6 - NULL translation
+	struct cctiTest Separate1 = { "Separate1", buff, 1, 3, FALSE, DEFAULT_INT, ERROR_NULL_PTR, DEFAULT_UINT, DEFAULT_UINT, NULL };
+
 	// ARRAY OF TEST GROUPS
-	struct cctiTestGroup* arrayOfTests[] = { &NormalUnitTests, NULL };
+	struct cctiTestGroup* arrayOfTests[] = { &NormalUnitTests, &ErrorUnitTests, NULL };
 
 	/* RUN THE TESTS */
 	tstGrpArr = arrayOfTests;
