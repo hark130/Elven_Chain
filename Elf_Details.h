@@ -87,6 +87,7 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 struct Elf_Details
 {
 	char* fileName;		// Absolute or relative path
+	char* magicNum;		// First four bytes of file
 	char* elfClass;		// 32 or 64 bit
 	char* endianess;	// Little or Big
 	int version;		// ELF version

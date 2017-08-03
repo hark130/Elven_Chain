@@ -166,9 +166,24 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	if (tmpPtr != elven_contents)
 	{
 		PERROR(errno);
-		fprintf(stderr, "This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elven_contents, ELF_H_MAGIC_NUM, tmpPtr);
+		// fprintf(stderr, "This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elven_contents, ELF_H_MAGIC_NUM, tmpPtr);
 		retVal = ERROR_ORC_FILE;
 		return retVal;
+	}
+	else
+	{
+		elven_struct->magicNum = gimme_mem(strlen(ELF_H_MAGIC_NUM), sizeof(char));
+		if (elven_struct->magicNum)
+		{
+			if (strncpy(elven_struct->magicNum, elven_contents, 4) != elven_struct->magicNum)
+			{
+				fprintf(stderr, "Error copying into Elf Struct magicNum!\n");
+			}
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct magicNum!\n");
+		}
 	}
 
 	/* PREPARE DYNAMICALLY ALLOCATED VARIABLES */
@@ -296,6 +311,30 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	else if ((sectionsToPrint >> 6) > 0)
 	{
 		fprintf(stream, "ERROR: Invalid flags found in sectionsToPrint!\n");
+		return;
+	}
+	else if (!elven_file->magicNum)
+	{
+		if (elven_file->fileName)
+		{
+			fprintf(stderr, "\n\n\tINVALID:  %s is not an ELF formatted file.\n\n\n", elven_file->fileName);
+		}
+		else
+		{
+			fprintf(stderr, "\n\n\tINVALID:  This is not an ELF formatted file.\n\n\n");
+		}
+		return;
+	}
+	else if (strncmp(elven_file->magicNum, ELF_H_MAGIC_NUM, 4))
+	{
+		if (elven_file->fileName)
+		{
+			fprintf(stderr, "\n\n\tINVALID:  %s is not an ELF formatted file.\n\n\n", elven_file->fileName);
+		}
+		else
+		{
+			fprintf(stderr, "\n\n\tINVALID:  This is not an ELF formatted file.\n\n\n");
+		}
 		return;
 	}
 
@@ -578,8 +617,10 @@ int kill_elf(struct Elf_Details** old_struct)
 
 	if (old_struct)
 	{
+		// fprintf(stdout, "old_struct:\t%p\n", old_struct);  // DEBUGGING
 		if (*old_struct)
 		{
+			// fprintf(stdout, "*old_struct:\t%p\n", *old_struct);  // DEBUGGING
 			/* ZEROIZE AND FREE (as appropriate) STRUCT MEMBERS */
 			// char* fileName;		// Absolute or relative path
 			if ((*old_struct)->fileName)
@@ -590,6 +631,29 @@ int kill_elf(struct Elf_Details** old_struct)
 					PERROR(errno);
 					fprintf(stderr, "take_mem_back() returned %d on struct->filename free!\n", retVal);
 					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->filename.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// 	char* magicNum;		// First four bytes of file
+			if ((*old_struct)->magicNum)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->magicNum), strlen((*old_struct)->magicNum), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->magicNum free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->magicNum.\n");
+#endif // DEBUGLEROAD
 				}
 			}
 			// char* elfClass;		// 32 or 64 bit
@@ -602,6 +666,12 @@ int kill_elf(struct Elf_Details** old_struct)
 					fprintf(stderr, "take_mem_back() returned %d on struct->elfClass free!\n", retVal);
 					retVal = ERROR_SUCCESS;
 				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->elfClass.\n");
+#endif // DEBUGLEROAD
+				}
 			}
 			// char* endianess;	// Little or Big
 			if ((*old_struct)->endianess)
@@ -612,6 +682,12 @@ int kill_elf(struct Elf_Details** old_struct)
 					PERROR(errno);
 					fprintf(stderr, "take_mem_back() returned %d on struct->endianess free!\n", retVal);
 					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->endianess.\n");
+#endif // DEBUGLEROAD
 				}
 			}
 			// int version;		// ELF version
@@ -626,6 +702,12 @@ int kill_elf(struct Elf_Details** old_struct)
 					fprintf(stderr, "take_mem_back() returned %d on struct->targetOS free!\n", retVal);
 					retVal = ERROR_SUCCESS;
 				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->targetOS.\n");
+#endif // DEBUGLEROAD
+				}
 			}
 			// int ABIversion;		// Version of the ABI
 			(*old_struct)->ABIversion = 0;
@@ -639,6 +721,12 @@ int kill_elf(struct Elf_Details** old_struct)
 				PERROR(errno);
 				fprintf(stderr, "take_mem_back() returned %d on struct free!\n", retVal);
 				retVal = ERROR_SUCCESS;
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "take_mem_back() successfully freed struct.\n");
+#endif // DEBUGLEROAD
 			}
 		}
 		else
