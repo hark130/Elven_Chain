@@ -145,6 +145,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
 	struct HarkleDict* elfHdrClassDict = NULL;
 	struct HarkleDict* elfHdrEndianDict = NULL;
+	struct HarkleDict* elfHdrTargetOSDict = NULL;
 	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
 
 	/* INPUT VALIDATION */
@@ -191,9 +192,12 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	tmpBuff = gimme_mem(strlen(elven_contents) + 1, sizeof(char));
 	elfHdrClassDict = init_elf_header_class_dict();
 	elfHdrEndianDict = init_elf_header_endian_dict();
+	elfHdrTargetOSDict = init_elf_header_targetOS_dict();
 
 	// 2. Begin initializing the struct
+
 	// 2.1. Filename should already be initialized in calling function
+
 	// 2.2. ELF Class
 	dataOffset = 4;
 	// fprintf(stdout, "ELF Class:\t%d\n", (*(elven_contents + dataOffset)));  // DEBUGGING
@@ -227,8 +231,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	{
 		fprintf(stderr, "ELF Class %d not found in HarkleDict!\n", tmpInt);
 	}
+	// Zeroize/Free/NULLify elfHdrClassDict
+	if (elfHdrClassDict)
+	{
+		tmpInt = destroy_a_list(&elfHdrClassDict);
+	}
+
 	// 2.3. Endianess
-	dataOffset += 1;
+	dataOffset += 1;  // 5
 	tmpInt = (int)(*(elven_contents + dataOffset));
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
 	tmpNode = lookup_value(elfHdrEndianDict, tmpInt);
@@ -254,12 +264,50 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	{
 		fprintf(stderr, "ELF Endianess %d not found in HarkleDict!\n", tmpInt);
 	}
+	// Zeroize/Free/NULLify elfHdrEndianDict
+	if (elfHdrEndianDict)
+	{
+		tmpInt = destroy_a_list(&elfHdrEndianDict);
+	}
+
 	// 2.4. Version
-	dataOffset += 1;
+	dataOffset += 1;  // 6
 	elven_struct->version = (int)(*(elven_contents + dataOffset));
 	// fprintf(stdout, "elven_struct->version now holds:\t%d\n", elven_struct->version);  // DEBUGGING
+
 	// 2.5. Target OS
-	// IMPLEMENT NOW!
+	dataOffset += 1;  // 7
+	tmpInt = (int)(*(elven_contents + dataOffset));
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	tmpNode = lookup_value(elfHdrTargetOSDict, tmpInt);
+	if (tmpNode)  // Found it
+	{
+		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
+		elven_struct->targetOS = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->targetOS)
+		{
+			if (strncpy(elven_struct->targetOS, tmpNode->name, strlen(tmpNode->name)) != elven_struct->targetOS)
+			{
+				fprintf(stderr, "ELF Target OS string '%s' not copied into ELF Struct!\n", tmpNode->name);
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->targetOS);
+#endif // DEBUGLEROAD
+			}
+		} 
+	}
+	else
+	{
+		fprintf(stderr, "ELF Target OS %d not found in HarkleDict!\n", tmpInt);
+	}
+	// Zeroize/Free/NULLify elfHdrTargetOSDict
+	if (elfHdrTargetOSDict)
+	{
+		tmpInt = destroy_a_list(&elfHdrTargetOSDict);
+	}
+
 	// 2.6. ABI Version
 	// IMPLEMENT NOW!
 	// 2.7. Type
@@ -270,16 +318,6 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	if (tmpBuff)
 	{
 		take_mem_back((void**)&tmpBuff, strlen(elven_contents) + 1, sizeof(char));
-	}
-	// Zeroize/Free/NULLify elfHdrClassDict
-	if (elfHdrClassDict)
-	{
-		tmpInt = destroy_a_list(&elfHdrClassDict);
-	}
-	// Zeroize/Free/NULLify elfHdrEndianDict
-	if (elfHdrEndianDict)
-	{
-		tmpInt = destroy_a_list(&elfHdrEndianDict);
 	}
 
 	return retVal;
@@ -790,6 +828,53 @@ struct HarkleDict* init_elf_header_endian_dict(void)
 	char* arrayOfNames[] = { "Little Endian", "Big Endian" };
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
 	int arrayOfValues[] = { ELF_H_DATA_LITTLE, ELF_H_DATA_BIG };
+	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
+	int i = 0;
+
+	/* INPUT VALIDATION */
+	// Verify the parallel arrays are the same length
+	assert(numNames == numValues);
+
+	for (i = 0; i < numNames; i++)
+	{
+		retVal = add_entry(retVal, (*(arrayOfNames + i)), (*(arrayOfValues + i)));
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
+			break;
+		}
+	}
+
+	return retVal;
+}
+
+
+// Purpose:	Build a HarkleDict of Elf Header Target OS ABI definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_targetOS_dict(void)
+{
+	/* LOCAL VARIABLES */
+	struct HarkleDict* retVal = NULL;
+	char* arrayOfNames[] = { \
+		"System V", "HP-UX", "NetBSD", \
+		"Linux", "GNU Hurd", "Solaris", \
+		"AIX", "IRIX", "FreeBSD", \
+		"Tru64", "Novell Modesto", "OpenBSD", \
+		"OpenVMS", "NonStop Kernel", "AROS", \
+		"Fenix OS", "CloudABI", "Sortix", \
+	};
+	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
+	int arrayOfValues[] = { \
+		ELF_H_OSABI_SYSTEM_V, ELF_H_OSABI_HP_UX, ELF_H_OSABI_NETBSD,\
+		ELF_H_OSABI_LINUX, ELF_H_OSABI_GNU_HURD, ELF_H_OSABI_SOLARIS,\
+		ELF_H_OSABI_AIX, ELF_H_OSABI_IRIX, ELF_H_OSABI_FREE_BSD,\
+		ELF_H_OSABI_TRU64, ELF_H_OSABI_NOVELL, ELF_H_OSABI_OPEN_BSD,\
+		ELF_H_OSABI_OPEN_VMS, ELF_H_OSABI_NONSTOP_K, ELF_H_OSABI_AROS,\
+		ELF_H_OSABI_FENIX_OS, ELF_H_OSABI_CLOUB_ABI, ELF_H_OSABI_SORTIX,\
+	};
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
 	int i = 0;
 
