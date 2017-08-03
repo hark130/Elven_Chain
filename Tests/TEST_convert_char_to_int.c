@@ -26,13 +26,14 @@ struct cctiTestGroup
 {
 	char* testGroupName;
 	struct cctiTest* headNode;
-}
+};
 
 int main(void)
 {
 	/* LOCAL VARIABLES */
 	char buff[BUFF_SIZE + 1] = { 0 };			// Reusable buffer
 	unsigned int i = 0;							// Iterating variable
+	struct cctiTestGroup** tstGrpArr = NULL;	// Array of test group pointers
 	struct cctiTestGroup* currTstGrp = NULL;	// Current test group pointer
 	struct cctiTest* currTst = NULL;			// Current test
 	int numTests = 0;							// Total number of tests
@@ -62,7 +63,7 @@ int main(void)
 	Normal2.nextTest = &Normal3;
 	Normal3.nextTest = &Normal4;
 	//// Create Test Group
-	struct cctiTestGroup NormalUnitTests = { "Normal Unit Tests", &cctiTest };
+	struct cctiTestGroup NormalUnitTests = { "Normal Unit Tests", &Normal1 };
 
 	// ERROR
 	//// Error1 - NULL buff
@@ -99,7 +100,8 @@ int main(void)
 	struct cctiTestGroup* arrayOfTests[] = { &NormalUnitTests, NULL };
 
 	/* RUN THE TESTS */
-	currTstGrp = *arrayOfTests;
+	tstGrpArr = arrayOfTests;
+	currTstGrp = *tstGrpArr;
 
 	while (currTstGrp)
 	{
@@ -116,7 +118,7 @@ int main(void)
 				                                        &(currTst->actualVal));
 
 			// Test return value
-			printf("\tReturn:\t");
+			printf("\tReturn:\t\t");
 			numTests++;
 			if (currTst->actualResult == currTst->expectedResult)
 			{
@@ -126,12 +128,12 @@ int main(void)
 			else
 			{
 				printf("FAIL\n");
-				print("\t\tExpected:\t%d\n", currTst->expectedResult);
-				print("\t\tReceived:\t%d\n", currTst->actualResult);
+				printf("\t\tExpected:\t%d\n", currTst->expectedResult);
+				printf("\t\tReceived:\t%d\n", currTst->actualResult);
 			}
 
 			// Test calculated value
-			printf("\tConversion:\t")
+			printf("\tConversion:\t");
 			numTests++;
 			if (currTst->actualVal == currTst->expectedVal)
 			{
@@ -141,8 +143,8 @@ int main(void)
 			else
 			{
 				printf("FAIL\n");
-				print("\t\tExpected:\t%d\n", currTst->expectedVal);
-				print("\t\tReceived:\t%d\n", currTst->actualVal);
+				printf("\t\tExpected:\t%d\n", currTst->expectedVal);
+				printf("\t\tReceived:\t%d\n", currTst->actualVal);
 			}
 
 			// Next test
@@ -150,7 +152,8 @@ int main(void)
 		}
 
 		// Next test group
-		currTstGrp = *(arrayOfTests++);
+		tstGrpArr++;
+		currTstGrp = *tstGrpArr;
 	}
 
 	return 0;
@@ -185,6 +188,3 @@ int main(void)
 //				Addr + 0x1:	0xFF
 //				Returns:	0xFFFE == 65534
 //			Also, translation will always be zeroized if input validation is passed
-// int convert_char_to_int(char* buffToConvert, int dataOffset, \
-// 	                    int numBytesToConvert, int bigEndian, \
-// 	                    unsigned int* translation);
