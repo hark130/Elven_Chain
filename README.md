@@ -30,3 +30,8 @@ This extremely light repository is made of very fine ELF links. This project is 
     clear; gcc -o Elf_Scout Elf_Details.c Elven_Chain.c Harklehash.c; ./Elf_Scout Elf_Scout
 
 ```
+-or-
+```
+    clear; make; ./Elf_Scout Elf_Scout
+    
+```
