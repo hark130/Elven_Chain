@@ -89,6 +89,71 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_TYPE_HI_OS		0xFEFF			// 65279
 #define ELF_H_TYPE_LO_PROC		0xFF00			// 65280
 #define ELF_H_TYPE_HI_PROC		0xFFFF			// 65535
+// Instruction Set Architecture 0x12 - 0x13
+#define ELF_H_ISA_NONE 			0 				// No machine
+#define ELF_H_ISA_M32 			1 				// AT&T WE 32100
+#define ELF_H_ISA_SPARC 		2 				// SPARC
+#define ELF_H_ISA_386 			3 				// Intel 80386
+#define ELF_H_ISA_68K 			4 				// Motorola 68000
+#define ELF_H_ISA_88K 			5 				// Motorola 88000
+// RESERVED 	6 	Reserved for future use
+#define ELF_H_ISA_860 			7 				// Intel 80860
+#define ELF_H_ISA_MIPS 			8 				// MIPS I Architecture
+#define ELF_H_ISA_S370 			9 				// IBM System/370 Processor
+#define ELF_H_ISA_MIPS_RS3_LE 	10 				// MIPS RS3000 Little-endian
+// RESERVED 	11-14 	Reserved for future use
+#define ELF_H_ISA_PARISC 		15 				// Hewlett-Packard PA-RISC
+// RESERVED 	16 	Reserved for future use
+#define ELF_H_ISA_VPP500 		17 				// Fujitsu VPP500
+#define ELF_H_ISA_SPARC32PLUS 	18 				// Enhanced instruction set SPARC
+#define ELF_H_ISA_960 			19 				// Intel 80960
+#define ELF_H_ISA_PPC 			20 				// PowerPC
+#define ELF_H_ISA_PPC64 		21 				// 64-bit PowerPC
+// RESERVED 	22-35 	Reserved for future use
+#define ELF_H_ISA_V800 			36 				// NEC V800
+#define ELF_H_ISA_FR20 			37 				// Fujitsu FR20
+#define ELF_H_ISA_RH32 			38 				// TRW RH-32
+#define ELF_H_ISA_RCE 			39 				// Motorola RCE
+#define ELF_H_ISA_ARM 			40 				// Advanced RISC Machines ARM
+#define ELF_H_ISA_ALPHA 		41 				// Digital Alpha
+#define ELF_H_ISA_SH 			42 				// Hitachi SH
+#define ELF_H_ISA_SPARCV9 		43 				// SPARC Version 9
+#define ELF_H_ISA_TRICORE 		44 				// Siemens Tricore embedded processor
+#define ELF_H_ISA_ARC 			45 				// Argonaut RISC Core, Argonaut Technologies Inc.
+#define ELF_H_ISA_H8_300 		46 				// Hitachi H8/300
+#define ELF_H_ISA_H8_300H 		47 				// Hitachi H8/300H
+#define ELF_H_ISA_H8S 			48 				// Hitachi H8S
+#define ELF_H_ISA_H8_500 		49 				// Hitachi H8/500
+#define ELF_H_ISA_IA_64 		50 				// Intel IA-64 processor architecture
+#define ELF_H_ISA_MIPS_X 		51 				// Stanford MIPS-X
+#define ELF_H_ISA_COLDFIRE 		52 				// Motorola ColdFire
+#define ELF_H_ISA_68HC12 		53 				// Motorola M68HC12
+#define ELF_H_ISA_MMA 			54 				// Fujitsu MMA Multimedia Accelerator
+#define ELF_H_ISA_PCP 			55 				// Siemens PCP
+#define ELF_H_ISA_NCPU 			56 				// Sony nCPU embedded RISC processor
+#define ELF_H_ISA_NDR1 			57 				// Denso NDR1 microprocessor
+#define ELF_H_ISA_STARCORE 		58 				// Motorola Star*Core processor
+#define ELF_H_ISA_ME16 			59 				// Toyota ME16 processor
+#define ELF_H_ISA_ST100 		60 				// STMicroelectronics ST100 processor
+#define ELF_H_ISA_TINYJ 		61 				// Advanced Logic Corp. TinyJ embedded processor family
+// Reserved 	62-65 	Reserved for future use
+#define ELF_H_ISA_FX66 			66 				// Siemens FX66 microcontroller
+#define ELF_H_ISA_ST9PLUS 		67 				// STMicroelectronics ST9+ 8/16 bit microcontroller
+#define ELF_H_ISA_ST7 			68 				// STMicroelectronics ST7 8-bit microcontroller
+#define ELF_H_ISA_68HC16 		69 				// Motorola MC68HC16 Microcontroller
+#define ELF_H_ISA_68HC11 		70 				// Motorola MC68HC11 Microcontroller
+#define ELF_H_ISA_68HC08 		71 				// Motorola MC68HC08 Microcontroller
+#define ELF_H_ISA_68HC05 		72 				// Motorola MC68HC05 Microcontroller
+#define ELF_H_ISA_SVX 			73 				// Silicon Graphics SVx
+#define ELF_H_ISA_ST19 			74 				// STMicroelectronics ST19 8-bit microcontroller
+#define ELF_H_ISA_VAX 			75 				// Digital VAX
+#define ELF_H_ISA_CRIS 			76 				// Axis Communications 32-bit embedded processor
+#define ELF_H_ISA_JAVELIN 		77 				// Infineon Technologies 32-bit embedded processor
+#define ELF_H_ISA_FIREPATH 		78 				// Element 14 64-bit DSP Processor
+#define ELF_H_ISA_ZSP 			79 				// LSI Logic 16-bit DSP Processor
+#define ELF_H_ISA_MMIX 			80 				// Donald Knuth's educational 64-bit processor
+#define ELF_H_ISA_HUANY 		81 				// Harvard University machine-independent object files
+#define ELF_H_ISA_PRISM 		82 				// SiTera Prism
 /****************************/
 /***** ELF HEADER STOP ******/
 /****************************/
