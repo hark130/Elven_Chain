@@ -154,6 +154,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	int retVal = ERROR_SUCCESS;	// parse_elf() return value
 	char* tmpPtr = NULL;		// Holds return values from string functions
 	int tmpInt = 0;				// Holds various temporary return values
+	unsigned int tmpUint = 0;	// Holds calculated values from convert_char_to_int()
 	int dataOffset = 0;			// Used to offset into elven_contents
 	char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
 	struct HarkleDict* elfHdrClassDict = NULL;
@@ -375,12 +376,19 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 
 	// 2.7. Type (OFFSET: 0x10)
 	dataOffset += 7;  // 16
-	tmpInt = (int)(*(elven_contents + dataOffset));
-	fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
-	tmpInt = (int)(*(elven_contents + dataOffset + 1));
-	fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
-	// WRITE A MULTI-BYTE ENDIAN FUNCTION HERE
-	tmpNode = lookup_value(elfHdrElfTypeDict, tmpInt);
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
+	if (tmpInt)
+	{
+		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
+		tmpNode = NULL;
+	}
+	else
+	{
+		tmpNode = lookup_value(elfHdrElfTypeDict, (int)tmpUint);
+	}
+	
 	if (tmpNode)  // Found it
 	{
 		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
@@ -405,7 +413,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 	else
 	{
-		fprintf(stderr, "ELF Type %d not found in HarkleDict!\n", tmpInt);
+		fprintf(stderr, "ELF Type %d not found in HarkleDict!\n", (int)tmpUint);
 	}
 	// Zeroize/Free/NULLify elfHdrElfTypeDict
 	if (elfHdrElfTypeDict)
