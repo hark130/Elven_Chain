@@ -7,4 +7,4 @@ all:
 	$(CC) $(CFLAGS) -o $(OUT) Elf_Details.c Elven_Chain.c Harklehash.c
 
 clean:
-	$(RM) *.o *.i
+	$(RM) *.o *.i $(OUT)
