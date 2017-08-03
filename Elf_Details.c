@@ -255,7 +255,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		fprintf(stderr, "ELF Endianess %d not found in HarkleDict!\n", tmpInt);
 	}
 	// 2.4. Version
-	// IMPLEMENT NOW!
+	dataOffset += 1;
+	elven_struct->version = (int)(*(elven_contents + dataOffset));
+	// fprintf(stdout, "elven_struct->version now holds:\t%d\n", elven_struct->version);  // DEBUGGING
 	// 2.5. Target OS
 	// IMPLEMENT NOW!
 	// 2.6. ABI Version
