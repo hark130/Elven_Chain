@@ -309,7 +309,10 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.6. ABI Version
-	// IMPLEMENT NOW!
+	dataOffset += 1;  // 8
+	elven_struct->ABIversion = (int)(*(elven_contents + dataOffset));
+	// fprintf(stdout, "elven_struct->ABIversion now holds:\t%d\n", elven_struct->ABIversion);  // DEBUGGING
+
 	// 2.7. Type
 	// Implement this later
 
