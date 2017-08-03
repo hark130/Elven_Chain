@@ -11,9 +11,18 @@
 #define ERROR_BAD_ARG	((int)-2)	// Bad arguments
 #define ERROR_ORC_FILE	((int)-3)	// Indicates this is not an ELF file
 #define MAX_RETRIES		((int)10)	// Number of times to retry a function call before giving up
+#define ZEROIZE_VALUE	((int)42)	// Value used to 'clear' int values
 #define ZEROIZE_CHAR	((char)'H') // Character used to memset free()'d memory
 #define HEADER_DELIM	((char)'#')	// Character used to print fance output headers
 // #define DEBUGLEROAD					// No IDEs were harmed during the coding of this project
+
+#ifndef TRUE
+#define TRUE ((int)1)
+#endif // TRUE
+
+#ifndef FALSE
+#define FALSE ((int)0)
+#endif // FALSE
 
 #ifndef DEBUGLEROAD
 #ifndef PERROR
@@ -68,10 +77,10 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 // Pad 0x09 - 0x0F
 // 		Currently unused
 // Type 0x10 - 0x11
-#define ELF_H_TYPE_RELOCATABLE	"\x1"			// 1
-#define ELF_H_TYPE_EXECUTABLE	"\x2"			// 2
-#define ELF_H_TYPE_SHARED		"\x3"			// 3
-#define ELF_H_TYPE_CORE			"\x4"			// 4
+#define ELF_H_TYPE_RELOCATABLE	0x01			// 1
+#define ELF_H_TYPE_EXECUTABLE	0x02			// 2
+#define ELF_H_TYPE_SHARED		0x03			// 3
+#define ELF_H_TYPE_CORE			0x04			// 4
 /****************************/
 /***** ELF HEADER STOP ******/
 /****************************/
@@ -90,11 +99,12 @@ struct Elf_Details
 	char* magicNum;		// First four bytes of file
 	char* elfClass;		// 32 or 64 bit
 	char* endianess;	// Little or Big
+	int bigEndian;		// If TRUE, bigEndian
 	int version;		// ELF version
 	char* targetOS;		// Target OS ABI
 	int ABIversion;		// Version of the ABI
 	char* pad;			// Unused portion
-	int type;			// The type of ELF file
+	char* type;			// The type of ELF file
 };
 // All char* members should be dynamically allocated and later free()'d
 
@@ -123,6 +133,12 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents);
 // Note:	This function will print the relevant data from elven_file into stream
 //				based on the flags found in sectionsToPrint
 void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPrint, FILE* stream);
+
+// Purpose:	Assist clean up efforts by zeroizing/free'ing an Elf_Details struct
+// Input:	Pointer to an Elf_Details struct pointer
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:	This function will modify the original variable in the calling function
+int kill_elf(struct Elf_Details** old_struct);
 
 // Purpose:	Prints an uppercase title surrounded by delimiters
 // Input:
@@ -164,12 +180,6 @@ void* gimme_mem(size_t numElem, size_t sizeElem);
 // Note:	Modifies the pointer to *buf by making it NULL
 int take_mem_back(void** buff, size_t numElem, size_t sizeElem);
 
-// Purpose:	Assist clean up efforts by zeroizing/free'ing an Elf_Details struct
-// Input:	Pointer to an Elf_Details struct pointer
-// Output:	ERROR_* as specified in Elf_Details.h
-// Note:	This function will modify the original variable in the calling function
-int kill_elf(struct Elf_Details** old_struct);
-
 // Purpose:	Build a HarkleDict of Elf Header Class definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
@@ -187,5 +197,11 @@ struct HarkleDict* init_elf_header_endian_dict(void);
 // Output:	Pointer to the head node of a linked list of HarkleDicts
 // Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
 struct HarkleDict* init_elf_header_targetOS_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Type definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_elf_type_dict(void);
 
 #endif // __ELF_DETAILS_H__
