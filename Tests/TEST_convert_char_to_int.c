@@ -32,8 +32,14 @@ int main(void)
 {
 	/* LOCAL VARIABLES */
 	char buff[BUFF_SIZE + 1] = { 0 };			// Reusable buffer
-	// Buffer that contains UINT_MAX, UINT_MAX + 1, and UINT_MIN for all endianness
-	char uintMax[] = { "FFFFFFFFFFFFFFFFFF0000000000001000000000000FFFFFFFFFFFFFFFF" };	
+	// Buffer that contains UINT_MAX, UINT_MAX + 1, and UINT_MIN for all endianness...es(sp?)
+	// "We've always been each other's greatest nemesises... uh, nemesee... What's the plural on that?""
+	// -Captain Amazing (Mystery Men)
+	char uintMax[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
+					   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+					   0x01, \
+					   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+					   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, };
 	unsigned int i = 0;							// Iterating variable
 	struct cctiTestGroup** tstGrpArr = NULL;	// Array of test group pointers
 	struct cctiTestGroup* currTstGrp = NULL;	// Current test group pointer
@@ -49,6 +55,18 @@ int main(void)
 	}
 	putchar('\n');
 	// print_it(buff, BUFF_SIZE);  // DEBUGGING
+
+	// DEBUGGING PRINT STATEMENTS
+	// DISCLAIMER: No Debuggers or IDEs were harmed during the debugging of this source file
+	// printf("Buff[BUFF_SIZE - 2] == %d(0x%X)\n", (*(buff + BUFF_SIZE - 2)), (*(buff + BUFF_SIZE - 2)));  // DEBUGGING
+	// printf("Buff[BUFF_SIZE - 1] == %d(0x%X)\n", (*(buff + BUFF_SIZE - 1)), (*(buff + BUFF_SIZE - 1)));  // DEBUGGING
+	// printf("uintMax[4] == %d(0x%X)\n", (*(uintMax + 4)), (*(uintMax + 4)));  // DEBUGGING
+	// printf("uintMax[5] == %d(0x%X)\n", (*(uintMax + 5)), (*(uintMax + 5)));  // DEBUGGING
+	// printf("uintMax[24] == %c(0x%02X)\n", (*(uintMax + 24)), (*(uintMax + 24)));  // DEBUGGING
+	// printf("uintMax[25] == %c(0x%02X)\n", (*(uintMax + 25)), (*(uintMax + 25)));  // DEBUGGING
+	// printf("uintMax[26] == %c(0x%02X)\n", (*(uintMax + 26)), (*(uintMax + 26)));  // DEBUGGING
+	// printf("uintMax[27] == %c(0x%02X)\n", (*(uintMax + 27)), (*(uintMax + 27)));  // DEBUGGING
+	// printf("uintMax[28] == %c(0x%02X)\n", (*(uintMax + 28)), (*(uintMax + 28)));  // DEBUGGING
 
 	/* SETUP UNIT TEST GROUPS */
 	// NORMAL
@@ -93,21 +111,58 @@ int main(void)
 
 	// BOUNDARY
 	//// Boundary1 - Normal input, start of buff (pass)
-	struct cctiTest Boundary1 = { "Boundary1", buff, 0, 5, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0001020304, NULL };
+	struct cctiTest Boundary1 = { "Boundary1", buff, 0, 4, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x00010203, NULL };
 	//// Boundary2 - Normal input, end of buff (pass)
-	struct cctiTest Boundary2 = { "Boundary2", buff, BUFF_SIZE, 2, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x7F7E, NULL };
+	struct cctiTest Boundary2 = { "Boundary2", buff, BUFF_SIZE - 2, 2, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x7F7E, NULL };
 	//// Boundary3 - Normal input, one char to convert (pass)
 	struct cctiTest Boundary3a = { "Boundary3a", buff, 13, 1, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0D, NULL };
 	struct cctiTest Boundary3b = { "Boundary3b", buff, 13, 1, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0D, NULL };
 	//// Boundary4 - Value equates to UINT_MAX (pass)
+	struct cctiTest Boundary4a = { "Boundary4a", uintMax, 4, 4, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0xFFFFFFFF, NULL };
+	struct cctiTest Boundary4b = { "Boundary4b", uintMax, 6, 4, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0xFFFFFFFF, NULL };
 	//// Boundary5 - Value equates to UINT_MAX + 1 (fail)
+	struct cctiTest Boundary5a = { "Boundary5a", uintMax, 9, 5, TRUE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	struct cctiTest Boundary5b = { "Boundary5b", uintMax, 19, 5, FALSE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
 	//// Boundary6 - Value equates to UINT_MIN (pass)
-	//// Boundary7 - numBytesToConvert == 8 + 1 (fail)
-	//// Boundary8 - numBytesToConvert == 8 (pass)
+	struct cctiTest Boundary6a = { "Boundary6a", uintMax, 19, 4, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x00000000, NULL };
+	struct cctiTest Boundary6b = { "Boundary6b", uintMax, 24, 4, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x00000000, NULL };
+	//// Boundary7 - numBytesToConvert == 4 + 1 (fail)
+	struct cctiTest Boundary7a = { "Boundary7a", buff, 1, 5, TRUE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	struct cctiTest Boundary7b = { "Boundary7b", buff, 5, 5, FALSE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	//// Boundary8 - numBytesToConvert == 4 (pass)
+	struct cctiTest Boundary8a = { "Boundary8a", buff, 10, 4, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0A0B0C0D, NULL };
+	struct cctiTest Boundary8b = { "Boundary8b", buff, 17, 4, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x14131211, NULL };
+	//// Link Tests
+	Boundary1.nextTest = &Boundary2;
+	Boundary2.nextTest = &Boundary3a;
+	Boundary3a.nextTest = &Boundary3b;
+	Boundary3b.nextTest = &Boundary4a;
+	Boundary4a.nextTest = &Boundary4b;
+	Boundary4b.nextTest = &Boundary5a;
+	Boundary5a.nextTest = &Boundary5b;
+	Boundary5b.nextTest = &Boundary6a;
+	Boundary6a.nextTest = &Boundary6b;
+	Boundary6b.nextTest = &Boundary7a;
+	Boundary7a.nextTest = &Boundary7b;
+	Boundary7b.nextTest = &Boundary8a;
+	Boundary8a.nextTest = &Boundary8b;
+	//// Create Test Group
+	struct cctiTestGroup BoundaryUnitTests = { "Boundary Unit Tests", &Boundary1 };
 
 	// SPECIAL
-	//// Special1 - Start of buff, numBytes > 1, bigEndian == FALSE (fail)
-	//// Special2 - End of buff, numBytes > 1, bigEndian == TRUE (fail)
+	//// Special1 - Start of buff, numBytes > 1, bigEndian == FALSE (pass)
+	struct cctiTest Special1 = { "Special1", buff, 0, 2, FALSE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x0100, NULL };
+	//// Special2 - End of buff, numBytes > 1, bigEndian == TRUE (pass)... Reads the nul terminator
+	struct cctiTest Special2 = { "Special2", buff, BUFF_SIZE - 1, 2, TRUE, DEFAULT_INT, ERROR_SUCCESS, DEFAULT_UINT, 0x7F00, NULL };
+	//// Special3 - numBytesToConvert > 8 but value < UINT_MAX (fail)
+	struct cctiTest Special3a = { "Special3a", buff, 0, 5, TRUE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	struct cctiTest Special3b = { "Special3b", buff, 128, 5, FALSE, DEFAULT_INT, ERROR_OVERFLOW, DEFAULT_UINT, DEFAULT_UINT, NULL };
+	//// Link Tests
+	Special1.nextTest = &Special2;
+	Special2.nextTest = &Special3a;
+	Special3a.nextTest = &Special3b;
+	//// Create Test Group
+	struct cctiTestGroup SpecialUnitTests = { "Special Unit Tests", &Special1 };
 
 	// Run this test separate in order to avoid redefining the struct
 	// Pass NULL as the unsigned int* in the function call
@@ -115,7 +170,9 @@ int main(void)
 	struct cctiTest Separate1 = { "Separate1", buff, 1, 3, FALSE, DEFAULT_INT, ERROR_NULL_PTR, DEFAULT_UINT, DEFAULT_UINT, NULL };
 
 	// ARRAY OF TEST GROUPS
-	struct cctiTestGroup* arrayOfTests[] = { &NormalUnitTests, &ErrorUnitTests, NULL };
+	struct cctiTestGroup* arrayOfTests[] = { &NormalUnitTests, &ErrorUnitTests, \
+		                                     &BoundaryUnitTests, &SpecialUnitTests, \
+		                                     NULL };
 
 	/* RUN THE TESTS */
 	tstGrpArr = arrayOfTests;
@@ -161,8 +218,8 @@ int main(void)
 			else
 			{
 				printf("FAIL\n");
-				printf("\t\t\tExpected:\t%d\n", currTst->expectedVal);
-				printf("\t\t\tReceived:\t%d\n", currTst->actualVal);
+				printf("\t\t\tExpected:\t%u\n", currTst->expectedVal);
+				printf("\t\t\tReceived:\t%u\n", currTst->actualVal);
 			}
 
 			// Next test
@@ -174,35 +231,19 @@ int main(void)
 		currTstGrp = *tstGrpArr;
 	}
 
+	/* PRINT TEST RESULTS */
+	putchar('\n');
+	print_fancy_header(stdout, "    UNIT TEST RESULTS    ", HEADER_DELIM);
+	printf("Total Pass:\t\t%d\n", numPass);
+	printf("Total Tests:\t\t%d\n", numTests);
+	if ((100 * numPass) % numTests)
+	{
+		printf("Percent Tests Passed:\t%.1f%%\n\n", (float)numPass / numTests * 100);
+	}
+	else
+	{
+		printf("Percent Tests Passed:\t%.0f%%\n\n", (float)numPass / numTests * 100);
+	}
+
 	return 0;
 }
-/*
-#define ERROR_SUCCESS	((int)0)	// EUREKA!
-#define ERROR_NULL_PTR	((int)-1)	// NULL pointer
-#define ERROR_BAD_ARG	((int)-2)	// Bad arguments
-#define ERROR_ORC_FILE	((int)-3)	// Indicates this is not an ELF file
-#define ERROR_OVERFLOW	((int)-4)	// The given data type will overflow
-*/
-// int convert_char_to_int(char* buffToConvert, int dataOffset, \
-// 	                    int numBytesToConvert, int bigEndian, \
-// 	                    unsigned int* translation);
-// Purpose:	Convert consecutive characters into a single int IAW the specified endianness
-// Input:
-//			buffToConvert - Pointer to the buffer that holds the bytes in question
-//			dataOffset - Starting location in buffToConvert
-//			numBytesToConvert - Number of bytes to translate starting at buffToConvert[dataOffset]
-//			bigEndian - If True, bigEndian byte ordering
-//			translation [out] - Pointer to memory space to hold the translated value
-// Output:	The translation of the raw values found in the first numBytesToConvert bytes in
-//				buffToConvert on success
-//			ERROR_* as specified in Elf_Details.h on failure
-// Note:	Behavior is as follows:
-//			If bigEndian == TRUE:
-//				Addr + 0x0:	0xFE
-//				Addr + 0x1:	0xFF
-//				Returns:	0xFEFF == 65279
-//			If bigEndian == FALSE:
-//				Addr + 0x0:	0xFE
-//				Addr + 0x1:	0xFF
-//				Returns:	0xFFFE == 65534
-//			Also, translation will always be zeroized if input validation is passed

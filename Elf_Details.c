@@ -1021,6 +1021,9 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
 	}
 	else if (bigEndian == FALSE)
 	{
+		// printf("buffToConvert[BUFF_SIZE - 2] == %d(0x%X)\n", (*(buffToConvert + 1024 - 2)), (*(buffToConvert + 1024 - 2)));  // DEBUGGING
+		// printf("buffToConvert[BUFF_SIZE - 1] == %d(0x%X)\n", (*(buffToConvert + 1024 - 1)), (*(buffToConvert + 1024 - 1)));  // DEBUGGING
+
 		for (i = (dataOffset + numBytesToConvert - 1); i >= dataOffset ; i--)
 		{
 			value |= (unsigned int)(*(buffToConvert + i));
