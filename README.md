@@ -8,9 +8,9 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Implement Program Data
     [ ] Implement Section Data
     [ ] Better way to convert a char value to int?
-    [ ] What about multi-byte char values?
+    [X] What about multi-byte char values?
     [ ] What happens if I hide something in the Elf Header PAD (offset 0x09)?
-    [ ] Add Elf Header PAD to Elf_Detail struct (see: NOTES TO THE WORLD)
+    [X] Add Elf Header PAD to Elf_Detail struct (see: NOTES TO THE WORLD)
 
 ## NOTES TO THE WORLD (and future Hark)
 ### Implementing new members of the Elf_Details struct involves updating the following:
