@@ -188,6 +188,30 @@ void* gimme_mem(size_t numElem, size_t sizeElem);
 // Note:	Modifies the pointer to *buf by making it NULL
 int take_mem_back(void** buff, size_t numElem, size_t sizeElem);
 
+// Purpose:	Convert consecutive characters into a single int IAW the specified endianess
+// Input:
+//			buffToConvert - Pointer to the buffer that holds the bytes in question
+//			dataOffset - Starting location in buffToConvert
+//			numBytesToConvert - Number of bytes to translate starting at buffToConvert[dataOffset]
+//			bigEndian - If True, bigEndian byte ordering
+//			translation [out] - Pointer to memory space to hold the translated value
+// Output:	The translation of the raw values found in the first numBytesToConvert bytes in
+//				buffToConvert on success
+//			ERROR_* as specified in Elf_Details.h on failure
+// Note:	Behavior is as follows:
+//			If bigEndian == TRUE:
+//				Addr + 0x0:	0xFE
+//				Addr + 0x1:	0xFF
+//				Returns:	0xFEFF == 65279
+//			If bigEndian == FALSE:
+//				Addr + 0x0:	0xFE
+//				Addr + 0x1:	0xFF
+//				Returns:	0xFFFE == 65534
+//			Also, translation will always be zeroized if input validation is passed
+int convert_char_to_int(char* buffToConvert, int dataOffset, \
+	                    int numBytesToConvert, int bigEndian, \
+	                    unsigned int* translation);
+
 // Purpose:	Build a HarkleDict of Elf Header Class definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts

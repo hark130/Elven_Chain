@@ -964,7 +964,9 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem)
 //				Addr + 0x1:	0xFF
 //				Returns:	0xFFFE == 65534
 //			Also, translation will always be zeroized if input validation is passed
-int convert_char_to_int(char* buffToConvert, int dataOffset, int numBytesToConvert, int bigEndian, unsigned int* translation)
+int convert_char_to_int(char* buffToConvert, int dataOffset, \
+	                    int numBytesToConvert, int bigEndian, \
+	                    unsigned int* translation)
 {
 	/* LOCAL VARIABLES */
 	int retVal = ERROR_SUCCESS;	// Function return value
