@@ -1187,7 +1187,7 @@ struct HarkleDict* init_elf_header_elf_type_dict(void)
 		}
 	}
 
-	for (i = ELF_H_TYPE_LO_OS; i <= ELF_H_TYPE_HI_OS, i++)
+	for (i = ELF_H_TYPE_LO_OS; i <= ELF_H_TYPE_HI_OS; i++)
 	{
 		retVal = add_entry(retVal, "Operating system-specific", i);
 		if (!retVal)
@@ -1198,7 +1198,7 @@ struct HarkleDict* init_elf_header_elf_type_dict(void)
 		}
 	}
 
-	for (i = ELF_H_TYPE_LO_PROC; i <= ELF_H_TYPE_HI_PROC, i++)
+	for (i = ELF_H_TYPE_LO_PROC; i <= ELF_H_TYPE_HI_PROC; i++)
 	{
 		retVal = add_entry(retVal, "Processor-specific", i);
 		if (!retVal)
