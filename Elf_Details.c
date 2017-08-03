@@ -532,7 +532,14 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 			fprintf(stream, "Pad:\t%s\n", notConfigured);	
 		}
 		// Type of ELF File
-		// IMPLEMENT THIS LATER
+		if (elven_file->type)
+		{
+			fprintf(stream, "ELF Type:\t%s\n", elven_file->type);
+		}
+		else
+		{
+			fprintf(stream, "ELF Type:\t%s\n", notConfigured);	
+		}
 		// Section delineation
 		fprintf(stream, "\n\n");
 	}
@@ -574,6 +581,162 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	}
 
 	return;
+}
+
+
+// Purpose:	Assist clean up efforts by zeroizing/free'ing an Elf_Details struct
+// Input:	Pointer to an Elf_Details struct pointer
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:	This function will modify the original variable in the calling function
+int kill_elf(struct Elf_Details** old_struct)
+{
+	int retVal = ERROR_SUCCESS;
+
+	if (old_struct)
+	{
+		// fprintf(stdout, "old_struct:\t%p\n", old_struct);  // DEBUGGING
+		if (*old_struct)
+		{
+			// fprintf(stdout, "*old_struct:\t%p\n", *old_struct);  // DEBUGGING
+			/* ZEROIZE AND FREE (as appropriate) STRUCT MEMBERS */
+			// char* fileName;		// Absolute or relative path
+			if ((*old_struct)->fileName)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->fileName), strlen((*old_struct)->fileName), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->filename free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->filename.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// 	char* magicNum;		// First four bytes of file
+			if ((*old_struct)->magicNum)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->magicNum), strlen((*old_struct)->magicNum), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->magicNum free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->magicNum.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// char* elfClass;		// 32 or 64 bit
+			if ((*old_struct)->elfClass)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->elfClass), strlen((*old_struct)->elfClass), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->elfClass free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->elfClass.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// char* endianess;	// Little or Big
+			if ((*old_struct)->endianess)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->endianess), strlen((*old_struct)->endianess), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->endianess free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->endianess.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// int bigEndian;		// If TRUE, bigEndian
+			(*old_struct)->bigEndian = ZEROIZE_VALUE;
+			// int version;		// ELF version
+			(*old_struct)->version = ZEROIZE_VALUE;
+			// char* targetOS;		// Target OS ABI
+			if ((*old_struct)->targetOS)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->targetOS), strlen((*old_struct)->targetOS), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->targetOS free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->targetOS.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// int ABIversion;		// Version of the ABI
+			(*old_struct)->ABIversion = ZEROIZE_VALUE;
+			// char* pad;			// Unused portion
+			// NOTE: This char* member is statically sized based on ELF Header specifications
+			if ((*old_struct)->pad)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->pad), 0x7, sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->pad free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->pad.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// int type;			// The type of ELF file
+			(*old_struct)->type = 0;  // FIX THIS... IT'S NOT AN INT ANYMORE!
+
+			/* FREE THE STRUCT ITSELF */
+			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
+			if (retVal)
+			{
+				PERROR(errno);
+				fprintf(stderr, "take_mem_back() returned %d on struct free!\n", retVal);
+				retVal = ERROR_SUCCESS;
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "take_mem_back() successfully freed struct.\n");
+#endif // DEBUGLEROAD
+			}
+		}
+		else
+		{
+			retVal = ERROR_NULL_PTR;
+		}
+	}
+	else
+	{
+		retVal = ERROR_NULL_PTR;
+	}
+
+	return retVal;
 }
 
 
@@ -747,162 +910,6 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem)
 
 		// NULL the pointer variable
 		*buff = NULL;
-	}
-
-	return retVal;
-}
-
-
-// Purpose:	Assist clean up efforts by zeroizing/free'ing an Elf_Details struct
-// Input:	Pointer to an Elf_Details struct pointer
-// Output:	ERROR_* as specified in Elf_Details.h
-// Note:	This function will modify the original variable in the calling function
-int kill_elf(struct Elf_Details** old_struct)
-{
-	int retVal = ERROR_SUCCESS;
-
-	if (old_struct)
-	{
-		// fprintf(stdout, "old_struct:\t%p\n", old_struct);  // DEBUGGING
-		if (*old_struct)
-		{
-			// fprintf(stdout, "*old_struct:\t%p\n", *old_struct);  // DEBUGGING
-			/* ZEROIZE AND FREE (as appropriate) STRUCT MEMBERS */
-			// char* fileName;		// Absolute or relative path
-			if ((*old_struct)->fileName)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->fileName), strlen((*old_struct)->fileName), sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->filename free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->filename.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// 	char* magicNum;		// First four bytes of file
-			if ((*old_struct)->magicNum)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->magicNum), strlen((*old_struct)->magicNum), sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->magicNum free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->magicNum.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// char* elfClass;		// 32 or 64 bit
-			if ((*old_struct)->elfClass)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->elfClass), strlen((*old_struct)->elfClass), sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->elfClass free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->elfClass.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// char* endianess;	// Little or Big
-			if ((*old_struct)->endianess)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->endianess), strlen((*old_struct)->endianess), sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->endianess free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->endianess.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// int bigEndian;		// If TRUE, bigEndian
-			(*old_struct)->bigEndian = ZEROIZE_VALUE;
-			// int version;		// ELF version
-			(*old_struct)->version = ZEROIZE_VALUE;
-			// char* targetOS;		// Target OS ABI
-			if ((*old_struct)->targetOS)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->targetOS), strlen((*old_struct)->targetOS), sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->targetOS free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->targetOS.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// int ABIversion;		// Version of the ABI
-			(*old_struct)->ABIversion = ZEROIZE_VALUE;
-			// char* pad;			// Unused portion
-			// NOTE: This char* member is statically sized based on ELF Header specifications
-			if ((*old_struct)->pad)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->pad), 0x7, sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->pad free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->pad.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// int type;			// The type of ELF file
-			(*old_struct)->type = 0;  // FIX THIS... IT'S NOT AN INT ANYMORE!
-
-			/* FREE THE STRUCT ITSELF */
-			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
-			if (retVal)
-			{
-				PERROR(errno);
-				fprintf(stderr, "take_mem_back() returned %d on struct free!\n", retVal);
-				retVal = ERROR_SUCCESS;
-			}
-			else
-			{
-#ifdef DEBUGLEROAD
-				fprintf(stdout, "take_mem_back() successfully freed struct.\n");
-#endif // DEBUGLEROAD
-			}
-		}
-		else
-		{
-			retVal = ERROR_NULL_PTR;
-		}
-	}
-	else
-	{
-		retVal = ERROR_NULL_PTR;
 	}
 
 	return retVal;
