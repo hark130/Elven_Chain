@@ -111,14 +111,14 @@ int main(void)
 		while(currTst)
 		{
 			// Header
-			printf("Test %s:\n", currTst->testName);
+			printf("\tTest %s:\n", currTst->testName);
 			// Function call
 			currTst->actualResult = convert_char_to_int(currTst->inputBuffer, currTst->dataOffset, \
 				                                        currTst->numBytes, currTst->bigEndian, \
 				                                        &(currTst->actualVal));
 
 			// Test return value
-			printf("\tReturn:\t\t");
+			printf("\t\tReturn:\t\t");
 			numTests++;
 			if (currTst->actualResult == currTst->expectedResult)
 			{
@@ -128,12 +128,12 @@ int main(void)
 			else
 			{
 				printf("FAIL\n");
-				printf("\t\tExpected:\t%d\n", currTst->expectedResult);
-				printf("\t\tReceived:\t%d\n", currTst->actualResult);
+				printf("\t\t\tExpected:\t%d\n", currTst->expectedResult);
+				printf("\t\t\tReceived:\t%d\n", currTst->actualResult);
 			}
 
 			// Test calculated value
-			printf("\tConversion:\t");
+			printf("\t\tConversion:\t");
 			numTests++;
 			if (currTst->actualVal == currTst->expectedVal)
 			{
@@ -143,8 +143,8 @@ int main(void)
 			else
 			{
 				printf("FAIL\n");
-				printf("\t\tExpected:\t%d\n", currTst->expectedVal);
-				printf("\t\tReceived:\t%d\n", currTst->actualVal);
+				printf("\t\t\tExpected:\t%d\n", currTst->expectedVal);
+				printf("\t\t\tReceived:\t%d\n", currTst->actualVal);
 			}
 
 			// Next test
