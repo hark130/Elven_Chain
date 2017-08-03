@@ -53,67 +53,6 @@ int main(int argc, char *argv[])
 	// FREE Elf_Details STRUCT
 	retVal = kill_elf(&elvenCharSheet);
 
-
-
-	// /* 3. READ ELF FILE */
-	// // OPEN FILE
-	// elfFile = fopen(argv[1], "rb");
-	// PERROR(errno);  // DEBUGGING
-
-	// if (elfFile)
-	// {
-	// 	// GET FILE SIZE
-	// 	elfSize = file_len(elfFile);
-
-	// 	// ALLOCATE BUFFER
-	// 	elfGuts = (char*)calloc(elfSize + 1, sizeof(char));
-	// 	PERROR(errno);  // DEBUGGING
-
-	// 	if (elfGuts)
-	// 	{
-	// 		// READ FILE
-	// 		if (fread(elfGuts, sizeof(char), elfSize, elfFile) != elfSize)
-	// 		{
-	// 			PERROR(errno);  // DEBUGGING
-	// 		}
-	// 		else
-	// 		{
-	// 			print_it(elfGuts, elfSize);  // DEBUGGING
-	// 		}			
-	// 	}
-	// }
-
-	// /* 4. PARSE BUFFER */
-	// if (elfGuts)
-	// {
-	// 	// 4.1. Find the beginning of the ELF Header
-	// 	tmpPtr = strstr(elfGuts, ELF_MAGIC_NUM);
-	// 	// printf("elfGuts:\t%p\nMagic Num:\t%p\n", elfGuts, tmpPtr);  // DEBUGGING
-	// 	if (tmpPtr != elfGuts)
-	// 	{
-	// 		PERROR(errno);
-	// 		printf("This is not an ELF formatted file.\nStart:\t%p\n%s:\t%p\n", elfGuts, ELF_MAGIC_NUM, tmpPtr);
-	// 		retVal = ERROR_NOT_ELF;
-	// 	}
-	// }
-
-	/* 5. CLEAN UP */
-	// // CLOSE FILE
-	// if (elfFile)
-	// {
-	// 	retVal = fclose(elfFile);
-	// 	PERROR(errno);  // DEBUGGING
-	// }
-	// // FREE MEMORY
-	// if (elfGuts)
-	// {
-	// 	memset(elfGuts, 0, elfSize);
-	// 	PERROR(errno);  // DEBUGGING
-	// 	free(elfGuts);
-	// 	PERROR(errno);  // DEBUGGING
-	// 	elfGuts = NULL;
-	// }
-
 	return retVal;
 }
 
