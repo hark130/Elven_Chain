@@ -1009,8 +1009,13 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
 	{
 		for (i = dataOffset; i < (dataOffset + numBytesToConvert); i++)
 		{
-			value |= (int)(*(buffToConvert + i));
-			value << 8;
+			value |= (unsigned int)(*(buffToConvert + i));
+			// printf("Value at %p:\t%d(0x%X)\n", buffToConvert + i, value, value);  // DEBUGGING
+			if ((i + 1) < (dataOffset + numBytesToConvert))
+			{
+				value <<= 8;
+				// printf("Value bit shift:\t\t%d(0x%X)\n", value, value);  // DEBUGGING
+			}
 		}
 		// We started at the top and now we're here
 	}
@@ -1018,8 +1023,13 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
 	{
 		for (i = (dataOffset + numBytesToConvert - 1); i >= dataOffset ; i--)
 		{
-			value |= (int)(*(buffToConvert + i));
-			value << 8;
+			value |= (unsigned int)(*(buffToConvert + i));
+			// printf("Value at %p:\t%d(0x%X)\n", buffToConvert + i, value, value);  // DEBUGGING
+			if (i > dataOffset)
+			{
+				value <<= 8;
+				// printf("Value bit shift:\t\t%d(0x%X)\n", value, value);  // DEBUGGING
+			}
 		}
 		// We started at the top and now we're here
 	}
