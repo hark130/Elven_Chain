@@ -40,8 +40,8 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_CLASS_32		0x01				// 1
 #define ELF_H_CLASS_64		0x02				// 2
 // Endianess 0x05
-#define ELF_H_DATA_LITTLE	"\x1"				// 1
-#define ELF_H_DATA_BIG		"\x2"				// 2
+#define ELF_H_DATA_LITTLE	0x01				// 1
+#define ELF_H_DATA_BIG		0x02				// 2
 // Version 0x06
 #define ELF_H_VERSION		"\x1"				// 1
 // Target Operating System ABI 0x07
@@ -173,5 +173,11 @@ int kill_elf(struct Elf_Details** old_struct);
 // Output:	Pointer to the head node of a linked list of HarkleDicts
 // Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
 struct HarkleDict* init_elf_header_class_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Data definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_endian_dict(void);
 
 #endif // __ELF_DETAILS_H__

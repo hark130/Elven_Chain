@@ -143,7 +143,8 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	int tmpInt = 0;				// Holds various temporary return values
 	int dataOffset = 0;			// Used to offset into elven_contents
 	char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
-	struct HarkleDict* elfHeaderClassDict = NULL;
+	struct HarkleDict* elfHdrClassDict = NULL;
+	struct HarkleDict* elfHdrEndianDict = NULL;
 	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
 
 	/* INPUT VALIDATION */
@@ -173,7 +174,8 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	/* PREPARE DYNAMICALLY ALLOCATED VARIABLES */
 	// Peformed here to avoid memory leak if elven_contents turns out to be an ORC File
 	tmpBuff = gimme_mem(strlen(elven_contents) + 1, sizeof(char));
-	elfHeaderClassDict = init_elf_header_class_dict();
+	elfHdrClassDict = init_elf_header_class_dict();
+	elfHdrEndianDict = init_elf_header_endian_dict();
 
 	// 2. Begin initializing the struct
 	// 2.1. Filename should already be initialized in calling function
@@ -187,7 +189,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// tmpInt = (int)tmpBuff[0];  // Better way to do this?
 	tmpInt = (int)(*(elven_contents + dataOffset));
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
-	tmpNode = lookup_value(elfHeaderClassDict, tmpInt);
+	tmpNode = lookup_value(elfHdrClassDict, tmpInt);
 	if (tmpNode)  // Found it
 	{
 		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
@@ -198,12 +200,12 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 			{
 				fprintf(stderr, "ELF Class string '%s' not copied into ELF Struct!\n", tmpNode->name);
 			}
-// 			else
-// 			{
-// #ifdef DEBUGLEROAD
-// 				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->elfClass);
-// #endif // DEBUGLEROAD
-// 			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->elfClass);
+#endif // DEBUGLEROAD
+			}
 		} 
 	}
 	else
@@ -211,7 +213,32 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		fprintf(stderr, "ELF Class %d not found in HarkleDict!\n", tmpInt);
 	}
 	// 2.3. Endianess
-	// IMPLEMENT NOW!
+	dataOffset += 1;
+	tmpInt = (int)(*(elven_contents + dataOffset));
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	tmpNode = lookup_value(elfHdrEndianDict, tmpInt);
+	if (tmpNode)  // Found it
+	{
+		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
+		elven_struct->endianess = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->endianess)
+		{
+			if (strncpy(elven_struct->endianess, tmpNode->name, strlen(tmpNode->name)) != elven_struct->endianess)
+			{
+				fprintf(stderr, "ELF Endianess string '%s' not copied into ELF Struct!\n", tmpNode->name);
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->endianess);
+#endif // DEBUGLEROAD
+			}
+		} 
+	}
+	else
+	{
+		fprintf(stderr, "ELF Endianess %d not found in HarkleDict!\n", tmpInt);
+	}
 	// 2.4. Version
 	// IMPLEMENT NOW!
 	// 2.5. Target OS
@@ -227,10 +254,15 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	{
 		take_mem_back((void**)&tmpBuff, strlen(elven_contents) + 1, sizeof(char));
 	}
-	// Zeroize/Free/NULLify elfHeaderClassDict
-	if (elfHeaderClassDict)
+	// Zeroize/Free/NULLify elfHdrClassDict
+	if (elfHdrClassDict)
 	{
-		tmpInt = destroy_a_list(&elfHeaderClassDict);
+		tmpInt = destroy_a_list(&elfHdrClassDict);
+	}
+	// Zeroize/Free/NULLify elfHdrEndianDict
+	if (elfHdrEndianDict)
+	{
+		tmpInt = destroy_a_list(&elfHdrEndianDict);
 	}
 
 	return retVal;
@@ -635,6 +667,39 @@ struct HarkleDict* init_elf_header_class_dict(void)
 	// fprintf(stdout, "ELF_H_CLASS_32:\t%s\n", STR_ME(ELF_H_CLASS_32));  // DEBUGGING
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
 	int arrayOfValues[] = { ELF_H_CLASS_32, ELF_H_CLASS_64 };
+	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
+	int i = 0;
+
+	/* INPUT VALIDATION */
+	// Verify the parallel arrays are the same length
+	assert(numNames == numValues);
+
+	for (i = 0; i < numNames; i++)
+	{
+		retVal = add_entry(retVal, (*(arrayOfNames + i)), (*(arrayOfValues + i)));
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
+			break;
+		}
+	}
+
+	return retVal;
+}
+
+
+// Purpose:	Build a HarkleDict of Elf Header Data definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_endian_dict(void)
+{
+	/* LOCAL VARIABLES */
+	struct HarkleDict* retVal = NULL;
+	char* arrayOfNames[] = { "Little Endian", "Big Endian" };
+	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
+	int arrayOfValues[] = { ELF_H_DATA_LITTLE, ELF_H_DATA_BIG };
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
 	int i = 0;
 
