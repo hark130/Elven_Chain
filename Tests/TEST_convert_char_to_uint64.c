@@ -1,11 +1,8 @@
 #include "../Elf_Details.h"
-// #include <assert.h>
 #include <inttypes.h>	// Print uint64_t variables
 #include <limits.h>		// CHAR_MAX
 #include <stdio.h>		// I/O
-// #include <stdlib.h>
 
-// #define TEST_NAME_SIZE	
 #define BUFF_SIZE 		1024
 #define DEFAULT_INT		((int)1337)
 #define DEFAULT_UINT64	((uint64_t)0x0000000007041776)
@@ -58,18 +55,6 @@ int main(void)
 	}
 	putchar('\n');
 	// print_it(buff, BUFF_SIZE);  // DEBUGGING
-
-	// DEBUGGING PRINT STATEMENTS
-	// DISCLAIMER: No Debuggers or IDEs were harmed during the debugging of this source file
-	// printf("Buff[BUFF_SIZE - 2] == %d(0x%X)\n", (*(buff + BUFF_SIZE - 2)), (*(buff + BUFF_SIZE - 2)));  // DEBUGGING
-	// printf("Buff[BUFF_SIZE - 1] == %d(0x%X)\n", (*(buff + BUFF_SIZE - 1)), (*(buff + BUFF_SIZE - 1)));  // DEBUGGING
-	// printf("uint64Max[4] == %d(0x%X)\n", (*(uint64Max + 4)), (*(uint64Max + 4)));  // DEBUGGING
-	// printf("uint64Max[5] == %d(0x%X)\n", (*(uint64Max + 5)), (*(uint64Max + 5)));  // DEBUGGING
-	// printf("uint64Max[24] == %c(0x%02X)\n", (*(uint64Max + 24)), (*(uint64Max + 24)));  // DEBUGGING
-	// printf("uint64Max[25] == %c(0x%02X)\n", (*(uint64Max + 25)), (*(uint64Max + 25)));  // DEBUGGING
-	// printf("uint64Max[26] == %c(0x%02X)\n", (*(uint64Max + 26)), (*(uint64Max + 26)));  // DEBUGGING
-	// printf("uint64Max[27] == %c(0x%02X)\n", (*(uint64Max + 27)), (*(uint64Max + 27)));  // DEBUGGING
-	// printf("uint64Max[28] == %c(0x%02X)\n", (*(uint64Max + 28)), (*(uint64Max + 28)));  // DEBUGGING
 
 	/* SETUP UNIT TEST GROUPS */
 	// NORMAL
@@ -177,8 +162,6 @@ int main(void)
 		                                     &BoundaryUnitTests, &SpecialUnitTests, \
 		                                     NULL };
 
-// %d --> %" PRIu64 "
-// %x --> %" PRIx64 "
 	/* RUN THE TESTS */
 	tstGrpArr = arrayOfTests;
 	currTstGrp = *tstGrpArr;
