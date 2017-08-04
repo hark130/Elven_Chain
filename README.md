@@ -16,7 +16,7 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Object File Version
         [X] Entry Point
         [X] Program Header Table Offset
-        [ ] Section Header Table Pointer
+        [X] Section Header Table Pointer
         [ ] Flags
         [ ] ELF Header Size
         [ ] Program Header Table Size

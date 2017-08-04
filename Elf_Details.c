@@ -615,6 +615,51 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		fprintf(stderr, "Struct Processor Type invalid so Program Header Offset not read!\n");
 	}
 
+	// 2.12. Section Header Table Offset
+	// 32-bit Processor
+	if (elven_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
+			if (tmpInt != ERROR_SUCCESS)
+			{
+				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+			}
+			else
+			{
+				elven_struct->sHdr32 = tmpUint32;
+			}
+		}
+	}
+	// 64-bit Processor
+	else if (elven_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 8, elven_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			elven_struct->sHdr64 = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
+	}
+
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
 	// if (tmpBuff)
@@ -804,6 +849,22 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		else
 		{
 			fprintf(stream, "PH Offset:\t%s\n", notConfigured);
+		}
+		// Section Header Offset
+		// 32-bit Processor
+		if (elven_file->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "SH Offset:\t0x%" PRIx32 "\n", elven_file->sHdr32);
+		}
+		// 64-bit Processor
+		else if (elven_file->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "SH Offset:\t0x%" PRIx64 "\n", elven_file->sHdr64);
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "SH Offset:\t%s\n", notConfigured);
 		}
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -1032,12 +1093,18 @@ int kill_elf(struct Elf_Details** old_struct)
 			// uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
 			(*old_struct)->ePnt64 = 0;
 			(*old_struct)->ePnt64 |= ZEROIZE_VALUE;
-			// 32-bit address offset of the program header table
+			// uint32_t pHdr32;	// 32-bit address offset of the program header table
 			(*old_struct)->pHdr32 = 0;
 			(*old_struct)->pHdr32 |= ZEROIZE_VALUE;
-			// 64-bit address offset of the program header table
+			// uint32_t pHdr64;	// 64-bit address offset of the program header table
 			(*old_struct)->pHdr64 = 0;
 			(*old_struct)->pHdr64 |= ZEROIZE_VALUE;
+			// uint32_t sHdr32;	// 32-bit address offset of the section header table
+			(*old_struct)->sHdr32 = 0;
+			(*old_struct)->sHdr32 |= ZEROIZE_VALUE;
+			// uint64_t sHdr64;	// 64-bit address offset of the section header table
+			(*old_struct)->sHdr64 = 0;
+			(*old_struct)->sHdr64 |= ZEROIZE_VALUE;
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
