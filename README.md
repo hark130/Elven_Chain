@@ -12,8 +12,8 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] ABI Version
         [X] Pad
         [X] ELF Type
-        [/] ISA
-        [ ] ELF Version
+        [X] ISA
+        [X] Object File Version
         [ ] Entry Point
         [ ] Program Header Table Pointer
         [ ] Section Header Table Pointer
