@@ -231,6 +231,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	tmpNode = lookup_value(elfHdrClassDict, tmpInt);
 	if (tmpNode)  // Found it
 	{
+		elven_struct->processorType = tmpInt;	// Set the processor type
 		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
 		elven_struct->elfClass = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
 		if (elven_struct->elfClass)
@@ -253,6 +254,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 	else
 	{
+		elven_struct->processorType = ELF_H_CLASS_NONE;
 		fprintf(stderr, "ELF Class %d not found in HarkleDict!\n", tmpInt);
 	}
 	// Zeroize/Free/NULLify elfHdrClassDict
@@ -787,6 +789,8 @@ int kill_elf(struct Elf_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
+			// int processorType;	// 32 or 64 bit
+			(*old_struct)->processorType = ZEROIZE_VALUE;
 			// char* endianness;	// Little or Big
 			if ((*old_struct)->endianness)
 			{

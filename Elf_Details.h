@@ -6,6 +6,7 @@
 
 #include "Harklehash.h"
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #define ERROR_SUCCESS	((int)0)	// EUREKA!
@@ -181,6 +182,7 @@ struct Elf_Details
 	char* fileName;		// Absolute or relative path
 	char* magicNum;		// First four bytes of file
 	char* elfClass;		// 32 or 64 bit
+	int processorType;	// 32 or 64 bit
 	char* endianness;	// Little or Big
 	int bigEndian;		// If TRUE, bigEndian
 	int elfVersion;		// ELF version
@@ -190,6 +192,8 @@ struct Elf_Details
 	char* type;			// The type of ELF file
 	char* ISA;			// Specifies target Instruction Set Architecture
 	char* objVersion;	// Object File Version
+	uint32_t ePnt32;	// 32-bit memory address of the entry point from where the process starts executing
+	uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
 };
 // All char* members should be dynamically allocated and later free()'d
 
