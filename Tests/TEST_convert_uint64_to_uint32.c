@@ -4,7 +4,7 @@
 
 #define DEFAULT_INT		((int)1337)
 #define DEFAULT_UINT32	((uint32_t)31337)
-#define UINT32_MAXIMUM	0xFFFFFFFF
+#define UINT32_MAXIMUM	((uint32_t)0xFFFFFFFF)
 #define DEFAULT_UINT64	((uint64_t)0x0000000007041776)
 #define UINT64_MAXIMUM	((uint64_t)0xFFFFFFFFFFFFFFFF)
 
@@ -60,7 +60,7 @@ int main(void)
 
 	// BOUNDARY
 	//// Boundary1 - inVal == UINT32_MAXIMUM + 1 (fail)
-	unitTest Boundary1 = { "Boundary1", DEFAULT_INT, ERROR_OVERFLOW, UINT32_MAXIMUM + 1, DEFAULT_UINT32, DEFAULT_UINT32, NULL };
+	unitTest Boundary1 = { "Boundary1", DEFAULT_INT, ERROR_OVERFLOW, 0x100000000, DEFAULT_UINT32, DEFAULT_UINT32, NULL };
 	//// Boundary2 - inVal == UINT32_MAXIMUM (pass)
 	unitTest Boundary2 = { "Boundary2", DEFAULT_INT, ERROR_SUCCESS, UINT32_MAXIMUM, DEFAULT_UINT32, UINT32_MAXIMUM, NULL };
 	//// Boundary3 - inVal == 0 (pass)
