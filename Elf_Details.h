@@ -178,6 +178,7 @@ struct Elf_Details
 	int ABIversion;		// Version of the ABI
 	char* pad;			// Unused portion
 	char* type;			// The type of ELF file
+	char* ISA;			// Specifies target Instruction Set Architecture
 };
 // All char* members should be dynamically allocated and later free()'d
 

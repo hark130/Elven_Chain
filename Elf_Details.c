@@ -423,6 +423,54 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrElfTypeDict);
 	}
 
+	// 2.8. Instruction Set Architecture (ISA) (OFFSET: 0x12)
+	dataOffset += 2;  // 18
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
+	fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
+	if (tmpInt)
+	{
+		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
+		tmpNode = NULL;
+	}
+	else
+	{
+		tmpNode = lookup_value(elfHdrISADict, (int)tmpUint);
+	}
+	
+	if (tmpNode)  // Found it
+	{
+		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
+		elven_struct->ISA = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->ISA)
+		{
+			if (strncpy(elven_struct->ISA, tmpNode->name, strlen(tmpNode->name)) != elven_struct->ISA)
+			{
+				fprintf(stderr, "ELF ISA string '%s' not copied into ELF Struct!\n", tmpNode->name);
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->ISA);
+#endif // DEBUGLEROAD
+			}
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct ISA!\n");
+		}
+	}
+	else
+	{
+		fprintf(stderr, "ELF ISA %d not found in HarkleDict!\n", (int)tmpUint);
+	}
+	// Zeroize/Free/NULLify elfHdrISADict
+	if (elfHdrISADict)
+	{
+		tmpInt = destroy_a_list(&elfHdrISADict);
+	}
+
+
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
 	if (tmpBuff)
@@ -562,6 +610,15 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		else
 		{
 			fprintf(stream, "ELF Type:\t%s\n", notConfigured);	
+		}
+		// Instruction Set Architecture (ISA)
+		if (elven_file->targetOS)
+		{
+			fprintf(stream, "Target ASI:\t%s\n", elven_file->ISA);
+		}
+		else
+		{
+			fprintf(stream, "Target ASI:\t%s\n", notConfigured);	
 		}
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -745,6 +802,23 @@ int kill_elf(struct Elf_Details** old_struct)
 				{
 #ifdef DEBUGLEROAD
 					fprintf(stdout, "take_mem_back() successfully freed struct->type.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// char* ISA;			// Specifies target Instruction Set Architecture
+			if ((*old_struct)->ISA)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->ISA), strlen((*old_struct)->ISA), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->ISA free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->ISA.\n");
 #endif // DEBUGLEROAD
 				}
 			}
@@ -1277,8 +1351,8 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 		ELF_H_ISA_RH32, ELF_H_ISA_RCE, ELF_H_ISA_ARM, \
 		ELF_H_ISA_ALPHA, ELF_H_ISA_SH, ELF_H_ISA_SPARCV9, \
 		ELF_H_ISA_TRICORE, ELF_H_ISA_ARC, ELF_H_ISA_H8_300, \
-		ELF_H_ISA_H8_300H, ELF_H_ISA_H8S, ELF_H_ISA_H8_500, \ 
-		ELF_H_ISA_IA_64, LF_H_ISA_MIPS_X, ELF_H_ISA_COLDFIRE, \
+		ELF_H_ISA_H8_300H, ELF_H_ISA_H8S, ELF_H_ISA_H8_500, \
+		ELF_H_ISA_IA_64, ELF_H_ISA_MIPS_X, ELF_H_ISA_COLDFIRE, \
 		ELF_H_ISA_68HC12, ELF_H_ISA_MMA, ELF_H_ISA_PCP, \
 		ELF_H_ISA_NCPU, ELF_H_ISA_NDR1, ELF_H_ISA_STARCORE, \
 		ELF_H_ISA_ME16, ELF_H_ISA_ST100, ELF_H_ISA_TINYJ, \
