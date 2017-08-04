@@ -14,7 +14,7 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] ELF Type
         [X] ISA
         [X] Object File Version
-        [/] Entry Point
+        [X] Entry Point
         [ ] Program Header Table Pointer
         [ ] Section Header Table Pointer
         [ ] Flags
@@ -56,17 +56,17 @@ This extremely light repository is made of very fine ELF links. This project is 
     gcc -c Elf_Details.c
     gcc -c Elven_Chain.c
     gcc -c Harklehash.c
-    gcc -o Elf_Scout Elf_Details.o Elven_Chain.o Harklehash.o
-    ./Elf_Scout Elf_Scout
+    gcc -o Elf_Scout.exe Elf_Details.o Elven_Chain.o Harklehash.o
+    ./Elf_Scout.exe Elf_Scout.exe
 
 ```
 -or-
 ```
-    clear; gcc -o Elf_Scout Elf_Details.c Elven_Chain.c Harklehash.c; ./Elf_Scout Elf_Scout
+    clear; gcc -o Elf_Scout.exe Elf_Details.c Elven_Chain.c Harklehash.c; ./Elf_Scout.exe Elf_Scout.exe
 
 ```
 -or-
 ```
-    clear; make; ./Elf_Scout Elf_Scout
+    clear; make; ./Elf_Scout.exe Elf_Scout.exe
 
 ```
