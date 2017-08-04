@@ -671,11 +671,11 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		// Object File Version
 		if (elven_file->objVersion)
 		{
-			fprintf(stream, "Object Version:\t%s\n", elven_file->objVersion);
+			fprintf(stream, "Object File:\t%s\n", elven_file->objVersion);
 		}
 		else
 		{
-			fprintf(stream, "Object Version:\t%s\n", notConfigured);	
+			fprintf(stream, "Object File:\t%s\n", notConfigured);	
 		}
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -896,7 +896,7 @@ int kill_elf(struct Elf_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
-			
+
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
 			if (retVal)
