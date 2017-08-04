@@ -318,6 +318,13 @@ int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
 	                       int numBytesToConvert, int bigEndian, \
 	                       uint64_t* translation);
 
+// Purpose:	Safely convert a uint64_t to a uint32_t
+// Input:
+//			inVal - Input a uint64_t value
+//			outVal - Pointer to a uint32_t that will receive converted value
+// Ouput:	ERROR_* as specified in Elf_Details.h on success and failure
+int convert_uint64_to_uint32(uint64_t inVal, uint32_t* outVal);
+
 // Purpose:	Build a HarkleDict of Elf Header Class definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts

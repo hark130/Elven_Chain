@@ -525,7 +525,20 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 
 	// 2.10 Entry Point
 	dataOffset += 4;  // 24
-	////////////// CONTINUE HERE AFTER UINT64 WRAPPER IS WRITTEN
+	if (elven_struct->processorType == ELF_H_CLASS_32)
+	{
+		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt)
+		{
+			fprintf(stderr, "Failed to convert to an unsigned int32_t.  Error Code:\t%d\n", tmpInt);
+		}
+		else
+		{
+			///////////////// CONVERT UINT64 TO UINT32
+		}
+	}
+	// tmpUint64
 
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
@@ -1119,9 +1132,7 @@ int take_mem_back(void** buff, size_t numElem, size_t sizeElem)
 //			numBytesToConvert - Number of bytes to translate starting at buffToConvert[dataOffset]
 //			bigEndian - If True, bigEndian byte ordering
 //			translation [out] - Pointer to memory space to hold the translated value
-// Output:	The translation of the raw values found in the first numBytesToConvert bytes in
-//				buffToConvert on success
-//			ERROR_* as specified in Elf_Details.h on failure
+// Output:	ERROR_* as specified in Elf_Details.h on success and failure
 // Note:	Behavior is as follows:
 //			If bigEndian == TRUE:
 //				Addr + 0x0:	0xFE
@@ -1226,9 +1237,7 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
 //			numBytesToConvert - Number of bytes to translate starting at buffToConvert[dataOffset]
 //			bigEndian - If True, bigEndian byte ordering
 //			translation [out] - Pointer to memory space to hold the translated value
-// Output:	The translation of the raw values found in the first numBytesToConvert bytes in
-//				buffToConvert on success
-//			ERROR_* as specified in Elf_Details.h on failure
+// Output:	ERROR_* as specified in Elf_Details.h on success and failure
 // Note:	Behavior is as follows:
 //			If bigEndian == TRUE:
 //				Addr + 0x0:	0xFE
@@ -1340,6 +1349,44 @@ int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
 	{
 		*translation = value;
 	}
+	return retVal;
+}
+
+
+// Purpose:	Safely convert a uint64_t to a uint32_t
+// Input:
+//			inVal - Input a uint64_t value
+//			outVal - Pointer to a uint32_t that will receive converted value
+// Ouput:	ERROR_* as specified in Elf_Details.h on success and failure
+int convert_uint64_to_uint32(uint64_t inVal, uint32_t* outVal)
+{
+	/* LOCAL VARIABLES */
+	int retVal = ERROR_SUCCESS;	// Function's return value
+	uint32_t newVal = 0;		// Value to calculate from the input uint64_t
+	// uint32_t tmpVal = 0;		// Used to hold bits of the uint64_t
+	int i = 0;					// Iterating variable
+
+	/* INPUT VALIDATION */
+	if (!outVal)
+	{
+		retVal = ERROR_NULL_PTR;
+	}
+	else if (inVal > 0xFFFFFFFF)
+	{
+		retVal = ERROR_OVERFLOW;
+	}
+	else
+	{
+		*outVal = newVal;
+		newVal = inVal & 0x00000000FFFFFFFF;
+	}
+
+	/* DONE */
+	if (retVal == ERROR_SUCCESS)
+	{
+		*outVal = newVal;
+	}
+
 	return retVal;
 }
 
