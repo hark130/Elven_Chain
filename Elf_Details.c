@@ -1318,6 +1318,9 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 {
 	/* LOCAL VARIABLES */
 	struct HarkleDict* retVal = NULL;
+	// The following arrays may not be in numerical order but they are still
+	//	parallel.
+	// FUN FACT: The arrays were originally created with an old list of ISAs and later updated.
 	char* arrayOfNames[] = { \
 		"No machine", "AT&T WE 32100", "SPARC", \
 		"Intel 80386", "Motorola 68000", "Motorola 88000", \
@@ -1338,7 +1341,9 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 		"Motorola MC68HC05 Microcontroller", "Silicon Graphics SVx", "STMicroelectronics ST19 8-bit microcontroller", \
 		"Digital VAX", "Axis Communications 32-bit embedded processor", "Infineon Technologies 32-bit embedded processor", \
 		"Element 14 64-bit DSP Processor", "LSI Logic 16-bit DSP Processor", "Donald Knuth's educational 64-bit processor", \
-		"Harvard University machine-independent object files", "SiTera Prism",
+		"Harvard University machine-independent object files", "SiTera Prism", "Intel MCU", \
+		"IBM System/390 Processor", "IBM SPU/SPC", "AMD x86-64 architecture", \
+		"Sony DSP Processor", "Digital Equipment Corp. PDP-10", "Digital Equipment Corp. PDP-11", \
 	};
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
 	int arrayOfValues[] = { \
@@ -1361,7 +1366,9 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 		ELF_H_ISA_68HC05, ELF_H_ISA_SVX, ELF_H_ISA_ST19, \
 		ELF_H_ISA_VAX, ELF_H_ISA_CRIS, ELF_H_ISA_JAVELIN, \
 		ELF_H_ISA_FIREPATH, ELF_H_ISA_ZSP, ELF_H_ISA_MMIX, \
-		ELF_H_ISA_HUANY, ELF_H_ISA_PRISM, \
+		ELF_H_ISA_HUANY, ELF_H_ISA_PRISM, ELF_H_ISA_IAMCU, \
+		ELF_H_ISA_S390, ELF_H_ISA_SPU, ELF_H_ISA_X86_64, \
+		ELF_H_ISA_PDSP, ELF_H_ISA_PDP10, ELF_H_ISA_PDP11, \
 	};
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
 	int i = 0;
@@ -1382,14 +1389,6 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 	}
 
 	// RESERVED ENTRIES
-	// RESERVED 	6 	Reserved for future use
-	i = 6;  
-	retVal = add_entry(retVal, "Reserved for future use", i);
-	if (!retVal)
-	{
-		fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
-			"Reserved for future use", i);
-	}
 	// RESERVED 	11-14 	Reserved for future use
 	for (i = 11; i <= 14; i++)
 	{
@@ -1409,19 +1408,8 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 		fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
 			"Reserved for future use", i);
 	}
-	// RESERVED 	22-35 	Reserved for future use
-	for (i = 22; i <= 35; i++)
-	{
-		retVal = add_entry(retVal, "Reserved for future use", i);
-		if (!retVal)
-		{
-			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
-				"Reserved for future use", i);
-			break;
-		}
-	}
-	// RESERVED 	62-65 	Reserved for future use
-	for (i = 62; i <= 65; i++)
+	// RESERVED 	24-35 	Reserved for future use
+	for (i = 24; i <= 35; i++)
 	{
 		retVal = add_entry(retVal, "Reserved for future use", i);
 		if (!retVal)

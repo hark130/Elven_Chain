@@ -1,6 +1,6 @@
 // https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
 // Additional macros gleaned from:
-//	http://www.sco.com/developers/gabi/2000-07-17/ch4.eheader.html
+//	http://www.sco.com/developers/gabi/latest/ch4.eheader.html
 #ifndef __ELF_DETAILS_H__
 #define __ELF_DETAILS_H__
 
@@ -96,7 +96,7 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_ISA_386 			3 				// Intel 80386
 #define ELF_H_ISA_68K 			4 				// Motorola 68000
 #define ELF_H_ISA_88K 			5 				// Motorola 88000
-// RESERVED 	6 	Reserved for future use
+#define ELF_H_ISA_IAMCU 	 	6 				// Intel MCU
 #define ELF_H_ISA_860 			7 				// Intel 80860
 #define ELF_H_ISA_MIPS 			8 				// MIPS I Architecture
 #define ELF_H_ISA_S370 			9 				// IBM System/370 Processor
@@ -109,7 +109,9 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_ISA_960 			19 				// Intel 80960
 #define ELF_H_ISA_PPC 			20 				// PowerPC
 #define ELF_H_ISA_PPC64 		21 				// 64-bit PowerPC
-// RESERVED 	22-35 	Reserved for future use
+#define ELF_H_ISA_S390			22				// IBM System/390 Processor
+#define ELF_H_ISA_SPU			23				// IBM SPU/SPC
+// RESERVED 	24-35 	Reserved for future use
 #define ELF_H_ISA_V800 			36 				// NEC V800
 #define ELF_H_ISA_FR20 			37 				// Fujitsu FR20
 #define ELF_H_ISA_RH32 			38 				// TRW RH-32
@@ -136,7 +138,10 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_ISA_ME16 			59 				// Toyota ME16 processor
 #define ELF_H_ISA_ST100 		60 				// STMicroelectronics ST100 processor
 #define ELF_H_ISA_TINYJ 		61 				// Advanced Logic Corp. TinyJ embedded processor family
-// Reserved 	62-65 	Reserved for future use
+#define ELF_H_ISA_X86_64 		62 				// AMD x86-64 architecture
+#define ELF_H_ISA_PDSP 			63 				// Sony DSP Processor
+#define ELF_H_ISA_PDP10 		64 				// Digital Equipment Corp. PDP-10
+#define ELF_H_ISA_PDP11 		65 				// Digital Equipment Corp. PDP-11
 #define ELF_H_ISA_FX66 			66 				// Siemens FX66 microcontroller
 #define ELF_H_ISA_ST9PLUS 		67 				// STMicroelectronics ST9+ 8/16 bit microcontroller
 #define ELF_H_ISA_ST7 			68 				// STMicroelectronics ST7 8-bit microcontroller
