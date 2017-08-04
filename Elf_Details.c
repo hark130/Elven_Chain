@@ -426,8 +426,8 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// 2.8. Instruction Set Architecture (ISA) (OFFSET: 0x12)
 	dataOffset += 2;  // 18
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
-	fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
-	fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
 	if (tmpInt)
 	{
 		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
