@@ -3,7 +3,8 @@ CFLAGS  = -g
 RM      = rm -f
 
 all: 
-	$(CC) $(CFLAGS) -o TEST_ccti TEST_convert_char_to_int.c ../Elf_Details.c ../Harklehash.c
+	$(CC) $(CFLAGS) -o TEST_ccti.exe TEST_convert_char_to_int.c ../Elf_Details.c ../Harklehash.c
+	$(CC) $(CFLAGS) -o TEST_cctu64.exe TEST_convert_char_to_uint64.c ../Elf_Details.c ../Harklehash.c
 
 clean:
-	$(RM) *.o *.i TEST_ccti
+	$(RM) *.o *.i *.exe

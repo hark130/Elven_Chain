@@ -1,6 +1,6 @@
 CC      = gcc
 CFLAGS  = -g
-OUT		= Elf_Scout
+OUT		= Elf_Scout.exe
 RM      = rm -f
 
 all: 
