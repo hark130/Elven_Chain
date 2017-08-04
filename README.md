@@ -25,15 +25,15 @@ This extremely light repository is made of very fine ELF links. This project is 
         [ ] Section Header Table Number of Entries
         [ ] Index to Section Header Table with Section Names
     [ ] Implement Program Header
-    	[ ] Segment Type
-    	[ ] 64-bit Flags
-    	[ ] Offset of the Segment
-    	[ ] Virtual Address of the Segment
-    	[ ] Segment's Physical Address
-    	[ ] Size of the Segment in File Image (bytes)
-    	[ ] Size of the Segment in Memory (bytes)
-    	[ ] 32-bit Flags
-    	[ ] Alignment
+        [ ] Segment Type
+        [ ] 64-bit Flags
+        [ ] Offset of the Segment
+        [ ] Virtual Address of the Segment
+        [ ] Segment's Physical Address
+        [ ] Size of the Segment in File Image (bytes)
+        [ ] Size of the Segment in Memory (bytes)
+        [ ] 32-bit Flags
+        [ ] Alignment
     [ ] Implement Section Header
     [ ] Implement Program Data
     [ ] Implement Section Data
