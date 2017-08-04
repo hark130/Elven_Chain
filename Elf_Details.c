@@ -156,12 +156,13 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	int tmpInt = 0;				// Holds various temporary return values
 	unsigned int tmpUint = 0;	// Holds calculated values from convert_char_to_int()
 	int dataOffset = 0;			// Used to offset into elven_contents
-	char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
+	// char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
 	struct HarkleDict* elfHdrClassDict = NULL;
 	struct HarkleDict* elfHdrEndianDict = NULL;
 	struct HarkleDict* elfHdrTargetOSDict = NULL;
 	struct HarkleDict* elfHdrElfTypeDict = NULL;
 	struct HarkleDict* elfHdrISADict = NULL;
+	struct HarkleDict* elfHdrObjVerDict = NULL;
 	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
 
 	/* INPUT VALIDATION */
@@ -205,12 +206,13 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 
 	/* PREPARE DYNAMICALLY ALLOCATED VARIABLES */
 	// Peformed here to avoid memory leak if elven_contents turns out to be an ORC File
-	tmpBuff = gimme_mem(strlen(elven_contents) + 1, sizeof(char));
+	// tmpBuff = gimme_mem(strlen(elven_contents) + 1, sizeof(char));
 	elfHdrClassDict = init_elf_header_class_dict();
 	elfHdrEndianDict = init_elf_header_endian_dict();
 	elfHdrTargetOSDict = init_elf_header_targetOS_dict();
 	elfHdrElfTypeDict = init_elf_header_elf_type_dict();
 	elfHdrISADict = init_elf_header_isa_dict();
+	elfHdrObjVerDict = init_elf_header_obj_version_dict();
 
 	// 2. Begin initializing the struct
 
@@ -470,14 +472,59 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrISADict);
 	}
 
-	// 2.9. 
+	// 2.9. Object File Version
+	dataOffset += 2;  // 20
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint);
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
+	if (tmpInt)
+	{
+		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
+		tmpNode = NULL;
+	}
+	else
+	{
+		tmpNode = lookup_value(elfHdrObjVerDict, (int)tmpUint);
+	}
+	
+	if (tmpNode)  // Found it
+	{
+		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
+		elven_struct->objVersion = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->objVersion)
+		{
+			if (strncpy(elven_struct->objVersion, tmpNode->name, strlen(tmpNode->name)) != elven_struct->objVersion)
+			{
+				fprintf(stderr, "ELF Object File Version string '%s' not copied into ELF Struct!\n", tmpNode->name);
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->objVersion);
+#endif // DEBUGLEROAD
+			}
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct Object File Version!\n");
+		}
+	}
+	else
+	{
+		fprintf(stderr, "ELF Object File Version %d not found in HarkleDict!\n", (int)tmpUint);
+	}
+	// Zeroize/Free/NULLify elfHdrObjVerDict
+	if (elfHdrObjVerDict)
+	{
+		tmpInt = destroy_a_list(&elfHdrObjVerDict);
+	}
 
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
-	if (tmpBuff)
-	{
-		take_mem_back((void**)&tmpBuff, strlen(elven_contents) + 1, sizeof(char));
-	}
+	// if (tmpBuff)
+	// {
+	// 	take_mem_back((void**)&tmpBuff, strlen(elven_contents) + 1, sizeof(char));
+	// }
 
 	return retVal;
 }
@@ -613,13 +660,22 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 			fprintf(stream, "ELF Type:\t%s\n", notConfigured);	
 		}
 		// Instruction Set Architecture (ISA)
-		if (elven_file->targetOS)
+		if (elven_file->ISA)
 		{
-			fprintf(stream, "Target ASI:\t%s\n", elven_file->ISA);
+			fprintf(stream, "Target ISA:\t%s\n", elven_file->ISA);
 		}
 		else
 		{
-			fprintf(stream, "Target ASI:\t%s\n", notConfigured);	
+			fprintf(stream, "Target ISA:\t%s\n", notConfigured);	
+		}
+		// Object File Version
+		if (elven_file->objVersion)
+		{
+			fprintf(stream, "Object Version:\t%s\n", elven_file->objVersion);
+		}
+		else
+		{
+			fprintf(stream, "Object Version:\t%s\n", notConfigured);	
 		}
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -823,7 +879,24 @@ int kill_elf(struct Elf_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
-
+			// char* objVersion;	// Object File Version
+			if ((*old_struct)->objVersion)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->objVersion), strlen((*old_struct)->objVersion), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->objVersion free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->objVersion.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
 			if (retVal)
@@ -1417,6 +1490,39 @@ struct HarkleDict* init_elf_header_isa_dict(void)
 		{
 			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
 				"Reserved for future use", i);
+			break;
+		}
+	}
+
+	return retVal;
+}
+
+
+// Purpose:	Build a HarkleDict of Elf Header Object File Version definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_obj_version_dict(void)
+{
+	/* LOCAL VARIABLES */
+	struct HarkleDict* retVal = NULL;
+	char* arrayOfNames[] = { "Invalid version", "Current version" };
+	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
+	int arrayOfValues[] = { ELF_H_OBJ_V_NONE, ELF_H_OBJ_V_CURRENT };
+	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
+	int i = 0;
+
+	/* INPUT VALIDATION */
+	// Verify the parallel arrays are the same length
+	assert(numNames == numValues);
+
+	for (i = 0; i < numNames; i++)
+	{
+		retVal = add_entry(retVal, (*(arrayOfNames + i)), (*(arrayOfValues + i)));
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
 			break;
 		}
 	}

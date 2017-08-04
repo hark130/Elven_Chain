@@ -161,6 +161,9 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_ISA_MMIX 			80 				// Donald Knuth's educational 64-bit processor
 #define ELF_H_ISA_HUANY 		81 				// Harvard University machine-independent object files
 #define ELF_H_ISA_PRISM 		82 				// SiTera Prism
+// Object File Version 0x14 - 0x17
+#define ELF_H_OBJ_V_NONE		0				// Invalid version
+#define ELF_H_OBJ_V_CURRENT		1				// Current version
 /****************************/
 /***** ELF HEADER STOP ******/
 /****************************/
@@ -315,5 +318,11 @@ struct HarkleDict* init_elf_header_elf_type_dict(void);
 // Output:	Pointer to the head node of a linked list of HarkleDicts
 // Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
 struct HarkleDict* init_elf_header_isa_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Object File Version definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_obj_version_dict(void);
 
 #endif // __ELF_DETAILS_H__
