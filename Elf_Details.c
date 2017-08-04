@@ -470,6 +470,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrISADict);
 	}
 
+	// 2.9. 
 
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
@@ -1141,10 +1142,10 @@ struct HarkleDict* init_elf_header_class_dict(void)
 {
 	/* LOCAL VARIABLES */
 	struct HarkleDict* retVal = NULL;
-	char* arrayOfNames[] = { "32-bit format", "64-bit format" };
+	char* arrayOfNames[] = { "Invalid class", "32-bit format", "64-bit format" };
 	// fprintf(stdout, "ELF_H_CLASS_32:\t%s\n", STR_ME(ELF_H_CLASS_32));  // DEBUGGING
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
-	int arrayOfValues[] = { ELF_H_CLASS_32, ELF_H_CLASS_64 };
+	int arrayOfValues[] = { ELF_H_CLASS_NONE, ELF_H_CLASS_32, ELF_H_CLASS_64 };
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
 	int i = 0;
 
@@ -1175,9 +1176,9 @@ struct HarkleDict* init_elf_header_endian_dict(void)
 {
 	/* LOCAL VARIABLES */
 	struct HarkleDict* retVal = NULL;
-	char* arrayOfNames[] = { "Little Endian", "Big Endian" };
+	char* arrayOfNames[] = { "Invalid data encoding", "Little Endian", "Big Endian" };
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
-	int arrayOfValues[] = { ELF_H_DATA_LITTLE, ELF_H_DATA_BIG };
+	int arrayOfValues[] = { ELF_H_DATA_NONE, ELF_H_DATA_LITTLE, ELF_H_DATA_BIG };
 	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
 	int i = 0;
 

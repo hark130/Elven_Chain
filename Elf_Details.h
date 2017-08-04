@@ -49,9 +49,11 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 // Magic Number 0x00 - 0x03
 #define ELF_H_MAGIC_NUM		"\x7f\x45\x4c\x46"	// 7F E L F
 // Class 0x04
+#define ELF_H_CLASS_NONE		0x00 			// 0
 #define ELF_H_CLASS_32			0x01			// 1
 #define ELF_H_CLASS_64			0x02			// 2
 // Endianness 0x05
+#define ELF_H_DATA_NONE			0x00 			// 0
 #define ELF_H_DATA_LITTLE		0x01			// 1
 #define ELF_H_DATA_BIG			0x02			// 2
 // Version 0x06
@@ -184,6 +186,7 @@ struct Elf_Details
 	char* pad;			// Unused portion
 	char* type;			// The type of ELF file
 	char* ISA;			// Specifies target Instruction Set Architecture
+	char* objVersion;	// Object File Version
 };
 // All char* members should be dynamically allocated and later free()'d
 
