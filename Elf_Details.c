@@ -305,10 +305,10 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrEndianDict);
 	}
 
-	// 2.4. Version (OFFSET: 0x06)
+	// 2.4. ELF Version (OFFSET: 0x06)
 	dataOffset += 1;  // 6
-	elven_struct->version = (int)(*(elven_contents + dataOffset));
-	// fprintf(stdout, "elven_struct->version now holds:\t%d\n", elven_struct->version);  // DEBUGGING
+	elven_struct->elfVersion = (int)(*(elven_contents + dataOffset));
+	// fprintf(stdout, "elven_struct->elfVersion now holds:\t%d\n", elven_struct->elfVersion);  // DEBUGGING
 
 	// 2.5. Target OS (OFFSET: 0x07)
 	dataOffset += 1;  // 7
@@ -577,7 +577,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 			fprintf(stream, "Endianness:\t%s\n", notConfigured);	
 		}
 		// ELF Version
-		fprintf(stream, "ELF Version:\t%d\n", elven_file->version);
+		fprintf(stream, "ELF Version:\t%d\n", elven_file->elfVersion);
 		// Target OS ABI
 		if (elven_file->targetOS)
 		{
@@ -750,8 +750,8 @@ int kill_elf(struct Elf_Details** old_struct)
 			}
 			// int bigEndian;		// If TRUE, bigEndian
 			(*old_struct)->bigEndian = ZEROIZE_VALUE;
-			// int version;		// ELF version
-			(*old_struct)->version = ZEROIZE_VALUE;
+			// int elfVersion;		// ELF version
+			(*old_struct)->elfVersion = ZEROIZE_VALUE;
 			// char* targetOS;		// Target OS ABI
 			if ((*old_struct)->targetOS)
 			{

@@ -180,7 +180,7 @@ struct Elf_Details
 	char* elfClass;		// 32 or 64 bit
 	char* endianness;	// Little or Big
 	int bigEndian;		// If TRUE, bigEndian
-	int version;		// ELF version
+	int elfVersion;		// ELF version
 	char* targetOS;		// Target OS ABI
 	int ABIversion;		// Version of the ABI
 	char* pad;			// Unused portion
