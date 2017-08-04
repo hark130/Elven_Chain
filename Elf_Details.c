@@ -155,6 +155,8 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	char* tmpPtr = NULL;		// Holds return values from string functions
 	int tmpInt = 0;				// Holds various temporary return values
 	unsigned int tmpUint = 0;	// Holds calculated values from convert_char_to_int()
+	uint32_t tmpUint32 = 0;		// Holds memory addresses on a 32-bit system
+	uint64_t tmpUint64 = 0;		// Holds memory addresses on a 64-bit system
 	int dataOffset = 0;			// Used to offset into elven_contents
 	// char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
 	struct HarkleDict* elfHdrClassDict = NULL;
@@ -387,7 +389,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
 	if (tmpInt)
 	{
-		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
+		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
 	}
 	else
@@ -434,7 +436,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
 	if (tmpInt)
 	{
-		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
+		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
 	}
 	else
@@ -481,7 +483,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
 	if (tmpInt)
 	{
-		fprintf(stderr, "Failed to convert to an unsinged int.  Error Code:\t%d\n", tmpInt);
+		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
 	}
 	else
@@ -520,6 +522,10 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	{
 		tmpInt = destroy_a_list(&elfHdrObjVerDict);
 	}
+
+	// 2.10 Entry Point
+	dataOffset += 4;  // 24
+	////////////// CONTINUE HERE AFTER UINT64 WRAPPER IS WRITTEN
 
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
@@ -1196,17 +1202,144 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
 				// printf("Value bit shift:\t\t%d(0x%X)\n", value, value);  // DEBUGGING
 			}
 		}
-		// We started at the top and now we're here
+		// We started at the bottom and now we're here
 	}
 	else
 	{
 		// How did we get here?!
 		retVal = ERROR_BAD_ARG;
-		return retVal;
 	}
 
 	// Done
-	*translation = value;
+	if (retVal == ERROR_SUCCESS)
+	{
+		*translation = value;
+	}
+	return retVal;
+}
+
+
+// Purpose:	Convert consecutive characters into a single uint64_t IAW the specified endianness
+// Input:
+//			buffToConvert - Pointer to the buffer that holds the bytes in question
+//			dataOffset - Starting location in buffToConvert
+//			numBytesToConvert - Number of bytes to translate starting at buffToConvert[dataOffset]
+//			bigEndian - If True, bigEndian byte ordering
+//			translation [out] - Pointer to memory space to hold the translated value
+// Output:	The translation of the raw values found in the first numBytesToConvert bytes in
+//				buffToConvert on success
+//			ERROR_* as specified in Elf_Details.h on failure
+// Note:	Behavior is as follows:
+//			If bigEndian == TRUE:
+//				Addr + 0x0:	0xFE
+//				Addr + 0x1:	0xFF
+//				Returns:	0xFEFF == 65279
+//			If bigEndian == FALSE:
+//				Addr + 0x0:	0xFE
+//				Addr + 0x1:	0xFF
+//				Returns:	0xFFFE == 65534
+//			Also, translation will always be zeroized if input validation is passed
+//			Finally, this function is a 64-bit wrapper to convert_char_to_int()
+int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
+	                       int numBytesToConvert, int bigEndian, \
+	                       uint64_t* translation)
+{
+	/* LOCAL VARIABLES */
+	int retVal = ERROR_SUCCESS;	// Function return value
+	uint64_t value = 0;			// Holds the current translated value prior to return
+	int i = 0;					// Iterating variable
+	unsigned int tmpValue = 0;	// Holds the value from successive calls to ccti()
+
+	/* INPUT VALIDATION */
+	if (!buffToConvert || !translation)
+	{
+		retVal = ERROR_NULL_PTR;
+		return retVal;
+	}
+	else if (dataOffset < 0)
+	{
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
+	else if (numBytesToConvert < 1)
+	{
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
+	else if (bigEndian != TRUE && bigEndian != FALSE)
+	{
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
+	else if (numBytesToConvert > sizeof(value))
+	{
+		retVal = ERROR_OVERFLOW;
+		return retVal;
+	}
+	else
+	{
+		// Zeroize translation
+		*translation = value;
+	}
+
+	/* CALL convert_char_to_int() */
+	if (bigEndian == TRUE)
+	{
+		for (i = dataOffset; i < (dataOffset + numBytesToConvert); i++)
+		{
+			retVal += convert_char_to_int(buffToConvert, i, 1, bigEndian, &tmpValue);
+			if (retVal)
+			{
+				tmpValue = 0;
+				*translation = 0;
+				return retVal;
+			}
+			else
+			{
+				value |= tmpValue;
+				tmpValue = 0;
+				if ((i + 1) < (dataOffset + numBytesToConvert))
+				{
+					value <<= 8;
+				}
+			}
+		}		
+		// We started at the top and now we're here
+	}
+	else if (bigEndian == FALSE)
+	{
+		for (i = (dataOffset + numBytesToConvert - 1); i >= dataOffset; i--)
+		{
+			retVal += convert_char_to_int(buffToConvert, i, 1, bigEndian, &tmpValue);
+			if (retVal)
+			{
+				tmpValue = 0;
+				*translation = 0;
+				return retVal;
+			}
+			else
+			{
+				value |= tmpValue;
+				tmpValue = 0;
+				if (i > dataOffset)
+				{
+					value <<= 8;
+				}
+			}
+		}
+		// We started at the bottom and now we're here
+	}
+	else
+	{
+		// How did we get here?!
+		retVal = ERROR_BAD_ARG;
+	}
+	
+	// Done
+	if (retVal == ERROR_SUCCESS)
+	{
+		*translation = value;
+	}
 	return retVal;
 }
 
