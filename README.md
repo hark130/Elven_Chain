@@ -44,6 +44,7 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Move init_*() function calls in parse_elf() to just-in-time code block calls
     [ ] Implement [ISA macros](http://www.sco.com/developers/gabi/latest/ch4.eheader.html) for 83 - 243
     [ ] What happens if I modify the entry point of an ELF File?  1337 h4x?
+    [ ] Look for memory leaks (valgrind)
 
 ## NOTES TO THE WORLD (and future Hark)
 ### Implementing new members of the Elf_Details struct involves updating the following:
