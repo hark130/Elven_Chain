@@ -42,6 +42,7 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] What happens if I hide something in the Elf Header PAD (offset 0x09)?
     [X] Add Elf Header PAD to Elf_Detail struct (see: NOTES TO THE WORLD)
     [ ] Move init_*() function calls in parse_elf() to just-in-time code block calls
+    [ ] Implement [ISA macros](http://www.sco.com/developers/gabi/latest/ch4.eheader.html) for 83 - 243
 
 ## NOTES TO THE WORLD (and future Hark)
 ### Implementing new members of the Elf_Details struct involves updating the following:
