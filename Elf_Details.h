@@ -194,6 +194,8 @@ struct Elf_Details
 	char* objVersion;	// Object File Version
 	uint32_t ePnt32;	// 32-bit memory address of the entry point from where the process starts executing
 	uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
+	uint32_t pHdr32;	// 32-bit address offset of the program header table
+	uint64_t pHdr64;	// 64-bit address offset of the program header table
 };
 // All char* members should be dynamically allocated and later free()'d
 
