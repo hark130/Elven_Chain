@@ -1,6 +1,7 @@
 #include "Elf_Details.h"
 #include "Harklehash.h"
 #include <assert.h>
+#include <inttypes.h>	// Print uint64_t variables
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -387,7 +388,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
 	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
-	if (tmpInt)
+	if (tmpInt != ERROR_SUCCESS)
 	{
 		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
@@ -434,7 +435,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
 	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
-	if (tmpInt)
+	if (tmpInt != ERROR_SUCCESS)
 	{
 		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
@@ -481,7 +482,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint);
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
 	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
-	if (tmpInt)
+	if (tmpInt != ERROR_SUCCESS)
 	{
 		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
@@ -525,20 +526,47 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 
 	// 2.10 Entry Point
 	dataOffset += 4;  // 24
+	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
 	{
 		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint64);
 
-		if (tmpInt)
+		if (tmpInt != ERROR_SUCCESS)
 		{
-			fprintf(stderr, "Failed to convert to an unsigned int32_t.  Error Code:\t%d\n", tmpInt);
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 		}
 		else
 		{
-			///////////////// CONVERT UINT64 TO UINT32
+			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
+			if (tmpInt != ERROR_SUCCESS)
+			{
+				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+			}
+			else
+			{
+				elven_struct->ePnt32 = tmpUint32;
+			}
 		}
 	}
-	// tmpUint64
+	// 64-bit Processor
+	else if (elven_struct->processorType == ELF_H_CLASS_64)
+	{
+		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			elven_struct->ePnt64 = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Entry Point not read!\n");
+	}
 
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
@@ -697,6 +725,22 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		else
 		{
 			fprintf(stream, "Object File:\t%s\n", notConfigured);	
+		}
+		// Entry Point
+		// 32-bit Processor
+		if (elven_file->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "Entry Point:\t0x%08" PRIx32 "\n", elven_file->ePnt32);
+		}
+		// 64-bit Processor
+		else if (elven_file->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "Entry Point:\t0x%016" PRIx64 "\n", elven_file->ePnt64);
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "Entry Point:\t%s\n", notConfigured);
 		}
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -919,7 +963,12 @@ int kill_elf(struct Elf_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
-
+			// uint32_t ePnt32;	// 32-bit memory address of the entry point from where the process starts executing
+			(*old_struct)->ePnt32 = 0;
+			(*old_struct)->ePnt32 |= ZEROIZE_VALUE;
+			// uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
+			(*old_struct)->ePnt64 = 0;
+			(*old_struct)->ePnt64 |= ZEROIZE_VALUE;
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
 			if (retVal)
