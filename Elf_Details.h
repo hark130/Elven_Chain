@@ -301,4 +301,10 @@ struct HarkleDict* init_elf_header_targetOS_dict(void);
 // Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
 struct HarkleDict* init_elf_header_elf_type_dict(void);
 
+// Purpose:	Build a HarkleDict of Elf Header ISA definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_isa_dict(void);
+
 #endif // __ELF_DETAILS_H__

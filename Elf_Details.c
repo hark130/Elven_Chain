@@ -161,6 +161,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	struct HarkleDict* elfHdrEndianDict = NULL;
 	struct HarkleDict* elfHdrTargetOSDict = NULL;
 	struct HarkleDict* elfHdrElfTypeDict = NULL;
+	struct HarkleDict* elfHdrISADict = NULL;
 	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
 
 	/* INPUT VALIDATION */
@@ -209,6 +210,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	elfHdrEndianDict = init_elf_header_endian_dict();
 	elfHdrTargetOSDict = init_elf_header_targetOS_dict();
 	elfHdrElfTypeDict = init_elf_header_elf_type_dict();
+	elfHdrISADict = init_elf_header_isa_dict();
 
 	// 2. Begin initializing the struct
 
@@ -1226,6 +1228,132 @@ struct HarkleDict* init_elf_header_elf_type_dict(void)
 		{
 			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
 				"Processor-specific", i);
+			break;
+		}
+	}
+
+	return retVal;
+}
+
+
+// Purpose:	Build a HarkleDict of Elf Header ISA definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_isa_dict(void)
+{
+	/* LOCAL VARIABLES */
+	struct HarkleDict* retVal = NULL;
+	char* arrayOfNames[] = { \
+		"No machine", "AT&T WE 32100", "SPARC", \
+		"Intel 80386", "Motorola 68000", "Motorola 88000", \
+		"Intel 80860", "MIPS I Architecture", "IBM System/370 Processor", \
+		"MIPS RS3000 Little-endian", "Hewlett-Packard PA-RISC", "Fujitsu VPP500", \
+		"Enhanced instruction set SPARC", "Intel 80960", "PowerPC", \
+		"64-bit PowerPC", "NEC V800", "Fujitsu FR20", \
+		"TRW RH-32", "Motorola RCE", "Advanced RISC Machines ARM", \
+		"Digital Alpha", "Hitachi SH", "SPARC Version 9", \
+		"Siemens Tricore embedded processor", "Argonaut RISC Core, Argonaut Technologies Inc.", "Hitachi H8/300", \
+		"Hitachi H8/300H", "Hitachi H8S", "Hitachi H8/500", \
+		"Intel IA-64 processor architecture", "Stanford MIPS-X", "Motorola ColdFire", \
+		"Motorola M68HC12", "Fujitsu MMA Multimedia Accelerator", "Siemens PCP", \
+		"Sony nCPU embedded RISC processor", "Denso NDR1 microprocessor", "Motorola Star*Core processor", \
+		"Toyota ME16 processor", "STMicroelectronics ST100 processor", "Advanced Logic Corp. TinyJ embedded processor family", \
+		"Siemens FX66 microcontroller", "STMicroelectronics ST9+ 8/16 bit microcontroller", "STMicroelectronics ST7 8-bit microcontroller", \
+		"Motorola MC68HC16 Microcontroller", "Motorola MC68HC11 Microcontroller", "Motorola MC68HC08 Microcontroller", \
+		"Motorola MC68HC05 Microcontroller", "Silicon Graphics SVx", "STMicroelectronics ST19 8-bit microcontroller", \
+		"Digital VAX", "Axis Communications 32-bit embedded processor", "Infineon Technologies 32-bit embedded processor", \
+		"Element 14 64-bit DSP Processor", "LSI Logic 16-bit DSP Processor", "Donald Knuth's educational 64-bit processor", \
+		"Harvard University machine-independent object files", "SiTera Prism",
+	};
+	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
+	int arrayOfValues[] = { \
+		ELF_H_ISA_NONE, ELF_H_ISA_M32, ELF_H_ISA_SPARC, \
+		ELF_H_ISA_386, ELF_H_ISA_68K, ELF_H_ISA_88K, \
+		ELF_H_ISA_860, ELF_H_ISA_MIPS, ELF_H_ISA_S370, \
+		ELF_H_ISA_MIPS_RS3_LE, ELF_H_ISA_PARISC, ELF_H_ISA_VPP500, \
+		ELF_H_ISA_SPARC32PLUS, ELF_H_ISA_960, ELF_H_ISA_PPC, \
+		ELF_H_ISA_PPC64, ELF_H_ISA_V800, ELF_H_ISA_FR20, \
+		ELF_H_ISA_RH32, ELF_H_ISA_RCE, ELF_H_ISA_ARM, \
+		ELF_H_ISA_ALPHA, ELF_H_ISA_SH, ELF_H_ISA_SPARCV9, \
+		ELF_H_ISA_TRICORE, ELF_H_ISA_ARC, ELF_H_ISA_H8_300, \
+		ELF_H_ISA_H8_300H, ELF_H_ISA_H8S, ELF_H_ISA_H8_500, \ 
+		ELF_H_ISA_IA_64, LF_H_ISA_MIPS_X, ELF_H_ISA_COLDFIRE, \
+		ELF_H_ISA_68HC12, ELF_H_ISA_MMA, ELF_H_ISA_PCP, \
+		ELF_H_ISA_NCPU, ELF_H_ISA_NDR1, ELF_H_ISA_STARCORE, \
+		ELF_H_ISA_ME16, ELF_H_ISA_ST100, ELF_H_ISA_TINYJ, \
+		ELF_H_ISA_FX66, ELF_H_ISA_ST9PLUS, ELF_H_ISA_ST7, \
+		ELF_H_ISA_68HC16, ELF_H_ISA_68HC11, ELF_H_ISA_68HC08, \
+		ELF_H_ISA_68HC05, ELF_H_ISA_SVX, ELF_H_ISA_ST19, \
+		ELF_H_ISA_VAX, ELF_H_ISA_CRIS, ELF_H_ISA_JAVELIN, \
+		ELF_H_ISA_FIREPATH, ELF_H_ISA_ZSP, ELF_H_ISA_MMIX, \
+		ELF_H_ISA_HUANY, ELF_H_ISA_PRISM, \
+	};
+	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
+	int i = 0;
+
+	/* INPUT VALIDATION */
+	// Verify the parallel arrays are the same length
+	assert(numNames == numValues);
+
+	for (i = 0; i < numNames; i++)
+	{
+		retVal = add_entry(retVal, (*(arrayOfNames + i)), (*(arrayOfValues + i)));
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
+			break;
+		}
+	}
+
+	// RESERVED ENTRIES
+	// RESERVED 	6 	Reserved for future use
+	i = 6;  
+	retVal = add_entry(retVal, "Reserved for future use", i);
+	if (!retVal)
+	{
+		fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+			"Reserved for future use", i);
+	}
+	// RESERVED 	11-14 	Reserved for future use
+	for (i = 11; i <= 14; i++)
+	{
+		retVal = add_entry(retVal, "Reserved for future use", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Reserved for future use", i);
+			break;
+		}
+	}
+	// RESERVED 	16 	Reserved for future use
+	i = 16;  
+	retVal = add_entry(retVal, "Reserved for future use", i);
+	if (!retVal)
+	{
+		fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+			"Reserved for future use", i);
+	}
+	// RESERVED 	22-35 	Reserved for future use
+	for (i = 22; i <= 35; i++)
+	{
+		retVal = add_entry(retVal, "Reserved for future use", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Reserved for future use", i);
+			break;
+		}
+	}
+	// RESERVED 	62-65 	Reserved for future use
+	for (i = 62; i <= 65; i++)
+	{
+		retVal = add_entry(retVal, "Reserved for future use", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Reserved for future use", i);
 			break;
 		}
 	}
