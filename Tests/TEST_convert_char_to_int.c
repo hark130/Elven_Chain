@@ -1,5 +1,5 @@
 #include "../Elf_Details.h"
-#include <assert.h>
+// #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 
@@ -229,6 +229,52 @@ int main(void)
 		// Next test group
 		tstGrpArr++;
 		currTstGrp = *tstGrpArr;
+	}
+
+	// SEPARATE TEST
+	currTst = &Separate1;
+	printf("Running '%s'...\n", "Separate Unit Tests");
+	while(currTst)
+	{
+		// Header
+		printf("\tTest %s:\n", currTst->testName);
+		// Function call
+		currTst->actualResult = convert_char_to_int(currTst->inputBuffer, currTst->dataOffset, \
+			                                        currTst->numBytes, currTst->bigEndian, \
+			                                        NULL);
+
+		// Test return value
+		printf("\t\tReturn:\t\t");
+		numTests++;
+		if (currTst->actualResult == currTst->expectedResult)
+		{
+			printf("Pass\n");
+			numPass++;
+		}
+		else
+		{
+			printf("FAIL\n");
+			printf("\t\t\tExpected:\t%d\n", currTst->expectedResult);
+			printf("\t\t\tReceived:\t%d\n", currTst->actualResult);
+		}
+
+		// Test calculated value
+		printf("\t\tConversion:\t");
+		numTests++;
+		if (currTst->actualVal == currTst->expectedVal)
+		{
+			printf("Pass\n");
+			numPass++;
+		}
+		else
+		{
+			printf("FAIL\n");
+			printf("\t\t\tExpected:\t%u\n", currTst->expectedVal);
+			printf("\t\t\tReceived:\t%u\n", currTst->actualVal);
+		}
+
+		// Next test
+		currTst = currTst->nextTest;
 	}
 
 	/* PRINT TEST RESULTS */
