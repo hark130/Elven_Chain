@@ -45,6 +45,7 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Implement [ISA macros](http://www.sco.com/developers/gabi/latest/ch4.eheader.html) for 83 - 243
     [ ] What happens if I modify the entry point of an ELF File?  1337 h4x?
     [ ] Look for memory leaks (valgrind)
+    [ ] Dump out of elf_parser() at offset 0x10 if Endianness doesn't match existing macro
 
 ## NOTES TO THE WORLD (and future Hark)
 ### Implementing new members of the Elf_Details struct involves updating the following:
