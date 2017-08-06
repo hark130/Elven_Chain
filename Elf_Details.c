@@ -660,6 +660,73 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
 	}
 
+	// 2.12. Section Header Table Offset
+	// 32-bit Processor
+	if (elven_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
+			if (tmpInt != ERROR_SUCCESS)
+			{
+				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+			}
+			else
+			{
+				elven_struct->sHdr32 = tmpUint32;
+			}
+		}
+	}
+	// 64-bit Processor
+	else if (elven_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 8, elven_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			elven_struct->sHdr64 = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
+	}
+
+	// 2.13. ELF Header Flags
+	// 32-bit Processor
+	if (elven_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+	}
+	// 64-bit Processor
+	else if (elven_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Flags not read!\n");
+	}
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint);
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		elven_struct->flags = tmpUint;
+	}
+
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
 	// if (tmpBuff)
@@ -733,6 +800,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	{
 		// Header
 		print_fancy_header(stream, "ELF HEADER", HEADER_DELIM);
+
 		// Filename
 		if (elven_file->fileName)
 		{
@@ -742,6 +810,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Filename:\t%s\n", notConfigured);	
 		}
+
 		// Class
 		if (elven_file->elfClass)
 		{
@@ -751,6 +820,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Class:\t\t%s\n", notConfigured);	
 		}
+
 		// Endianness
 		if (elven_file->endianness)
 		{
@@ -764,8 +834,10 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Endianness:\t%s\n", notConfigured);	
 		}
+
 		// ELF Version
 		fprintf(stream, "ELF Version:\t%d\n", elven_file->elfVersion);
+
 		// Target OS ABI
 		if (elven_file->targetOS)
 		{
@@ -775,8 +847,10 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Target OS ABI:\t%s\n", notConfigured);	
 		}
+
 		// Version of the ABI
 		fprintf(stream, "ABI Version:\t%d\n", elven_file->ABIversion);
+
 		// Pad
 		if (elven_file->pad)
 		{
@@ -791,6 +865,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Pad:\t%s\n", notConfigured);	
 		}
+
 		// Type of ELF File
 		if (elven_file->type)
 		{
@@ -800,6 +875,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "ELF Type:\t%s\n", notConfigured);	
 		}
+
 		// Instruction Set Architecture (ISA)
 		if (elven_file->ISA)
 		{
@@ -809,6 +885,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Target ISA:\t%s\n", notConfigured);	
 		}
+
 		// Object File Version
 		if (elven_file->objVersion)
 		{
@@ -818,6 +895,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Object File:\t%s\n", notConfigured);	
 		}
+
 		// Entry Point
 		// 32-bit Processor
 		if (elven_file->processorType == ELF_H_CLASS_32)
@@ -834,6 +912,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Entry Point:\t%s\n", notConfigured);
 		}
+
 		// Program Header Offset
 		// 32-bit Processor
 		if (elven_file->processorType == ELF_H_CLASS_32)
@@ -850,6 +929,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "PH Offset:\t%s\n", notConfigured);
 		}
+
 		// Section Header Offset
 		// 32-bit Processor
 		if (elven_file->processorType == ELF_H_CLASS_32)
@@ -866,6 +946,20 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "SH Offset:\t%s\n", notConfigured);
 		}
+
+		// Flags
+		if (elven_file->processorType == ELF_H_CLASS_32 || elven_file->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "Flags:\t\t");
+			// Implement binary printer
+			fprintf(stream, "\n");
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "Flags:\t\t%s\n", notConfigured);
+		}
+
 		// Section delineation
 		fprintf(stream, "\n\n");
 	}
@@ -1105,6 +1199,9 @@ int kill_elf(struct Elf_Details** old_struct)
 			// uint64_t sHdr64;	// 64-bit address offset of the section header table
 			(*old_struct)->sHdr64 = 0;
 			(*old_struct)->sHdr64 |= ZEROIZE_VALUE;
+			// unsigned int flags;	// Interpretation of this field depends on the target architecture
+			(*old_struct)->flags = 0;
+			(*old_struct)->flags |= ZEROIZE_VALUE;
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
@@ -1574,6 +1671,110 @@ int convert_uint64_to_uint32(uint64_t inVal, uint32_t* outVal)
 	}
 
 	return retVal;
+}
+
+
+// Purpose:	Print a certain number of bytes in binary
+// Input:	
+//			stream - The stream to print output
+//			valueToPrint - A variable to print data from
+//			numBytesToPrint - The number of bytes to print
+//			bigEndian - If TRUE, bigEndian byte ordering
+// Output:	None
+// Note:	
+//			Endianness does not appear to matter since these are flags
+//			Function will print one space on invalid input
+void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int bigEndian)
+{
+	/* LOCAL VARIABLES */
+	unsigned char mask = 0;			// Bit mask used to print bits
+	unsigned char printThis = 0;	// Value to print
+	int i = 0;					// Iterating variable
+	int j = 0;					// Iterating variable
+	// int numOfPasses = 0;	// Number of passes for the mask
+
+	/* INPUT VALIDATION */
+	if (!stream)
+	{
+		return;
+	}
+	else if (!valueToPrint)
+	{
+		fprintf(stream, " ");
+		return;
+	}
+	else if (numBytesToPrint < 1)
+	{
+		fprintf(stream, " ");
+		return;
+	}
+	else if (bigEndian != TRUE && bigEndian != FALSE)
+	{
+		fprintf(stream, " ");
+		return;
+	}
+
+	/* START PRINTING */
+	if (bigEndian == TRUE)
+	{
+		for (i = 0; i < numBytesToPrint; i++)
+		{
+			printThis = (unsigned char)(*(unsigned char*)(valueToPrint + i));
+
+			for (j = 7; j >= 0; j--)
+			{
+				if (j == 3)
+				{
+					fprintf(stream, " ");
+				}
+
+				mask = 1 << j;
+				printf("i == %d\tj== %d\tMask:\t0x%02X\tCurrent Value:\t0x%02X\n", i, j, mask, printThis);  // DEBUGGING
+				if (printThis & mask)
+				{
+					fprintf(stream, "1");
+				}
+				else
+				{
+					fprintf(stream, "0");
+				}
+			}
+			fprintf(stream, " ");
+		}
+	}
+	else if (bigEndian == FALSE)
+	{
+		for (i = (numBytesToPrint - 1); i >= 0; i--)
+		{
+			printThis = (unsigned char)(*(unsigned char*)(valueToPrint + i));
+
+			for (j = 7; j >= 0; j--)
+			{
+				if (j == 3)
+				{
+					fprintf(stream, " ");
+				}
+
+				mask = 1 << j;
+				// printf("i == %d\tj== %d\tMask:\t0x%02X\tCurrent Value:\t0x%02X\n", i, j, mask, printThis);  // DEBUGGING
+				if (printThis & mask)
+				{
+					fprintf(stream, "1");
+				}
+				else
+				{
+					fprintf(stream, "0");
+				}
+			}
+			fprintf(stream, " ");
+		}
+	}
+	else
+	{
+		fprintf(stream, " ");
+	}
+
+	return;
 }
 
 

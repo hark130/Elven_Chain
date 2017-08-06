@@ -198,6 +198,7 @@ struct Elf_Details
 	uint64_t pHdr64;	// 64-bit address offset of the program header table
 	uint32_t sHdr32;	// 32-bit address offset of the section header table
 	uint64_t sHdr64;	// 64-bit address offset of the section header table
+	unsigned int flags;	// Interpretation of this field depends on the target architecture
 };
 // All char* members should be dynamically allocated and later free()'d
 
@@ -328,6 +329,18 @@ int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
 //			outVal - Pointer to a uint32_t that will receive converted value
 // Ouput:	ERROR_* as specified in Elf_Details.h on success and failure
 int convert_uint64_to_uint32(uint64_t inVal, uint32_t* outVal);
+
+// Purpose:	Print a certain number of bytes in binary
+// Input:	
+//			stream - The stream to print output
+//			valueToPrint - A variable to print data from
+//			numBytesToPrint - The number of bytes to print
+//			bigEndian - If TRUE, bigEndian byte ordering
+// Output:	None
+// Note:	
+//			Endianness does not appear to matter since these are flags
+//			Function will print one space on invalid input
+void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int bigEndian);
 
 // Purpose:	Build a HarkleDict of Elf Header Class definitions
 // Input:	None
