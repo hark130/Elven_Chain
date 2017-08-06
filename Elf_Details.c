@@ -951,7 +951,9 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		if (elven_file->processorType == ELF_H_CLASS_32 || elven_file->processorType == ELF_H_CLASS_64)
 		{
 			fprintf(stream, "Flags:\t\t");
-			// Implement binary printer
+			// Binary printer
+			// Printing flags so endianness shouldn't matter
+			print_binary(stream, &(elven_file->flags), sizeof(elven_file->flags), TRUE);
 			fprintf(stream, "\n");
 		}
 		// ??-bit Processor
@@ -1729,7 +1731,7 @@ void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int 
 				}
 
 				mask = 1 << j;
-				printf("i == %d\tj== %d\tMask:\t0x%02X\tCurrent Value:\t0x%02X\n", i, j, mask, printThis);  // DEBUGGING
+				// printf("i == %d\tj== %d\tMask:\t0x%02X\tCurrent Value:\t0x%02X\n", i, j, mask, printThis);  // DEBUGGING
 				if (printThis & mask)
 				{
 					fprintf(stream, "1");
