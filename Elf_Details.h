@@ -202,6 +202,7 @@ struct Elf_Details
 	int elfHdrSize;		// ELF Header Size
 	int prgmHdrSize;	// Contains the size of a program header table entry.
 	int prgmHdrEntrNum;	// Number of entries in the program header table
+	int sectHdrSize;	// Contains the size of a section header table entry.
 };
 // All char* members should be dynamically allocated and later free()'d
 
