@@ -660,51 +660,6 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
 	}
 
-	// 2.12. Section Header Table Offset
-	// 32-bit Processor
-	if (elven_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
-			if (tmpInt != ERROR_SUCCESS)
-			{
-				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-			}
-			else
-			{
-				elven_struct->sHdr32 = tmpUint32;
-			}
-		}
-	}
-	// 64-bit Processor
-	else if (elven_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		tmpInt = convert_char_to_uint64(elven_contents, dataOffset, 8, elven_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			elven_struct->sHdr64 = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
-	}
-
 	// 2.13. ELF Header Flags
 	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
