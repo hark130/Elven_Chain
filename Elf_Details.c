@@ -682,6 +682,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		elven_struct->flags = tmpUint;
 	}
 
+	// 2.14. ELF Header Size
+	dataOffset += 4;
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		elven_struct->elfHdrSize = tmpUint;
+	}
+
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
 	// if (tmpBuff)
@@ -916,6 +924,9 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		{
 			fprintf(stream, "Flags:\t\t%s\n", notConfigured);
 		}
+
+		// ELF Header Size
+		fprintf(stream, "Header Size:\t%d\n", elven_file->elfHdrSize);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -1159,6 +1170,9 @@ int kill_elf(struct Elf_Details** old_struct)
 			// unsigned int flags;	// Interpretation of this field depends on the target architecture
 			(*old_struct)->flags = 0;
 			(*old_struct)->flags |= ZEROIZE_VALUE;
+			// int elfHdrSize;  // ELF Header Size
+			(*old_struct)->elfHdrSize = 0;
+			(*old_struct)->elfHdrSize |= ZEROIZE_VALUE;
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
