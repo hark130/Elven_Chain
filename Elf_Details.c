@@ -1,6 +1,6 @@
 #include "Elf_Details.h"
 #include "Harklehash.h"
-// #include <assert.h>
+#include <assert.h>
 #include <inttypes.h>	// Print uint64_t variables
 #include <stdio.h>
 #include <stdlib.h>
