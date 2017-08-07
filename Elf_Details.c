@@ -1,6 +1,6 @@
 #include "Elf_Details.h"
 #include "Harklehash.h"
-#include <assert.h>
+// #include <assert.h>
 #include <inttypes.h>	// Print uint64_t variables
 #include <stdio.h>
 #include <stdlib.h>
@@ -689,6 +689,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	{
 		elven_struct->elfHdrSize = tmpUint;
 	}
+	
+	// 2.15. Program Header Size
+	dataOffset += 2;
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		elven_struct->prgmHdrSize = tmpUint;
+	}
 
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
@@ -926,7 +934,10 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		}
 
 		// ELF Header Size
-		fprintf(stream, "Header Size:\t%d\n", elven_file->elfHdrSize);
+		fprintf(stream, "EHeader Size:\t%d\n", elven_file->elfHdrSize);
+		
+		// Program Header Size
+		fprintf(stream, "PHeader Size:\t%d\n", elven_file->prgmHdrSize);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -1173,6 +1184,9 @@ int kill_elf(struct Elf_Details** old_struct)
 			// int elfHdrSize;  // ELF Header Size
 			(*old_struct)->elfHdrSize = 0;
 			(*old_struct)->elfHdrSize |= ZEROIZE_VALUE;
+			// int prgmHdrSize; // Contains the size of a program header table entry.
+			(*old_struct)->prgmHdrSize = 0;
+			(*old_struct)->prgmHdrSize |= ZEROIZE_VALUE;
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
