@@ -204,6 +204,7 @@ struct Elf_Details
 	int prgmHdrEntrNum;	// Number of entries in the program header table
 	int sectHdrSize;	// Contains the size of a section header table entry.
 	int sectHdrEntrNum;	// Number of entries in the section header table
+	int sectHdrSectNms;	// Index of the section header table entry with section names
 };
 // All char* members should be dynamically allocated and later free()'d
 

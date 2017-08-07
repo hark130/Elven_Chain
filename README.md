@@ -23,7 +23,7 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Program Header Table Number of Entries
         [X] Section Header Table Size
         [X] Section Header Table Number of Entries
-        [ ] Index to Section Header Table with Section Names
+        [/] Index to Section Header Table with Section Names
     [ ] Implement Program Header
         [ ] Segment Type
         [ ] 64-bit Flags
@@ -37,6 +37,9 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Implement Section Header
     [ ] Implement Program Data
     [ ] Implement Section Data
+    [ ] Implement ELF Integrity Validator
+        [ ] ELF Header actually adds up to ELF Header Size
+        [ ] Index to Section Header Table with Section Names <= Section Header Table Number of Entries
     [ ] Better way to convert a char value to int?
     [X] What about multi-byte char values?
     [ ] What happens if I hide something in the Elf Header PAD (offset 0x09)?

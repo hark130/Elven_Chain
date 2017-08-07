@@ -722,6 +722,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		elven_struct->sectHdrEntrNum = tmpUint;
 	}
 
+	// 2.18. Section Header Index to Entry with Names
+	dataOffset += 2;
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		elven_struct->sectHdrSectNms = tmpUint;
+	}
+
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
 	// if (tmpBuff)
@@ -971,6 +979,9 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 
 		// Number of Section Header Entries
 		fprintf(stream, "# SH Entries:\t%d\n", elven_file->sectHdrEntrNum);
+
+		// Section Header Index to the Entry with Names
+		fprintf(stream, "SH Name Index:\t%d\n", elven_file->sectHdrSectNms);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -1228,7 +1239,10 @@ int kill_elf(struct Elf_Details** old_struct)
 			(*old_struct)->sectHdrSize |= ZEROIZE_VALUE;
 			// int sectHdrEntrNum;	// Number of entries in the section header table
 			(*old_struct)->sectHdrEntrNum = 0;
-			(*old_struct)->sectHdrEntrNum |= ZEROIZE_VALUE;	
+			(*old_struct)->sectHdrEntrNum |= ZEROIZE_VALUE;
+			// int sectHdrSectNms;	// Index of the section header table entry with section names
+			(*old_struct)->sectHdrSectNms = 0;
+			(*old_struct)->sectHdrSectNms |= ZEROIZE_VALUE;
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
