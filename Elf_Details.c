@@ -354,9 +354,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrTargetOSDict);
 	}
 
-	// 2.6. ABI Version (OFFSET: 0x08)
+	// 2.6. ABI Version (OFFSET: 0x08) //////////////////////////////////
 	dataOffset += 1;  // 8
-	elven_struct->ABIversion = (int)(*(elven_contents + dataOffset));
+	// elven_struct->ABIversion = (int)(*(elven_contents + dataOffset));  // APPEARS TO BE NON-FUNCTIONAL
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 1, elven_struct->bigEndian, &tmpUint);
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		elven_struct->ABIversion = tmpUint;
+	}
 	// fprintf(stdout, "elven_struct->ABIversion now holds:\t%d\n", elven_struct->ABIversion);  // DEBUGGING
 
 	// 2.6. Pad (OFFSET: 0x09)
