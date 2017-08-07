@@ -698,6 +698,14 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		elven_struct->prgmHdrSize = tmpUint;
 	}
 
+	// 2.16. Number of Program Header Entries
+	dataOffset += 2;
+	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		elven_struct->prgmHdrEntrNum = tmpUint;
+	}
+
 	/* CLEAN UP */
 	// Zeroize/Free/NULLify tempBuff
 	// if (tmpBuff)
@@ -938,6 +946,9 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		
 		// Program Header Size
 		fprintf(stream, "PHeader Size:\t%d\n", elven_file->prgmHdrSize);
+
+		// Number of Program Header Entries
+		fprintf(stream, "# PH Entries:\t%d\n", elven_file->prgmHdrEntrNum);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -1187,6 +1198,9 @@ int kill_elf(struct Elf_Details** old_struct)
 			// int prgmHdrSize; // Contains the size of a program header table entry.
 			(*old_struct)->prgmHdrSize = 0;
 			(*old_struct)->prgmHdrSize |= ZEROIZE_VALUE;
+			// int prgmHdrEntrNum;	// Number of entries in the program header table
+			(*old_struct)->prgmHdrEntrNum = 0;
+			(*old_struct)->prgmHdrEntrNum |= ZEROIZE_VALUE;
 
 			/* FREE THE STRUCT ITSELF */
 			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));

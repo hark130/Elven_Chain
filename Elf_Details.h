@@ -201,6 +201,7 @@ struct Elf_Details
 	unsigned int flags;	// Interpretation of this field depends on the target architecture
 	int elfHdrSize;		// ELF Header Size
 	int prgmHdrSize;	// Contains the size of a program header table entry.
+	int prgmHdrEntrNum;	// Number of entries in the program header table
 };
 // All char* members should be dynamically allocated and later free()'d
 

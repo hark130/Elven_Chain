@@ -19,8 +19,8 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Section Header Table Pointer
         [X] Flags
         [X] ELF Header Size
-        [/] Program Header Table Size
-        [ ] Program Header Table Number of Entries
+        [X] Program Header Table Size
+        [/] Program Header Table Number of Entries
         [ ] Section Header Table Size
         [ ] Section Header Table Number of Entries
         [ ] Index to Section Header Table with Section Names
