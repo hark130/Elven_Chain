@@ -200,6 +200,7 @@ struct Elf_Details
 	uint64_t sHdr64;	// 64-bit address offset of the section header table
 	unsigned int flags;	// Interpretation of this field depends on the target architecture
 	int elfHdrSize;		// ELF Header Size
+	int prgmHdrSize;	// Contains the size of a program header table entry.
 };
 // All char* members should be dynamically allocated and later free()'d
 
