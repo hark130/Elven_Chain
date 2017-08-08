@@ -3,6 +3,7 @@ This extremely light repository is made of very fine ELF links. This project is 
 
 ## VERSION
 1. v0.1.0 - Implements ELF Header
+2. prgrm_hdr - Current working branch, implementing the Program Header (future v0.2.0)
 
 ## TO DO
     [ ] Rename Harklehash to Harkledict
