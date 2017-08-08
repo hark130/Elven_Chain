@@ -208,7 +208,43 @@ struct Elf_Details
 };
 // All char* members should be dynamically allocated and later free()'d
 
+/*************************/
+/* ELF HEADER PROTOTYPES */
+/*************************/
+// Purpose: Open and parse an ELF file.  Allocate, configure and return Elf_Details pointer.
+// Input:	Filename, relative or absolute, to an ELF file
+// Output:	A dynamically allocated Elf_Details struct that contains information about elvenFilename
+// Note:	It is caller's responsibility to free the return value from this function by calling
+//				kill_elf()
+struct Elf_Details* read_elf(char* elvenFilename);
 
+// Purpse:	Parse an ELF file contents into an Elf_Details struct
+// Input:
+//			elven_struct - Struct to store elven details
+//			elven_contents - ELF file contents
+// Output:	ERROR_* as specified in Elf_Details.h
+int parse_elf(struct Elf_Details* elven_struct, char* elven_contents);
+
+// Purpose:	Print human-readable details about an ELF file
+// Input:
+//			elven_file - A Elf_Details struct that contains data about an ELF file
+//			sectionsToPrint - Bitwise AND the "PRINT_*" macros into this variable
+//				to control what the function actually prints.
+//			stream - A stream to send the information to (e.g., stdout, A file)
+// Output:	None
+// Note:	This function will print the relevant data from elven_file into stream
+//				based on the flags found in sectionsToPrint
+void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPrint, FILE* stream);
+
+// Purpose:	Assist clean up efforts by zeroizing/free'ing an Elf_Details struct
+// Input:	Pointer to an Elf_Details struct pointer
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:	This function will modify the original variable in the calling function
+int kill_elf(struct Elf_Details** old_struct);
+
+/*****************************/
+/* PROGRAM HEADER PROTOTYPES */
+/*****************************/
 // Purpose: Open and parse an ELF file.  Allocate, configure and return Elf_Details pointer.
 // Input:	Filename, relative or absolute, to an ELF file
 // Output:	A dynamically allocated Elf_Details struct that contains information about elvenFilename
