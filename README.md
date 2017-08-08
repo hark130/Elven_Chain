@@ -3,7 +3,7 @@ This extremely light repository is made of very fine ELF links. This project is 
 
 ## TO DO
     [ ] Rename Harklehash to Harkledict
-    [/] Implement ELF Header
+    [X] Implement ELF Header
         [X] Magic Number
         [X] Class
         [X] Endianness
@@ -23,7 +23,7 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Program Header Table Number of Entries
         [X] Section Header Table Size
         [X] Section Header Table Number of Entries
-        [/] Index to Section Header Table with Section Names
+        [X] Index to Section Header Table with Section Names
     [ ] Implement Program Header
         [ ] Segment Type
         [ ] 64-bit Flags
