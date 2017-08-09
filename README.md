@@ -44,6 +44,7 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Implement ELF Integrity Validator
         [ ] ELF Header actually adds up to ELF Header Size
         [ ] Index to Section Header Table with Section Names <= Section Header Table Number of Entries
+        [ ] Section Header type SHT_GROUP should only appear in relocatable objects (e_type == ET_REL)
     [ ] Better way to convert a char value to int?
     [X] What about multi-byte char values?
     [ ] What happens if I hide something in the Elf Header PAD (offset 0x09)?
