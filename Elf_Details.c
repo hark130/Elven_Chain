@@ -1622,6 +1622,151 @@ struct HarkleDict* init_elf_header_obj_version_dict(void)
 /********************************************************/
 
 
+// Purpose: Open and parse an ELF file.  Allocate, configure and return Prgrm_Hdr_Details pointer.
+// Input:	
+//			[in] elvenFilename - Filename, relative or absolute, to an ELF file
+//			[in] elven_file - ELF Header struct previously read from program_contents
+// Output:	A dynamically allocated Prgrm_Hdr_Details struct that contains information about elvenFilename
+// Note:	It is caller's responsibility to free the return value from this function by calling
+//				kill_elf()
+struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_Details* elven_file)
+{
+    /* LOCAL VARIABLES */
+    struct Prgrm_Hdr_Details* retVal = NULL;
+	FILE* elfFile = NULL;				// File pointer of elvenFilename
+	size_t elfSize = 0;					// Size of the file in bytes
+	char* elfGuts = NULL;				// Holds contents of binary file
+	char* tmpPtr = NULL;				// Holds return value from strstr()/strncpy()
+	int tmpRetVal = 0;					// Holds return value from parse_program_header()
+	
+    /* INPUT VALIDATION */
+	if (!elvenFilename)
+    {
+		return retVal;	
+    }
+	else if (!elven_file)
+	{
+		return retVal;	
+	}
+	
+	/* READ ELF FILE */
+	// OPEN FILE
+	elfFile = fopen(elvenFilename, "rb");
+
+	if (elfFile)
+	{
+		// GET FILE SIZE
+		elfSize = file_len(elfFile);
+		PERROR(errno);  // DEBUGGING
+
+		// ALLOCATE BUFFER
+		elfGuts = (char*)gimme_mem(elfSize + 1, sizeof(char));
+		PERROR(errno);  // DEBUGGING
+
+		if (elfGuts)
+		{
+			// READ FILE
+			if (fread(elfGuts, sizeof(char), elfSize, elfFile) != elfSize)
+			{
+				PERROR(errno);  // DEBUGGING
+				take_mem_back((void**)&elfGuts, strlen(elfGuts), sizeof(char));
+				fclose(elfFile);
+				elfFile = NULL;
+				return retVal;
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				print_it(elfGuts, elfSize);  // DEBUGGING
+#endif // DEBUGLEROAD
+			}			
+		}
+	}
+	else
+	{
+		PERROR(errno);  // DEBUGGING
+		return retVal;
+	}
+
+	/* ALLOCATE STRUCT MEMORY */
+	retVal = (struct Elf_Details*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Details));
+	if (!retVal)
+	{
+		PERROR(errno);
+		take_mem_back((void**)&elfGuts, elfSize, sizeof(char));
+		fclose(elfFile);
+		elfFile = NULL;
+		return retVal;
+	}
+
+	/* CLOSE ELF FILE */
+	if (elfFile)
+	{
+		fclose(elfFile);
+		elfFile = NULL;
+	}
+
+	/* COPY OVERLAP STRUCT MEMBERS FROM ELF_DETAILS INTO PRGRM_HDR_DETAILS */
+	// Allocate Filename
+	retVal->fileName = gimme_mem(strlen(elvenFilename) + 1, sizeof(char));
+	// Copy Filename
+	if (retVal->fileName)
+	{
+		tmpPtr = strncpy(retVal->fileName, elvenFilename, strlen(elvenFilename));
+		if(tmpPtr != retVal->fileName)
+		{
+			PERROR(errno);
+			fprintf(stderr, "ERROR: strncpy of filename into Prgrm_Hdr_Details struct failed!\n");
+		}
+		else
+		{
+#ifdef DEBUGLEROAD
+			puts(retVal->fileName);  // DEBUGGING
+#endif // DEBUGLEROAD
+		}
+	}
+	// Allocate Elf Class
+	if (elven_file->elfClass)
+	{
+		retVal->elfClass = gimme_mem(strlen(elven_file->elfClass) + 1, sizeof(char));
+	}
+	// Copy elfClass
+	if (retVal->elfClass)
+	{
+		// Copy Elf Class
+		tmpPtr = strncpy(retVal->elfClass, elven_file->elfClass, strlen(elven_file->elfClass));
+		if(tmpPtr != retVal->elfClass)
+		{
+			PERROR(errno);
+			fprintf(stderr, "ERROR: strncpy of elfClass into Prgrm_Hdr_Details struct failed!\n");
+		}
+		else
+		{
+#ifdef DEBUGLEROAD
+			puts(retVal->elfClass);  // DEBUGGING
+#endif // DEBUGLEROAD
+		}
+	}
+	else
+	{
+		PERROR(errno);
+		fprintf(stderr, "ERROR: Allocation of memory for Prgrm_Hdr_Details->elfClass failed!\n");
+	}	
+	
+	/* PARSE PROGRAM HEADER INTO STRUCT */
+	// Initialize Remaining Struct Members
+	tmpRetVal = parse_program_header(retVal, elfGuts, elven_file);
+
+	/* FINAL CLEAN UP */
+	if (elfGuts)
+	{
+		take_mem_back((void**)&elfGuts, elfSize + 1, sizeof(char));
+	}
+
+	return retVal;
+}
+
+
 // Purpose:	Build a HarkleDict of Program Header Type definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
