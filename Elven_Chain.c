@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 
 	/* 4. PRINT ELF FILE DETAILS */
 	print_elf_details(elvenCharSheet, PRINT_EVERYTHING, stdout);
+	// print_program_header();
 
 	/* 5. CLEAN UP */
 	// FREE Elf_Details STRUCT
