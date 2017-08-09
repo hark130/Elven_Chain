@@ -488,7 +488,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrISADict);
 	}
 
-	// 2.9. Object File Version
+	// 2.9. Object File Version (OFFSET: 0x14)
 	dataOffset += 2;  // 20
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 4, elven_struct->bigEndian, &tmpUint);
 	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
@@ -535,7 +535,7 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 		tmpInt = destroy_a_list(&elfHdrObjVerDict);
 	}
 
-	// 2.10 Entry Point
+	// 2.10 Entry Point (OFFSET: 0x18)
 	dataOffset += 4;
 	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
@@ -1811,11 +1811,9 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	}
 	// Verify Program Header Offsets (and other necessary struct members)
     // IMPLEMENT THIS LATER
+	//// Verify program_struct->pHdr32 and program_struct->pHdr64 are non-0 as appropriate
 
 	/* PARSE PROGRAM HEADER CONTENTS */
-	prgrmHdrTypeDict = init_program_header_type_dict();
-
-
 	// 2. Begin initializing the struct
 	// 2.1. fileName should already be initialized in calling function
 	// 2.2. elfClass should already be initialized in calling function
@@ -1823,6 +1821,53 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// 2.4. endianness should already be initialized in calling function
 	// 2.5. bigEndian should already be initialized in calling function
 	// 2.6. int prgmHdrType; // Identifies the type of the segment
+	prgrmHdrTypeDict = init_program_header_type_dict();
+	dataOffset = ;  
+	tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
+	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
+	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
+	if (tmpInt != ERROR_SUCCESS)
+	{
+		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
+		tmpNode = NULL;
+	}
+	else
+	{
+		tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
+	}
+	
+	if (tmpNode)  // Found it
+	{
+		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
+		elven_struct->objVersion = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (elven_struct->objVersion)
+		{
+			if (strncpy(elven_struct->objVersion, tmpNode->name, strlen(tmpNode->name)) != elven_struct->objVersion)
+			{
+				fprintf(stderr, "ELF Object File Version string '%s' not copied into ELF Struct!\n", tmpNode->name);
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->objVersion);
+#endif // DEBUGLEROAD
+			}
+		}
+		else
+		{
+			fprintf(stderr, "Error allocating memory for Elf Struct Object File Version!\n");
+		}
+	}
+	else
+	{
+		fprintf(stderr, "ELF Object File Version %d not found in HarkleDict!\n", (int)tmpUint);
+	}
+	// Zeroize/Free/NULLify elfHdrObjVerDict
+	if (elfHdrObjVerDict)
+	{
+		tmpInt = destroy_a_list(&prgrmHdrTypeDict);
+	}
+
 
 	return retVal;
 }
