@@ -208,6 +208,37 @@ struct Elf_Details
 };
 // All char* members should be dynamically allocated and later free()'d
 
+struct Prgrm_Hdr_Details
+{
+	char* fileName;		// Absolute or relative path
+	char* magicNum;		// First four bytes of file
+	char* elfClass;		// 32 or 64 bit
+	int processorType;	// 32 or 64 bit
+	char* endianness;	// Little or Big
+	int bigEndian;		// If TRUE, bigEndian
+	int elfVersion;		// ELF version
+	char* targetOS;		// Target OS ABI
+	int ABIversion;		// Version of the ABI
+	char* pad;			// Unused portion
+	char* type;			// The type of ELF file
+	char* ISA;			// Specifies target Instruction Set Architecture
+	char* objVersion;	// Object File Version
+	uint32_t ePnt32;	// 32-bit memory address of the entry point from where the process starts executing
+	uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
+	uint32_t pHdr32;	// 32-bit address offset of the program header table
+	uint64_t pHdr64;	// 64-bit address offset of the program header table
+	uint32_t sHdr32;	// 32-bit address offset of the section header table
+	uint64_t sHdr64;	// 64-bit address offset of the section header table
+	unsigned int flags;	// Interpretation of this field depends on the target architecture
+	int elfHdrSize;		// ELF Header Size
+	int prgmHdrSize;	// Contains the size of a program header table entry.
+	int prgmHdrEntrNum;	// Number of entries in the program header table
+	int sectHdrSize;	// Contains the size of a section header table entry.
+	int sectHdrEntrNum;	// Number of entries in the section header table
+	int sectHdrSectNms;	// Index of the section header table entry with section names
+};
+// All char* members should be dynamically allocated and later free()'d
+
 /*************************/
 /* ELF HEADER PROTOTYPES */
 /*************************/
@@ -245,36 +276,36 @@ int kill_elf(struct Elf_Details** old_struct);
 /*****************************/
 /* PROGRAM HEADER PROTOTYPES */
 /*****************************/
-// Purpose: Open and parse an ELF file.  Allocate, configure and return Elf_Details pointer.
+// Purpose: Open and parse an ELF file.  Allocate, configure and return Prgrm_Hdr_Details pointer.
 // Input:	Filename, relative or absolute, to an ELF file
-// Output:	A dynamically allocated Elf_Details struct that contains information about elvenFilename
+// Output:	A dynamically allocated Prgrm_Hdr_Details struct that contains information about elvenFilename
 // Note:	It is caller's responsibility to free the return value from this function by calling
 //				kill_elf()
-struct Elf_Details* read_elf(char* elvenFilename);
+struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename);
 
 // Purpse:	Parse an ELF file contents into an Elf_Details struct
 // Input:
-//			elven_struct - Struct to store elven details
-//			elven_contents - ELF file contents
+//			program_struct - Struct to store elven details regarding the program header
+//			program_contents - ELF file contents
 // Output:	ERROR_* as specified in Elf_Details.h
-int parse_elf(struct Elf_Details* elven_struct, char* elven_contents);
+int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program_contents);
 
 // Purpose:	Print human-readable details about an ELF file
 // Input:
-//			elven_file - A Elf_Details struct that contains data about an ELF file
+//			program_struct - A Prgrm_Hdr_Details struct that contains data about an ELF file
 //			sectionsToPrint - Bitwise AND the "PRINT_*" macros into this variable
 //				to control what the function actually prints.
 //			stream - A stream to send the information to (e.g., stdout, A file)
 // Output:	None
 // Note:	This function will print the relevant data from elven_file into stream
 //				based on the flags found in sectionsToPrint
-void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPrint, FILE* stream);
+void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int sectionsToPrint, FILE* stream);
 
-// Purpose:	Assist clean up efforts by zeroizing/free'ing an Elf_Details struct
-// Input:	Pointer to an Elf_Details struct pointer
+// Purpose:	Assist clean up efforts by zeroizing/free'ing an Prgrm_Hdr_Details struct
+// Input:	Pointer to an Prgrm_Hdr_Details struct pointer
 // Output:	ERROR_* as specified in Elf_Details.h
 // Note:	This function will modify the original variable in the calling function
-int kill_elf(struct Elf_Details** old_struct);
+int kill_program_header(struct Prgrm_Hdr_Details** old_struct);
 
 // Purpose:	Prints an uppercase title surrounded by delimiters
 // Input:
