@@ -1767,6 +1767,67 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 }
 
 
+// Purpse:	Parse an ELF file contents into an Elf_Details struct
+// Input:
+//			program_struct - Struct to store elven details regarding the program header
+//			program_contents - ELF file contents
+//			elven_file - ELF Header struct previously read from program_contents
+// Output:	ERROR_* as specified in Elf_Details.h
+int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program_contents, struct Elf_Details* elven_file)
+	/* LOCAL VARIABLES */
+	int retVal = ERROR_SUCCESS;	// parse_elf() return value
+	char* tmpPtr = NULL;		// Holds return values from string functions
+	int tmpInt = 0;				// Holds various temporary return values
+	unsigned int tmpUint = 0;	// Holds calculated values from convert_char_to_int()
+	uint32_t tmpUint32 = 0;		// Holds memory addresses on a 32-bit system
+	uint64_t tmpUint64 = 0;		// Holds memory addresses on a 64-bit system
+	int dataOffset = 0;			// Used to offset into elven_contents
+	// char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
+	struct HarkleDict* prgrmHdrTypeDict = NULL;
+	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
+
+	/* INPUT VALIDATION */
+	// Check for NULL pointers
+	if (!program_struct || !program_contents || !elven_file)
+	{
+		retVal = ERROR_NULL_PTR;
+		return retVal;
+	}
+	// Verify file has been read
+	else if (strlen(program_contents) == 0)
+	{
+		retVal = ERROR_ORC_FILE;
+		return retVal;
+	}
+	// Verify processory type (e.g., 32-bit, 64-bit) has been configured already
+	else if (program_struct->processorType != ELF_H_CLASS_32 && program_struct->processorType != ELF_H_CLASS_64)
+	{
+		retVal = ERROR_BAD_ARG;
+	}
+	// Verify Endianness has been configured already
+	else if (program_struct->bigEndian != TRUE && program_struct->bigEndian != FALSE)
+	{
+		retVal = ERROR_BAD_ARG;
+	}
+	// Verify Program Header Offsets (and other necessary struct members)
+    // IMPLEMENT THIS LATER
+
+	/* PARSE PROGRAM HEADER CONTENTS */
+	prgrmHdrTypeDict = init_program_header_type_dict();
+
+
+	// 2. Begin initializing the struct
+	// 2.1. fileName should already be initialized in calling function
+	// 2.2. elfClass should already be initialized in calling function
+	// 2.3. processorType should already be initialized in calling function
+	// 2.4. endianness should already be initialized in calling function
+	// 2.5. bigEndian should already be initialized in calling function
+	// 2.6. int prgmHdrType; // Identifies the type of the segment
+
+	return retVal;
+}
+
+
 // Purpose:	Build a HarkleDict of Program Header Type definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
