@@ -263,6 +263,8 @@ struct Prgrm_Hdr_Details
 	char* fileName;		// Absolute or relative path
 	char* elfClass;		// 32 or 64 bit
 	int processorType;	// 32 or 64 bit
+	char* endianness;	// Little or Big
+	int bigEndian;		// If TRUE, bigEndian
 	int prgmHdrType;	// Identifies the type of the segment
 };
 // All char* members should be dynamically allocated and later free()'d
