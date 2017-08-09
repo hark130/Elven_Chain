@@ -265,6 +265,8 @@ struct Prgrm_Hdr_Details
 	int processorType;	// 32 or 64 bit
 	char* endianness;	// Little or Big
 	int bigEndian;		// If TRUE, bigEndian
+	uint32_t pHdr32;	// 32-bit address offset of the program header table
+	uint64_t pHdr64;	// 64-bit address offset of the program header table
 	int prgmHdrType;	// Identifies the type of the segment
 };
 // All char* members should be dynamically allocated and later free()'d
