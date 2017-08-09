@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 	// char* elfGuts = NULL;
 	// char* tmpPtr = NULL;
 	struct Elf_Details* elvenCharSheet = NULL;
+	struct Prgrm_Hdr_Details* programHeaderDetails = NULL;
 
 	/* 2. INPUT VALIDATTION */
 	if (argc != 2)
@@ -39,11 +40,11 @@ int main(int argc, char *argv[])
 	}
 
 	/* 3. READ ELF FILE */
-	elvenCharSheet = read_elf(argv[1]);
-	if (!elvenCharSheet)
+	retVal = read_elf_file(argv[1], &elvenCharSheet, &programHeaderDetails);
+	if (retVal != ERROR_SUCCESS)
 	{
 		PERROR(errno);
-		return ERROR_NULL_PTR;
+		return retVal;
 	}
 
 	/* 4. PRINT ELF FILE DETAILS */
@@ -52,6 +53,8 @@ int main(int argc, char *argv[])
 	/* 5. CLEAN UP */
 	// FREE Elf_Details STRUCT
 	retVal = kill_elf(&elvenCharSheet);
+	// FREE Prgrm_Hdr_Details STRUCT
+	retVal += kill_program_header(&programHeaderDetails);
 
 	return retVal;
 }
