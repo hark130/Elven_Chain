@@ -169,6 +169,44 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 /***** ELF HEADER STOP ******/
 /****************************/
 
+/********************************/
+/***** PROGRAM HEADER START *****/
+/********************************/
+
+/********************************/
+/***** PROGRAM HEADER STOP ******/
+/********************************/
+
+/********************************/
+/***** SECTION HEADER START *****/
+/********************************/
+#define ELF_H_SHT_NULL 			0			// Inactive
+#define ELF_H_SHT_PROGBITS 		1			// Holds information defined by the program
+#define ELF_H_SHT_SYMTAB 		2			// Provides a symbol table for link editing
+#define ELF_H_SHT_STRTAB 		3			// String table
+#define ELF_H_SHT_RELA 			4			// Relocation entries with explicit addends
+#define ELF_H_SHT_HASH 			5			// Holds a symbol hash table
+#define ELF_H_SHT_DYNAMIC 		6			// Holds information for dynamic linking
+#define ELF_H_SHT_NOTE 			7			// Holds information that marks the file in some way
+#define ELF_H_SHT_NOBITS 		8			// Occupies no space but resembles SHT_PROGBITS
+#define ELF_H_SHT_REL 			9			// Relocation entries without explicit addends
+#define ELF_H_SHT_SHLIB 		10			// Reserved but has unspecified semantics
+#define ELF_H_SHT_DYNSYM 		11			// Minimal set of dynamic linking symbols
+#define ELF_H_SHT_INIT_ARRAY 	14			// Array of pointers to initilization functions
+#define ELF_H_SHT_FINI_ARRAY 	15			// Array of pointers to termination functions
+#define ELF_H_SHT_PREINIT_ARRAY 16			// Array of pointers to pre-initilization functions
+#define ELF_H_SHT_GROUP 		17			// Defines a section group
+#define ELF_H_SHT_SYMTAB_SHNDX 	18			// Associated with a symbol table section
+#define ELF_H_SHT_LOOS 			0x60000000	// Reserved for OS-specific semantics
+#define ELF_H_SHT_HIOS 			0x6fffffff	// Reserved for OS-specific semantics
+#define ELF_H_SHT_LOPROC 		0x70000000	// Reserved for processor-specific semantics
+#define ELF_H_SHT_HIPROC 		0x7fffffff	// Reserved for processor-specific semantics
+#define ELF_H_SHT_LOUSER 		0x80000000	// Lower bound for range of indexes reserved for application programs
+#define ELF_H_SHT_HIUSER 		0xffffffff	// Upper bound for range of indexes reserved for application programs
+/********************************/
+/***** SECTION HEADER STOP ******/
+/********************************/
+
 /* sectionsToPrint Flags for print_elf_details() */
 #define PRINT_EVERYTHING		((unsigned int)1)			// Print everything
 #define PRINT_ELF_HEADER		(((unsigned int)1) << 1)	// Print the ELF header
@@ -211,31 +249,9 @@ struct Elf_Details
 struct Prgrm_Hdr_Details
 {
 	char* fileName;		// Absolute or relative path
-	char* magicNum;		// First four bytes of file
 	char* elfClass;		// 32 or 64 bit
 	int processorType;	// 32 or 64 bit
-	char* endianness;	// Little or Big
-	int bigEndian;		// If TRUE, bigEndian
-	int elfVersion;		// ELF version
-	char* targetOS;		// Target OS ABI
-	int ABIversion;		// Version of the ABI
-	char* pad;			// Unused portion
-	char* type;			// The type of ELF file
-	char* ISA;			// Specifies target Instruction Set Architecture
-	char* objVersion;	// Object File Version
-	uint32_t ePnt32;	// 32-bit memory address of the entry point from where the process starts executing
-	uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
-	uint32_t pHdr32;	// 32-bit address offset of the program header table
-	uint64_t pHdr64;	// 64-bit address offset of the program header table
-	uint32_t sHdr32;	// 32-bit address offset of the section header table
-	uint64_t sHdr64;	// 64-bit address offset of the section header table
-	unsigned int flags;	// Interpretation of this field depends on the target architecture
-	int elfHdrSize;		// ELF Header Size
-	int prgmHdrSize;	// Contains the size of a program header table entry.
-	int prgmHdrEntrNum;	// Number of entries in the program header table
-	int sectHdrSize;	// Contains the size of a section header table entry.
-	int sectHdrEntrNum;	// Number of entries in the section header table
-	int sectHdrSectNms;	// Index of the section header table entry with section names
+	uint32_t segType;	// Identifies the type of the segment
 };
 // All char* members should be dynamically allocated and later free()'d
 
