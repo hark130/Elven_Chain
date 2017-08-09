@@ -341,18 +341,21 @@ struct HarkleDict* init_elf_header_obj_version_dict(void);
 /* PROGRAM HEADER PROTOTYPES */
 /*****************************/
 // Purpose: Open and parse an ELF file.  Allocate, configure and return Prgrm_Hdr_Details pointer.
-// Input:	Filename, relative or absolute, to an ELF file
+// Input:	
+//			[in] elvenFilename - Filename, relative or absolute, to an ELF file
+//			[in] elven_file - ELF Header struct previously read from program_contents
 // Output:	A dynamically allocated Prgrm_Hdr_Details struct that contains information about elvenFilename
 // Note:	It is caller's responsibility to free the return value from this function by calling
 //				kill_elf()
-struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename);
+struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_Details* elven_file);
 
 // Purpse:	Parse an ELF file contents into an Elf_Details struct
 // Input:
 //			program_struct - Struct to store elven details regarding the program header
 //			program_contents - ELF file contents
+//			elven_file - ELF Header struct previously read from program_contents
 // Output:	ERROR_* as specified in Elf_Details.h
-int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program_contents);
+int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program_contents, struct Elf_Details* elven_file);
 
 // Purpose:	Print human-readable details about an ELF file
 // Input:
@@ -380,6 +383,19 @@ struct HarkleDict* init_program_header_type_dict(void);
 /******************************/
 /* HELPER FUNCTION PROTOTYPES */
 /******************************/
+// Purpose:	Wrapper for individual header parse function calls
+// Input:
+// 			[in] elvenFilename - Filename, relative or absolute, to an ELF file
+//			[out] ELFstruct - Pointer to an Elf_Details struct pointer
+//			[out] PHstruct - Pointer to an Prgrm_Hdr_Details struct pointer
+//			program_contents - ELF file contents
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:
+//			This function calls parse_elf() and parse_program_header()
+//			ELFstruct may not be NULL but *ELFstruct is expected to be NULL and will be overwritten
+//			Prgrm_Hdr_Details may not be NULL but *ELFstruct is expected to be NULL and will be overwritten
+int read_elf_file(char* elvenFilename, struct Elf_Details** ELFstruct, struct Prgrm_Hdr_Details** PHstruct);
+
 // Purpose:	Prints an uppercase title surrounded by delimiters
 // Input:
 //			stream - Stream to print the header to
