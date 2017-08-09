@@ -263,7 +263,7 @@ struct Prgrm_Hdr_Details
 	char* fileName;		// Absolute or relative path
 	char* elfClass;		// 32 or 64 bit
 	int processorType;	// 32 or 64 bit
-	uint32_t segType;	// Identifies the type of the segment
+	int prgmHdrType;	// Identifies the type of the segment
 };
 // All char* members should be dynamically allocated and later free()'d
 
@@ -371,6 +371,15 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 // Note:	This function will modify the original variable in the calling function
 int kill_program_header(struct Prgrm_Hdr_Details** old_struct);
 
+// Purpose:	Build a HarkleDict of Program Header Type definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_program_header_type_dict(void);
+
+/******************************/
+/* HELPER FUNCTION PROTOTYPES */
+/******************************/
 // Purpose:	Prints an uppercase title surrounded by delimiters
 // Input:
 //			stream - Stream to print the header to

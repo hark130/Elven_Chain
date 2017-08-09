@@ -1622,6 +1622,82 @@ struct HarkleDict* init_elf_header_obj_version_dict(void)
 /********************************************************/
 
 
+// Purpose:	Build a HarkleDict of Program Header Type definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_program_header_type_dict(void)
+{
+	/* LOCAL VARIABLES */
+	struct HarkleDict* retVal = NULL;
+	// The following arrays may not be in numerical order but they are still
+	//	parallel.
+	// FUN FACT: The arrays were originally created with an old list of ISAs and later updated.
+	char* arrayOfNames[] = { \
+		"Unused", \
+		"Loadable segment, described by p_filesz and p_memsz", \
+		"Specifies dynamic linking information", \
+		"Location and size of interpreter's null-terminated path name", \
+		"Location and size of auxiliary information", \
+		"Reserved", \
+		"Location and size of the program header table", \
+		"Thread-Local Storage template", \
+	};
+	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
+	int arrayOfValues[] = { \
+		ELF_H_PT_NULL, \
+		ELF_H_PT_LOAD, \
+		ELF_H_PT_DYNAMIC, \
+		ELF_H_PT_INTERP, \
+		ELF_H_PT_NOTE, \
+		ELF_H_PT_SHLIB, \
+		ELF_H_PT_PHDR, \
+		ELF_H_PT_TLS, \
+	};
+	size_t numValues = sizeof(arrayOfValues)/sizeof(*arrayOfValues);
+	int i = 0;
+
+	/* INPUT VALIDATION */
+	// Verify the parallel arrays are the same length
+	assert(numNames == numValues);
+
+	for (i = 0; i < numNames; i++)
+	{
+		retVal = add_entry(retVal, (*(arrayOfNames + i)), (*(arrayOfValues + i)));
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				(*(arrayOfNames + i)), (*(arrayOfValues + i)));
+			break;
+		}
+	}
+
+	// RANGED ENTRIES
+	for (i = ELF_H_PT_LOOS; i <= ELF_H_PT_HIOS; i++)
+	{
+		retVal = add_entry(retVal, "Reserved for OS-specific semantics", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Reserved for OS-specific semantics", i);
+			break;
+		}
+	}
+	for (i = ELF_H_PT_LOPROC; i <= ELF_H_PT_HIPROC; i++)
+	{
+		retVal = add_entry(retVal, "Reserved for processor-specific semantics", i);
+		if (!retVal)
+		{
+			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+				"Reserved for processor-specific semantics", i);
+			break;
+		}
+	}
+
+	return retVal;
+}
+
+
 /********************************************************/
 /********************************************************/
 /***************** PROGRAM HEADER STOP ******************/
