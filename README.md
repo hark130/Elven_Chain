@@ -28,8 +28,8 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Section Header Table Size
         [X] Section Header Table Number of Entries
         [X] Index to Section Header Table with Section Names
-    [ ] Implement Program Header
-        [ ] Segment Type
+    [/] Implement Program Header
+        [/] Segment Type
         [ ] 64-bit Flags
         [ ] Offset of the Segment
         [ ] Virtual Address of the Segment
