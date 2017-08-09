@@ -1711,6 +1711,62 @@ struct HarkleDict* init_program_header_type_dict(void)
 /********************************************************/
 /********************************************************/
 
+
+// Purpose:	Wrapper for individual header parse function calls
+// Input:
+// 			[in] elvenFilename - Filename, relative or absolute, to an ELF file
+//			[out] ELFstruct - Pointer to an Elf_Details struct pointer
+//			[out] PHstruct - Pointer to an Prgrm_Hdr_Details struct pointer
+//			program_contents - ELF file contents
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:
+//			This function calls parse_elf() and parse_program_header()
+//			ELFstruct may not be NULL but *ELFstruct is expected to be NULL and will be overwritten
+//			PHstruct may not be NULL but *PHstruct is expected to be NULL and will be overwritten
+//			This function will return ERROR_BAD_ARG if either *ELFstruct or *PHstruct is not NULL
+int read_elf_file(char* elvenFilename, struct Elf_Details** ELFstruct, struct Prgrm_Hdr_Details** PHstruct)
+{
+	/* LOCAL VARIABLES */
+	int retVal = ERROR_SUCCESS;
+
+	/* INPUT VALIDATION */
+	if (!elvenFilename || !ELFstruct || !PHstruct)  // || !SHstruct
+	{
+		retVal = ERROR_NULL_PTR;
+	}
+	else if (*ELFstruct || *PHstruct)  // || *SHstruct
+	{
+		retVal = ERROR_BAD_ARG;
+	}
+	else
+	{
+		*ELFstruct = read_elf(elvenFilename);
+
+		if (*ELFstruct)
+		{
+			*PHstruct = read_program_header(elvenFilename, *ELFstruct);
+
+			if (*PHstruct)
+			{
+				// *SHstruct = read_section_header(elvenFilename, *ELFstruct);
+			}
+			else
+			{
+				PERROR(errno);
+				retVal = ERROR_NULL_PTR;
+			}
+		}
+		else
+		{
+			PERROR(errno);
+			retVal = ERROR_NULL_PTR;
+		}
+	}
+
+	return retVal;
+}
+
+
 // Purpose:	Prints an uppercase title surrounded by delimiters
 // Input:
 //			stream - Stream to print the header to
