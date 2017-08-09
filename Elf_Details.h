@@ -172,7 +172,19 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 /********************************/
 /***** PROGRAM HEADER START *****/
 /********************************/
-
+// http://www.sco.com/developers/gabi/latest/ch5.pheader.html
+#define ELF_H_PT_NULL 		0			// Unused
+#define ELF_H_PT_LOAD 		1			// Loadable segment, described by p_filesz and p_memsz
+#define ELF_H_PT_DYNAMIC 	2			// Specifies dynamic linking information
+#define ELF_H_PT_INTERP 	3			// Location and size of interpreter's null-terminated path name 
+#define ELF_H_PT_NOTE 		4			// Location and size of auxiliary information
+#define ELF_H_PT_SHLIB 		5			// Reserved
+#define ELF_H_PT_PHDR 		6			// Location and size of the program header table
+#define ELF_H_PT_TLS 		7			// Thread-Local Storage template
+#define ELF_H_PT_LOOS 		0x60000000	// Reserved for OS-specific semantics
+#define ELF_H_PT_HIOS 		0x6fffffff	// Reserved for OS-specific semantics
+#define ELF_H_PT_LOPROC 	0x70000000	// Reserved for processor-specific semantics
+#define ELF_H_PT_HIPROC 	0x7fffffff	// Reserved for processor-specific semantics
 /********************************/
 /***** PROGRAM HEADER STOP ******/
 /********************************/
@@ -288,6 +300,42 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 // Output:	ERROR_* as specified in Elf_Details.h
 // Note:	This function will modify the original variable in the calling function
 int kill_elf(struct Elf_Details** old_struct);
+
+// Purpose:	Build a HarkleDict of Elf Header Class definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_class_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Data definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_endian_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Target OS ABI definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_targetOS_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Type definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_elf_type_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header ISA definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_isa_dict(void);
+
+// Purpose:	Build a HarkleDict of Elf Header Object File Version definitions
+// Input:	None
+// Output:	Pointer to the head node of a linked list of HarkleDicts
+// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
+struct HarkleDict* init_elf_header_obj_version_dict(void);
 
 /*****************************/
 /* PROGRAM HEADER PROTOTYPES */
@@ -431,40 +479,6 @@ int convert_uint64_to_uint32(uint64_t inVal, uint32_t* outVal);
 //			Function will print one space on invalid input
 void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int bigEndian);
 
-// Purpose:	Build a HarkleDict of Elf Header Class definitions
-// Input:	None
-// Output:	Pointer to the head node of a linked list of HarkleDicts
-// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
-struct HarkleDict* init_elf_header_class_dict(void);
 
-// Purpose:	Build a HarkleDict of Elf Header Data definitions
-// Input:	None
-// Output:	Pointer to the head node of a linked list of HarkleDicts
-// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
-struct HarkleDict* init_elf_header_endian_dict(void);
-
-// Purpose:	Build a HarkleDict of Elf Header Target OS ABI definitions
-// Input:	None
-// Output:	Pointer to the head node of a linked list of HarkleDicts
-// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
-struct HarkleDict* init_elf_header_targetOS_dict(void);
-
-// Purpose:	Build a HarkleDict of Elf Header Type definitions
-// Input:	None
-// Output:	Pointer to the head node of a linked list of HarkleDicts
-// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
-struct HarkleDict* init_elf_header_elf_type_dict(void);
-
-// Purpose:	Build a HarkleDict of Elf Header ISA definitions
-// Input:	None
-// Output:	Pointer to the head node of a linked list of HarkleDicts
-// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
-struct HarkleDict* init_elf_header_isa_dict(void);
-
-// Purpose:	Build a HarkleDict of Elf Header Object File Version definitions
-// Input:	None
-// Output:	Pointer to the head node of a linked list of HarkleDicts
-// Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
-struct HarkleDict* init_elf_header_obj_version_dict(void);
 
 #endif // __ELF_DETAILS_H__
