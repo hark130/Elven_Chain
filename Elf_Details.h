@@ -250,9 +250,9 @@ struct Elf_Details
 	uint64_t sHdr64;	// 64-bit address offset of the section header table
 	unsigned int flags;	// Interpretation of this field depends on the target architecture
 	int elfHdrSize;		// ELF Header Size
-	int prgmHdrSize;	// Contains the size of a program header table entry.
+	int prgmHdrSize;	// Contains the size of a program header table entry
 	int prgmHdrEntrNum;	// Number of entries in the program header table
-	int sectHdrSize;	// Contains the size of a section header table entry.
+	int sectHdrSize;	// Contains the size of a section header table entry
 	int sectHdrEntrNum;	// Number of entries in the section header table
 	int sectHdrSectNms;	// Index of the section header table entry with section names
 };
@@ -267,7 +267,9 @@ struct Prgrm_Hdr_Details
 	int bigEndian;		// If TRUE, bigEndian
 	uint32_t pHdr32;	// 32-bit address offset of the program header table
 	uint64_t pHdr64;	// 64-bit address offset of the program header table
-	int prgmHdrType;	// Identifies the type of the segment
+	int prgmHdrSize;	// Contains the size of a program header table entry
+	int prgmHdrEntrNum;	// Number of entries in the program header table
+	char* prgmHdrType;	// Identifies the type of the segment
 };
 // All char* members should be dynamically allocated and later free()'d
 
@@ -361,14 +363,14 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 // Output:	ERROR_* as specified in Elf_Details.h
 int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program_contents, struct Elf_Details* elven_file);
 
-// Purpose:	Print human-readable details about an ELF file
+// Purpose:	Print human-readable details about an ELF file's Program Header
 // Input:
 //			program_struct - A Prgrm_Hdr_Details struct that contains data about an ELF file
 //			sectionsToPrint - Bitwise AND the "PRINT_*" macros into this variable
 //				to control what the function actually prints.
 //			stream - A stream to send the information to (e.g., stdout, A file)
 // Output:	None
-// Note:	This function will print the relevant data from elven_file into stream
+// Note:	This function will print the relevant data from program_struct into stream
 //				based on the flags found in sectionsToPrint
 void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int sectionsToPrint, FILE* stream);
 
