@@ -2023,6 +2023,135 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 }
 
 
+// Purpose:	Assist clean up efforts by zeroizing/free'ing an Prgrm_Hdr_Details struct
+// Input:	Pointer to an Prgrm_Hdr_Details struct pointer
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:	This function will modify the original variable in the calling function
+int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
+{
+	int retVal = ERROR_SUCCESS;
+
+	if (old_struct)
+	{
+		if (*old_struct)
+		{
+			/* ZEROIZE AND FREE (as appropriate) STRUCT MEMBERS */
+			// char* fileName;		// Absolute or relative path
+			if ((*old_struct)->fileName)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->fileName), strlen((*old_struct)->fileName), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->filename free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->filename.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// char* elfClass;		// 32 or 64 bit
+			if ((*old_struct)->elfClass)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->elfClass), strlen((*old_struct)->elfClass), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->elfClass free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->elfClass.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// int processorType;	// 32 or 64 bit
+			(*old_struct)->processorType = 0;
+			(*old_struct)->processorType |= ZEROIZE_VALUE;
+			// char* endianness;	// Little or Big
+			if ((*old_struct)->endianness)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->endianness), strlen((*old_struct)->endianness), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->endianness free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->endianness.\n");
+#endif // DEBUGLEROAD
+				}
+			}
+			// int bigEndian;		// If TRUE, bigEndian
+			(*old_struct)->bigEndian = 0;
+			(*old_struct)->bigEndian |= ZEROIZE_VALUE;
+			// uint32_t pHdr32;	// 32-bit address offset of the program header table
+			(*old_struct)->pHdr32 = 0;
+			(*old_struct)->pHdr32 |= ZEROIZE_VALUE;
+			// uint32_t pHdr64;	// 64-bit address offset of the program header table
+			(*old_struct)->pHdr64 = 0;
+			(*old_struct)->pHdr64 |= ZEROIZE_VALUE;
+			// int prgmHdrSize; // Contains the size of a program header table entry.
+			(*old_struct)->prgmHdrSize = 0;
+			(*old_struct)->prgmHdrSize |= ZEROIZE_VALUE;
+			// int prgmHdrEntrNum;	// Number of entries in the program header table
+			(*old_struct)->prgmHdrEntrNum = 0;
+			(*old_struct)->prgmHdrEntrNum |= ZEROIZE_VALUE;
+			// char* prgmHdrType; // Identifies the type of the segment
+			if ((*old_struct)->prgmHdrType)
+			{
+				retVal += take_mem_back((void**)&((*old_struct)->prgmHdrType), strlen((*old_struct)->prgmHdrType), sizeof(char));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->prgmHdrType free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->prgmHdrType.\n");
+#endif // DEBUGLEROAD
+				}
+			}			
+			
+			/* FREE THE STRUCT ITSELF */
+			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
+			if (retVal)
+			{
+				PERROR(errno);
+				fprintf(stderr, "take_mem_back() returned %d on struct free!\n", retVal);
+				retVal = ERROR_SUCCESS;
+			}
+			else
+			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "take_mem_back() successfully freed struct.\n");
+#endif // DEBUGLEROAD
+			}
+		}
+		else
+		{
+			retVal = ERROR_NULL_PTR;
+		}
+	}
+	else
+	{
+		retVal = ERROR_NULL_PTR;
+	}
+
+	return retVal;
+}
+
+
 // Purpose:	Build a HarkleDict of Program Header Type definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
