@@ -1007,32 +1007,32 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		fprintf(stream, "\n\n");
 	}
 
-	/* SECTION HEADER */
-	if (sectionsToPrint & PRINT_ELF_SECTN_HEADER || sectionsToPrint & PRINT_EVERYTHING)
-	{
-		// Header
-		print_fancy_header(stream, "SECTION HEADER", HEADER_DELIM);
-		// Implement later
-		fprintf(stream, "\n\n");
-	}
+	// /* SECTION HEADER */
+	// if (sectionsToPrint & PRINT_ELF_SECTN_HEADER || sectionsToPrint & PRINT_EVERYTHING)
+	// {
+	// 	// Header
+	// 	print_fancy_header(stream, "SECTION HEADER", HEADER_DELIM);
+	// 	// Implement later
+	// 	fprintf(stream, "\n\n");
+	// }
 
-	/* PROGRAM DATA */
-	if (sectionsToPrint & PRINT_ELF_PRGRM_DATA || sectionsToPrint & PRINT_EVERYTHING)
-	{
-		// Header
-		print_fancy_header(stream, "PROGRAM DATA", HEADER_DELIM);
-		// Implement later
-		fprintf(stream, "\n\n");
-	}
+	// /* PROGRAM DATA */
+	// if (sectionsToPrint & PRINT_ELF_PRGRM_DATA || sectionsToPrint & PRINT_EVERYTHING)
+	// {
+	// 	// Header
+	// 	print_fancy_header(stream, "PROGRAM DATA", HEADER_DELIM);
+	// 	// Implement later
+	// 	fprintf(stream, "\n\n");
+	// }
 
-	/* SECTION DATA */
-	if (sectionsToPrint & PRINT_ELF_SECTN_DATA || sectionsToPrint & PRINT_EVERYTHING)
-	{
-		// Header
-		print_fancy_header(stream, "SECTION DATA", HEADER_DELIM);
-		// Implement later
-		fprintf(stream, "\n\n");
-	}
+	// /* SECTION DATA */
+	// if (sectionsToPrint & PRINT_ELF_SECTN_DATA || sectionsToPrint & PRINT_EVERYTHING)
+	// {
+	// 	// Header
+	// 	print_fancy_header(stream, "SECTION DATA", HEADER_DELIM);
+	// 	// Implement later
+	// 	fprintf(stream, "\n\n");
+	// }
 
 	return;
 }
@@ -1752,7 +1752,15 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 		PERROR(errno);
 		fprintf(stderr, "ERROR: Allocation of memory for Prgrm_Hdr_Details->elfClass failed!\n");
 	}	
-	
+	// Copy ELF Header pHdr32 into the Program Header pHdr32
+	retVal->pHdr32 = elven_file->pHdr32;
+	// Copy ELF Header pHdr64 into the Program Header pHdr64
+	retVal->pHdr64 = elven_file->pHdr64;
+	// Copy ELF Header prgmHdrSize into the Program Header prgmHdrSize
+	retVal->prgmHdrSize = elven_file->prgmHdrSize;
+	// Copy ELF Header prgmHdrEntrNum into the Program Header prgmHdrEntrNum
+	retVal->prgmHdrEntrNum = elven_file->prgmHdrEntrNum;
+
 	/* PARSE PROGRAM HEADER INTO STRUCT */
 	// Initialize Remaining Struct Members
 	tmpRetVal = parse_program_header(retVal, elfGuts, elven_file);
@@ -1774,6 +1782,7 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 //			elven_file - ELF Header struct previously read from program_contents
 // Output:	ERROR_* as specified in Elf_Details.h
 int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program_contents, struct Elf_Details* elven_file)
+{
 	/* LOCAL VARIABLES */
 	int retVal = ERROR_SUCCESS;	// parse_elf() return value
 	char* tmpPtr = NULL;		// Holds return values from string functions
@@ -1811,6 +1820,19 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	}
 	// Verify Program Header Offsets (and other necessary struct members)
     // IMPLEMENT THIS LATER
+	if (program_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset = pHdr32;
+	}
+	else if (program_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset = pHdr64;
+	}
+	else
+	{
+		retVal = ERROR_BAD_ARG;
+		return retVal;
+	}
 	//// Verify program_struct->pHdr32 and program_struct->pHdr64 are non-0 as appropriate
 
 	/* PARSE PROGRAM HEADER CONTENTS */
@@ -1820,47 +1842,58 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// 2.3. processorType should already be initialized in calling function
 	// 2.4. endianness should already be initialized in calling function
 	// 2.5. bigEndian should already be initialized in calling function
-	// 2.6. int prgmHdrType; // Identifies the type of the segment
+	// 2.6. pHdr32 should already be initialized by the calling function
+	// 2.7. pHdr64 should already be initialized by the calling function
+	// 2.8. prgmHdrSize
+	// 2.9. prgmHdrEntrNum
+	// 2.10. int prgmHdrType; // Identifies the type of the segment
+	// Prepare Harkledict of Program Header Types
 	prgrmHdrTypeDict = init_program_header_type_dict();
-	dataOffset = ;  
+	// Read data from Program Contents
 	tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
-	// fprintf(stdout, "tmpInt now holds:\t%d\n", tmpInt);  // DEBUGGING
-	// fprintf(stdout, "tmpUint now holds:\t%u\n", tmpUint);  // DEBUGGING
-	if (tmpInt != ERROR_SUCCESS)
+	// Match data value to human readable string
+	if (tmpInt == ERROR_SUCCESS)
+	{
+		if (prgrmHdrTypeDict)
+		{
+			tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
+		}
+		else
+		{
+			fprintf(stderr, "init_program_header_type_dict() failed to build a HarkleDict.\n");
+			tmpNode = NULL;
+		}
+	}
+	else 
 	{
 		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
 		tmpNode = NULL;
 	}
-	else
-	{
-		tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
-	}
-	
+	// Allocate and copy human readable string into the struct
 	if (tmpNode)  // Found it
 	{
-		// fprintf(stdout, "tmpNode->name:\t%s\n", tmpNode->name);  // DEBUGGING
-		elven_struct->objVersion = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
-		if (elven_struct->objVersion)
+		program_struct->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+		if (program_struct->prgmHdrType)
 		{
-			if (strncpy(elven_struct->objVersion, tmpNode->name, strlen(tmpNode->name)) != elven_struct->objVersion)
+			if (strncpy(program_struct->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != program_struct->prgmHdrType)
 			{
-				fprintf(stderr, "ELF Object File Version string '%s' not copied into ELF Struct!\n", tmpNode->name);
+				fprintf(stderr, "Program Header Type string '%s' not copied into Program Header Struct!\n", tmpNode->name);
 			}
 			else
 			{
 #ifdef DEBUGLEROAD
-				fprintf(stdout, "Successfully copied '%s' into ELF Struct!\n", elven_struct->objVersion);
+				fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", elven_struct->objVersion);
 #endif // DEBUGLEROAD
 			}
 		}
 		else
 		{
-			fprintf(stderr, "Error allocating memory for Elf Struct Object File Version!\n");
+			fprintf(stderr, "Error allocating memory for Program Header Struct Type!\n");
 		}
 	}
 	else
 	{
-		fprintf(stderr, "ELF Object File Version %d not found in HarkleDict!\n", (int)tmpUint);
+		fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint);
 	}
 	// Zeroize/Free/NULLify elfHdrObjVerDict
 	if (elfHdrObjVerDict)
@@ -1868,8 +1901,125 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		tmpInt = destroy_a_list(&prgrmHdrTypeDict);
 	}
 
+	/* CLEAN UP */
+	// Nothing to clean up... yet
 
 	return retVal;
+}
+
+
+// Purpose:	Print human-readable details about an ELF file's Program Header
+// Input:
+//			program_struct - A Prgrm_Hdr_Details struct that contains data about an ELF file
+//			sectionsToPrint - Bitwise AND the "PRINT_*" macros into this variable
+//				to control what the function actually prints.
+//			stream - A stream to send the information to (e.g., stdout, A file)
+// Output:	None
+// Note:	This function will print the relevant data from program_struct into stream
+//				based on the flags found in sectionsToPrint
+void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int sectionsToPrint, FILE* stream)
+{
+	/* LOCAL VARIABLES */
+	const char notConfigured[] = { "¡NOT CONFIGURED!"};	// Standard error output
+	int i = 0;  										// Iterating variable
+
+	/* INPUT VALIDATION */
+	if (!stream)
+	{
+		fprintf(stderr, "ERROR: FILE* stream was NULL!\n");
+		return;
+	}
+	else if (!elven_file)
+	{
+		fprintf(stream, "ERROR: struct Prgrm_Hdr_Details* program_struct was NULL!\n");
+		return;
+	}
+	else if ((sectionsToPrint >> 6) > 0)
+	{
+		fprintf(stream, "ERROR: Invalid flags found in sectionsToPrint!\n");
+		return;
+	}
+
+	/* PROGRAM HEADER */
+	if (sectionsToPrint & PRINT_ELF_PRGRM_HEADER || sectionsToPrint & PRINT_EVERYTHING)
+	{
+		// Header
+		print_fancy_header(stream, "PROGRAM HEADER", HEADER_DELIM);
+		// Implement later
+		fprintf(stream, "\n\n");
+
+		// Filename
+		if (program_struct->fileName)
+		{
+			fprintf(stream, "Filename:\t%s\n", program_struct->fileName);
+		}
+		else
+		{
+			fprintf(stream, "Filename:\t%s\n", notConfigured);	
+		}
+
+		// Class
+		if (program_struct->elfClass)
+		{
+			fprintf(stream, "Class:\t\t%s\n", program_struct->elfClass);
+		}
+		else
+		{
+			fprintf(stream, "Class:\t\t%s\n", notConfigured);	
+		}
+
+		// Endianness
+		if (program_struct->endianness)
+		{
+			fprintf(stream, "Endianness:\t%s\n", program_struct->endianness);
+		}
+		else if (program_struct->bigEndian == TRUE)
+		{
+			fprintf(stream, "Endianness:\t%s\n", "Big Endian");
+		}
+		else
+		{
+			fprintf(stream, "Endianness:\t%s\n", notConfigured);	
+		}
+
+		// Program Header Offset
+		// 32-bit Processor
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "PH Offset:\t0x%" PRIx32 "\n", program_struct->pHdr32);
+		}
+		// 64-bit Processor
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "PH Offset:\t0x%" PRIx64 "\n", program_struct->pHdr64);
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "PH Offset:\t%s\n", notConfigured);
+		}
+
+		// Program Header Size
+		fprintf(stream, "PHeader Size:\t%d\n", elven_file->prgmHdrSize);
+
+		// Number of Program Header Entries
+		fprintf(stream, "# PH Entries:\t%d\n", elven_file->prgmHdrEntrNum);
+
+		// Program Header Type
+		if (program_struct->prgmHdrType)
+		{
+			fprintf(stream, "Type:\t\t%s\n", program_struct->prgmHdrType);
+		}
+		else
+		{
+			fprintf(stream, "Type:\t\t%s\n", notConfigured);	
+		}
+
+		// Section delineation
+		fprintf(stream, "\n\n");
+	}
+
+	return;
 }
 
 
