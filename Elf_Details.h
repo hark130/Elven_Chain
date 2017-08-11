@@ -512,4 +512,4 @@ void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int 
 
 
 
-#endif // __ELF_DETAILS_H__\
+#endif // __ELF_DETAILS_H__
