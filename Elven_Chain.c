@@ -46,15 +46,25 @@ int main(int argc, char *argv[])
 		PERROR(errno);
 		return retVal;
 	}
+	else
+	{
+		// puts("ELVEN CHAIN: Completed read_elf_file()");  // DEBUGGING
+	}
 
-	/* 4. PRINT ELF FILE DETAILS */
+	/* 4. PRINT ELF HEADER DETAILS */
+	// puts("ELVEN CHAIN: Made it to print_elf_details()");  // DEBUGGING
 	print_elf_details(elvenCharSheet, PRINT_EVERYTHING, stdout);
-	// print_program_header();
 
-	/* 5. CLEAN UP */
+	/* 5. PRINT PROGRAM HEADER DETAILS */
+	// puts("ELVEN CHAIN: Made it to print_program_header()");  // DEBUGGING
+	print_program_header(programHeaderDetails, PRINT_EVERYTHING, stdout);  // sectionsToPrint not yet implemented
+
+	/* 6. CLEAN UP */
 	// FREE Elf_Details STRUCT
+	// puts("ELVEN CHAIN: Made it to kill_elf()");  // DEBUGGING
 	retVal = kill_elf(&elvenCharSheet);
 	// FREE Prgrm_Hdr_Details STRUCT
+	// puts("ELVEN CHAIN: Made it to kill_program_header()");  // DEBUGGING
 	retVal += kill_program_header(&programHeaderDetails);
 
 	return retVal;
