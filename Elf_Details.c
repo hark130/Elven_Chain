@@ -136,14 +136,15 @@ struct Elf_Details* read_elf(char* elvenFilename)
 	}
 	// Initialize Remaining Struct Members
 	tmpRetVal = parse_elf(retVal, elfGuts);
+	if (tmpRetVal != ERROR_SUCCESS)
+	{
+		fprintf(stderr, "ERROR: parse_elf() encountered error number %d\n", tmpRetVal);
+	}
 
 	/* FINAL CLEAN UP */
 	if (elfGuts)
 	{
 		take_mem_back((void**)&elfGuts, elfSize + 1, sizeof(char));
-		// memset(elfGuts, 0, elfSize);
-		// free(elfGuts);
-		// elfGuts = NULL;
 	}
 
 	return retVal;
@@ -537,6 +538,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 
 	// 2.10 Entry Point (OFFSET: 0x18)
 	dataOffset += 4;
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Entry Point section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
 	{		
@@ -580,6 +584,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.11. Program Header Table Offset
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Program Header Table Offset section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
 	{
@@ -627,6 +634,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.12. Section Header Table Offset
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Section Header Table Offset section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
 	{
@@ -672,6 +682,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.13. ELF Header Flags
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering ELF Header Flags section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// 32-bit Processor
 	if (elven_struct->processorType == ELF_H_CLASS_32)
 	{
@@ -694,6 +707,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.14. ELF Header Size
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering ELF Header Size section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	dataOffset += 4;
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	if (tmpInt == ERROR_SUCCESS)
@@ -702,6 +718,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 	
 	// 2.15. Program Header Size
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Program Header Size section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	dataOffset += 2;
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	if (tmpInt == ERROR_SUCCESS)
@@ -710,6 +729,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.16. Number of Program Header Entries
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Number of Program Header Entries section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	dataOffset += 2;
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	if (tmpInt == ERROR_SUCCESS)
@@ -718,6 +740,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.17. Program Header Size
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Program Header Size section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	dataOffset += 2;
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	if (tmpInt == ERROR_SUCCESS)
@@ -726,6 +751,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.18. Number of Section Header Entries
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Number of Section Header Entries section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	dataOffset += 2;
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	if (tmpInt == ERROR_SUCCESS)
@@ -734,6 +762,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	}
 
 	// 2.18. Section Header Index to Entry with Names
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Entering Section Header Index to Entry with Names section\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 	dataOffset += 2;
 	tmpInt = convert_char_to_int(elven_contents, dataOffset, 2, elven_struct->bigEndian, &tmpUint);
 	if (tmpInt == ERROR_SUCCESS)
@@ -747,6 +778,9 @@ int parse_elf(struct Elf_Details* elven_struct, char* elven_contents)
 	// {
 	// 	take_mem_back((void**)&tmpBuff, strlen(elven_contents) + 1, sizeof(char));
 	// }
+#ifdef DEBUGLEROAD
+	fprintf(stdout, "Exiting parse_elf()\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 
 	return retVal;
 }
@@ -998,14 +1032,14 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		fprintf(stream, "\n\n");
 	}
 
-	/* PROGRAM HEADER */
-	if (sectionsToPrint & PRINT_ELF_PRGRM_HEADER || sectionsToPrint & PRINT_EVERYTHING)
-	{
-		// Header
-		print_fancy_header(stream, "PROGRAM HEADER", HEADER_DELIM);
-		// Implement later
-		fprintf(stream, "\n\n");
-	}
+	// /* PROGRAM HEADER */
+	// if (sectionsToPrint & PRINT_ELF_PRGRM_HEADER || sectionsToPrint & PRINT_EVERYTHING)
+	// {
+	// 	// Header
+	// 	print_fancy_header(stream, "PROGRAM HEADER", HEADER_DELIM);
+	// 	// Implement later
+	// 	fprintf(stream, "\n\n");
+	// }
 
 	// /* SECTION HEADER */
 	// if (sectionsToPrint & PRINT_ELF_SECTN_HEADER || sectionsToPrint & PRINT_EVERYTHING)
@@ -1689,7 +1723,7 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 	}
 
 	/* ALLOCATE STRUCT MEMORY */
-	retVal = (struct Elf_Details*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Details));
+	retVal = (struct Prgrm_Hdr_Details*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Details));
 	if (!retVal)
 	{
 		PERROR(errno);
@@ -1725,6 +1759,7 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 #endif // DEBUGLEROAD
 		}
 	}
+
 	// Allocate Elf Class
 	if (elven_file->elfClass)
 	{
@@ -1751,7 +1786,43 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 	{
 		PERROR(errno);
 		fprintf(stderr, "ERROR: Allocation of memory for Prgrm_Hdr_Details->elfClass failed!\n");
-	}	
+	}
+
+	// Copy ELF Header processorType into the Program Header processorType
+	retVal->processorType = elven_file->processorType;
+
+	// Allocate Endianness
+	if (elven_file->endianness)
+	{
+		retVal->endianness = gimme_mem(strlen(elven_file->endianness) + 1, sizeof(char));
+	}
+	// Copy endianness
+	if (retVal->endianness)
+	{
+		// Copy Elf Class
+		tmpPtr = strncpy(retVal->endianness, elven_file->endianness, strlen(elven_file->endianness));
+		if(tmpPtr != retVal->endianness)
+		{
+			PERROR(errno);
+			fprintf(stderr, "ERROR: strncpy of endianness into Prgrm_Hdr_Details struct failed!\n");
+		}
+		else
+		{
+#ifdef DEBUGLEROAD
+			puts(retVal->endianness);  // DEBUGGING
+#endif // DEBUGLEROAD
+		}
+	}
+	else
+	{
+		PERROR(errno);
+		fprintf(stderr, "ERROR: Allocation of memory for Prgrm_Hdr_Details->endianness failed!\n");
+	}
+#ifdef DEBUGLEROAD
+	puts("Entering copy section");  // DEBUGGING
+#endif // DEBUGLEROAD
+	// Copy ELF Header bigEndian into the Program Header bigEndian
+	retVal->bigEndian = elven_file->bigEndian;
 	// Copy ELF Header pHdr32 into the Program Header pHdr32
 	retVal->pHdr32 = elven_file->pHdr32;
 	// Copy ELF Header pHdr64 into the Program Header pHdr64
@@ -1763,7 +1834,14 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 
 	/* PARSE PROGRAM HEADER INTO STRUCT */
 	// Initialize Remaining Struct Members
+#ifdef DEBUGLEROAD
+	puts("Entering parse_program_header()");  // DEBUGGING
+#endif // DEBUGLEROAD
 	tmpRetVal = parse_program_header(retVal, elfGuts, elven_file);
+	if (tmpRetVal != ERROR_SUCCESS)
+	{
+		fprintf(stderr, "ERROR: parse_program_header() encountered error number %d\n", tmpRetVal);
+	}
 
 	/* FINAL CLEAN UP */
 	if (elfGuts)
@@ -1812,21 +1890,26 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	else if (program_struct->processorType != ELF_H_CLASS_32 && program_struct->processorType != ELF_H_CLASS_64)
 	{
 		retVal = ERROR_BAD_ARG;
+		return retVal;
 	}
 	// Verify Endianness has been configured already
 	else if (program_struct->bigEndian != TRUE && program_struct->bigEndian != FALSE)
 	{
 		retVal = ERROR_BAD_ARG;
+		return retVal;
 	}
 	// Verify Program Header Offsets (and other necessary struct members)
     // IMPLEMENT THIS LATER
+#ifdef DEBUGLEROAD
+    puts("parse_program_header() copying Processor Type");  // DEBUGGING
+#endif // DEBUGLEROAD
 	if (program_struct->processorType == ELF_H_CLASS_32)
 	{
-		dataOffset = pHdr32;
+		dataOffset = program_struct->pHdr32;
 	}
 	else if (program_struct->processorType == ELF_H_CLASS_64)
 	{
-		dataOffset = pHdr64;
+		dataOffset = program_struct->pHdr64;
 	}
 	else
 	{
@@ -1836,6 +1919,9 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	//// Verify program_struct->pHdr32 and program_struct->pHdr64 are non-0 as appropriate
 
 	/* PARSE PROGRAM HEADER CONTENTS */
+#ifdef DEBUGLEROAD
+	puts("parse_program_header() made it past input validation");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// 2. Begin initializing the struct
 	// 2.1. fileName should already be initialized in calling function
 	// 2.2. elfClass should already be initialized in calling function
@@ -1849,6 +1935,9 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// 2.10. int prgmHdrType; // Identifies the type of the segment
 	// Prepare Harkledict of Program Header Types
 	prgrmHdrTypeDict = init_program_header_type_dict();
+#ifdef DEBUGLEROAD
+	puts("parse_program_header() made init_program_header_type_dict()");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// Read data from Program Contents
 	tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
 	// Match data value to human readable string
@@ -1882,7 +1971,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 			else
 			{
 #ifdef DEBUGLEROAD
-				fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", elven_struct->objVersion);
+				fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", program_struct->prgmHdrType);
 #endif // DEBUGLEROAD
 			}
 		}
@@ -1895,8 +1984,8 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	{
 		fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint);
 	}
-	// Zeroize/Free/NULLify elfHdrObjVerDict
-	if (elfHdrObjVerDict)
+	// Zeroize/Free/NULLify prgrmHdrTypeDict
+	if (prgrmHdrTypeDict)
 	{
 		tmpInt = destroy_a_list(&prgrmHdrTypeDict);
 	}
@@ -1929,7 +2018,7 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		fprintf(stderr, "ERROR: FILE* stream was NULL!\n");
 		return;
 	}
-	else if (!elven_file)
+	else if (!program_struct)
 	{
 		fprintf(stream, "ERROR: struct Prgrm_Hdr_Details* program_struct was NULL!\n");
 		return;
@@ -1946,7 +2035,7 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		// Header
 		print_fancy_header(stream, "PROGRAM HEADER", HEADER_DELIM);
 		// Implement later
-		fprintf(stream, "\n\n");
+		// fprintf(stream, "\n\n");
 
 		// Filename
 		if (program_struct->fileName)
@@ -2000,19 +2089,19 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		}
 
 		// Program Header Size
-		fprintf(stream, "PHeader Size:\t%d\n", elven_file->prgmHdrSize);
+		fprintf(stream, "PHeader Size:\t%d\n", program_struct->prgmHdrSize);
 
 		// Number of Program Header Entries
-		fprintf(stream, "# PH Entries:\t%d\n", elven_file->prgmHdrEntrNum);
+		fprintf(stream, "# PH Entries:\t%d\n", program_struct->prgmHdrEntrNum);
 
 		// Program Header Type
 		if (program_struct->prgmHdrType)
 		{
-			fprintf(stream, "Type:\t\t%s\n", program_struct->prgmHdrType);
+			fprintf(stream, "PH Type:\t%s\n", program_struct->prgmHdrType);
 		}
 		else
 		{
-			fprintf(stream, "Type:\t\t%s\n", notConfigured);	
+			fprintf(stream, "PH Type:\t%s\n", notConfigured);
 		}
 
 		// Section delineation
@@ -2073,9 +2162,18 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			// int processorType;	// 32 or 64 bit
 			(*old_struct)->processorType = 0;
 			(*old_struct)->processorType |= ZEROIZE_VALUE;
+#ifdef DEBUGLEROAD
+			fprintf(stdout, "take_mem_back() successfully zeroized struct->processorType.\n");
+#endif // DEBUGLEROAD
 			// char* endianness;	// Little or Big
+#ifdef DEBUGLEROAD
+			fprintf(stdout, "take_mem_back() attempting to free() struct->endianness:\t%s\n", (*old_struct)->endianness);
+#endif // DEBUGLEROAD
 			if ((*old_struct)->endianness)
 			{
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Attempting to free struct->endianness:\t%s\n", (*old_struct)->endianness);  // DEBUGGING
+#endif // DEBUGLEROAD
 				retVal += take_mem_back((void**)&((*old_struct)->endianness), strlen((*old_struct)->endianness), sizeof(char));
 				if (retVal)
 				{
@@ -2124,7 +2222,10 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			}			
 			
 			/* FREE THE STRUCT ITSELF */
-			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Elf_Details));
+#ifdef DEBUGLEROAD
+			fprintf(stdout, "Attempting to free the struct\n");
+#endif // DEBUGLEROAD
+			retVal += take_mem_back((void**)old_struct, 1, sizeof(struct Prgrm_Hdr_Details));
 			if (retVal)
 			{
 				PERROR(errno);
@@ -2158,6 +2259,9 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 // Note:	Caller is responsible for utilizing destroy_a_list() to free this linked list
 struct HarkleDict* init_program_header_type_dict(void)
 {
+#ifdef DEBUGLEROAD
+	puts("Entering init_program_header_type_dict()");  // DEBUGGING
+#endif // DEBUGLEROAD
 	/* LOCAL VARIABLES */
 	struct HarkleDict* retVal = NULL;
 	// The following arrays may not be in numerical order but they are still
@@ -2202,28 +2306,38 @@ struct HarkleDict* init_program_header_type_dict(void)
 		}
 	}
 
+#ifdef DEBUGLEROAD
+	puts("Starting ranged entries");  // DEBUGGING
+#endif // DEBUGLEROAD
 	// RANGED ENTRIES
-	for (i = ELF_H_PT_LOOS; i <= ELF_H_PT_HIOS; i++)
-	{
-		retVal = add_entry(retVal, "Reserved for OS-specific semantics", i);
-		if (!retVal)
-		{
-			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
-				"Reserved for OS-specific semantics", i);
-			break;
-		}
-	}
-	for (i = ELF_H_PT_LOPROC; i <= ELF_H_PT_HIPROC; i++)
-	{
-		retVal = add_entry(retVal, "Reserved for processor-specific semantics", i);
-		if (!retVal)
-		{
-			fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
-				"Reserved for processor-specific semantics", i);
-			break;
-		}
-	}
+	// NOTE:  These ranged entries are commented about because the creation of the Harkledict
+	//			entries is taking too long.
+	// for (i = ELF_H_PT_LOOS; i <= ELF_H_PT_HIOS; i++)
+	// {
+	// 	fprintf(stdout, "Harkledict adding OS-specific #%d\n", i);
+	// 	retVal = add_entry(retVal, "Reserved for OS-specific semantics", i);
+	// 	if (!retVal)
+	// 	{
+	// 		fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+	// 			"Reserved for OS-specific semantics", i);
+	// 		break;
+	// 	}
+	// }
+	// for (i = ELF_H_PT_LOPROC; i <= ELF_H_PT_HIPROC; i++)
+	// {
+	// 	fprintf(stdout, "Harkledict adding processor-specific #%d\n", i);
+	// 	retVal = add_entry(retVal, "Reserved for processor-specific semantics", i);
+	// 	if (!retVal)
+	// 	{
+	// 		fprintf(stderr, "Harkledict add_entry() returned NULL for:\n\tName:\t%s\n\tValue:\t%d\n", \
+	// 			"Reserved for processor-specific semantics", i);
+	// 		break;
+	// 	}
+	// }
 
+#ifdef DEBUGLEROAD
+	puts("Exiting init_program_header_type_dict()");  // DEBUGGING
+#endif // DEBUGLEROAD
 	return retVal;
 }
 
@@ -2274,11 +2388,17 @@ int read_elf_file(char* elvenFilename, struct Elf_Details** ELFstruct, struct Pr
 
 		if (*ELFstruct)
 		{
+#ifdef DEBUGLEROAD
+			fprintf(stdout, "Successfully read ELF header.\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 			*PHstruct = read_program_header(elvenFilename, *ELFstruct);
 
 			if (*PHstruct)
 			{
 				// *SHstruct = read_section_header(elvenFilename, *ELFstruct);
+#ifdef DEBUGLEROAD
+				fprintf(stdout, "Successfully read program header.\n");  // DEBUGGING
+#endif // DEBUGLEROAD
 			}
 			else
 			{
