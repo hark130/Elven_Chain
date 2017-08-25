@@ -281,6 +281,8 @@ struct Prgrm_Hdr_Details
 	uint64_t seg64off;			// 64-bit offset of the segment's first byte in the file image
 	uint32_t seg32virAddr;		// 32-bit Virtual address of the segment in memory
 	uint64_t seg64virAddr;		// 64-bit Virtual address of the segment in memory
+	uint32_t seg32physAddr;		// 32-bit Physical address of the segment in memory
+	uint64_t seg64physAddr;		// 64-bit Physical address of the segment in memory
 };
 // All char* members should be dynamically allocated and later free()'d
 
