@@ -57,6 +57,7 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Look for memory leaks (valgrind)
     [ ] Dump out of elf_parser() at offset 0x10 if Endianness doesn't match existing macro
     [ ] Match allocation error handling from read_program_header() into read_elf() [see: "ERROR: Allocation..."]
+    [ ] Rename Program Header 64-bit flag macros to something agnostic of processor "class"
 
 ## NOTES TO THE WORLD (and future Hark)
 ### Implementing new members of the "Header"_Details struct involves updating the following:

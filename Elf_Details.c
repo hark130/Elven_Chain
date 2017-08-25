@@ -2014,7 +2014,6 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		else 
 		{
 			fprintf(stderr, "Failed to read 64-bit flags field from the program header.  Error Code:\t%d\n", tmpInt);
-			tmpNode = NULL;
 		}
 	}
 
@@ -2240,6 +2239,26 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Memory Size not read!\n");
 	}
 
+	// 2.17. 32-bit Flag Field
+	// uint32_t flags32bit;  // 32 bit flag segment
+	// Read data from Program Contents into struct
+	if (program_struct->processorType == ELF_H_CLASS_32)  // This field only exists in 64 bit ELFs
+	{
+		dataOffset += 4;
+		// Read the data
+		tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
+
+		// Store the data in the struct
+		if (tmpInt == ERROR_SUCCESS)
+		{
+			program_struct->flags32bit = (uint32_t)tmpUint;
+		}
+		else 
+		{
+			fprintf(stderr, "Failed to read 32-bit flags field from the program header.  Error Code:\t%d\n", tmpInt);
+		}
+	}
+
 	/* CLEAN UP */
 	// Nothing to clean up... yet
 
@@ -2367,21 +2386,22 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 			if (!(program_struct->flags64bit && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
 			{
 				fprintf(stream, "\t\t\t");
-			}
-			// Read
-			if ((program_struct->flags64bit && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
-			{
-				fprintf(stream, "Read ");
-			}
-			// Write
-			if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
-			{
-				fprintf(stream, "Write ");
-			}
-			// Execute
-			if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
-			{
-				fprintf(stream, "Execute ");
+				// Read
+				if ((program_struct->flags64bit && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
+				{
+					fprintf(stream, "Read ");
+				}
+				// Write
+				if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+				{
+					fprintf(stream, "Write ");
+				}
+				// Execute
+				if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+				{
+					fprintf(stream, "Execute ");
+				}
+				fprintf(stream, "\n");
 			}
 		}
 
@@ -2450,6 +2470,38 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		// Segment Size in Memory
 		// uint64_t segMemSize;  // Size in bytes of the segment in memory
 		fprintf(stream, "Seg Mem Size:\t%" PRIu64 " bytes\n", program_struct->segMemSize);
+
+		// 32-bit Flag Field
+		// uint32_t flags32bit;  // 32 bit flag segment
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "32-bit Flags:\t");
+			// Binary printer
+			// Printing flags so endianness shouldn't matter
+			print_binary(stream, &(program_struct->flags32bit), sizeof(program_struct->flags32bit), TRUE);
+			fprintf(stream, "\n");
+			// If at least one known flag is set, tab over
+			if (!(program_struct->flags32bit && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
+			{
+				fprintf(stream, "\t\t\t");
+				// Read
+				if ((program_struct->flags32bit && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
+				{
+					fprintf(stream, "Read ");
+				}
+				// Write
+				if ((program_struct->flags32bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+				{
+					fprintf(stream, "Write ");
+				}
+				// Execute
+				if ((program_struct->flags32bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+				{
+					fprintf(stream, "Execute ");
+				}
+				fprintf(stream, "\n");
+			}
+		}
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -2567,6 +2619,7 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 #endif // DEBUGLEROAD
 				}
 			}
+			// 64-bit Flag Field
 			// uint32_t flags64bit;  // 64 bit flag segment
 			(*old_struct)->flags64bit = 0;
 			(*old_struct)->flags64bit |= ZEROIZE_VALUE;
@@ -2598,6 +2651,10 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			// uint64_t segMemSize;  // Size in bytes of the segment in memory
 			(*old_struct)->segMemSize = 0;
 			(*old_struct)->segMemSize |= ZEROIZE_VALUE;
+			// 32-bit Flag Field
+			// uint32_t flags32bit;  // 32 bit flag segment
+			(*old_struct)->flags32bit = 0;
+			(*old_struct)->flags32bit |= ZEROIZE_VALUE;
 
 			
 			/* FREE THE STRUCT ITSELF */
