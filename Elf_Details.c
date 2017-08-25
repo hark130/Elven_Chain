@@ -2105,7 +2105,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// ??-bit Processor
 	else
 	{
-		fprintf(stderr, "Struct Processor Type invalid so Section Header Virtual Address not read!\n");
+		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Virtual Address not read!\n");
 	}
 
 	// 2.14. Segment Physical Address
@@ -2153,9 +2153,47 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// ??-bit Processor
 	else
 	{
-		fprintf(stderr, "Struct Processor Type invalid so Section Header Virtual Address not read!\n");
+		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Physical Address not read!\n");
 	}
 
+	// Segment Size
+	// uint64_t segFileSize;  // Size in bytes of the segment in the file image
+	// 32-bit Processor
+	if (program_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->segFileSize = tmpUint64;
+		}
+	}
+	// 64-bit Processor
+	else if (program_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->segFileSize = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment File Size not read!\n");
+	}
 
 	/* CLEAN UP */
 	// Nothing to clean up... yet
@@ -2322,8 +2360,8 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		}
 
 		// Segment Virtual Address
-		// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
-		// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
+		// uint32_t seg32virAddr;  // 32-bit Virtual address of the segment in memory
+		// uint64_t seg64virAddr;  // 64-bit Virtual address of the segment in memory
 		// 32-bit Processor
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
@@ -2359,6 +2397,10 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 			fprintf(stream, "Seg Phys Addr:\t%s\n", notConfigured);
 		}
 
+		// Segment Size
+		// uint64_t segFileSize;  // Size in bytes of the segment in the file image
+		// 32-bit Processor
+		fprintf(stream, "Seg File Size:\t%" PRIu64 " bytes\n", program_struct->segFileSize);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -2499,6 +2541,11 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			(*old_struct)->seg32physAddr |= ZEROIZE_VALUE;
 			(*old_struct)->seg64physAddr = 0;
 			(*old_struct)->seg64physAddr |= ZEROIZE_VALUE;
+			// Segment Size
+			// uint64_t segFileSize;  // Size in bytes of the segment in the file image
+			(*old_struct)->segFileSize = 0;
+			(*old_struct)->segFileSize |= ZEROIZE_VALUE;
+
 			
 			/* FREE THE STRUCT ITSELF */
 #ifdef DEBUGLEROAD

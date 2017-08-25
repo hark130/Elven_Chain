@@ -283,6 +283,7 @@ struct Prgrm_Hdr_Details
 	uint64_t seg64virAddr;		// 64-bit Virtual address of the segment in memory
 	uint32_t seg32physAddr;		// 32-bit Physical address of the segment in memory
 	uint64_t seg64physAddr;		// 64-bit Physical address of the segment in memory
+	uint64_t segFileSize;		// Size in bytes of the segment in the file image
 };
 // All char* members should be dynamically allocated and later free()'d
 
