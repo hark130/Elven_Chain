@@ -965,12 +965,12 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 		// 32-bit Processor
 		if (elven_file->processorType == ELF_H_CLASS_32)
 		{
-			fprintf(stream, "PH Offset:\t0x%" PRIx32 "\n", elven_file->pHdr32);
+			fprintf(stream, "PH Offset:\t0x%" PRIx32 " (%" PRIu32 ")\n", elven_file->pHdr32, elven_file->pHdr32);
 		}
 		// 64-bit Processor
 		else if (elven_file->processorType == ELF_H_CLASS_64)
 		{
-			fprintf(stream, "PH Offset:\t0x%" PRIx64 "\n", elven_file->pHdr64);
+			fprintf(stream, "PH Offset:\t0x%" PRIx64 " (%" PRIu64 ")\n", elven_file->pHdr64, elven_file->pHdr64);
 		}
 		// ??-bit Processor
 		else
@@ -1994,14 +1994,14 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// Read data from Program Contents into struct
 	if (program_struct->processorType == ELF_H_CLASS_64)  // This field only exists in 64 bit ELFs
 	{
-		if (program_struct->processorType == ELF_H_CLASS_32)  // DEBUGGING
-		{
-			fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr32);  // DEBUGGING
-		}
-		else if (program_struct->processorType == ELF_H_CLASS_64)
-		{
-			fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr64);  // DEBUGGING
-		}		
+		// if (program_struct->processorType == ELF_H_CLASS_32)  // DEBUGGING
+		// {
+		// 	fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr32);  // DEBUGGING
+		// }
+		// else if (program_struct->processorType == ELF_H_CLASS_64)
+		// {
+		// 	fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr64);  // DEBUGGING
+		// }		
 
 		// Read the data
 		tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
@@ -2162,7 +2162,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Physical Address not read!\n");
 	}
 
-	// Segment Size
+	// 2.15. Segment File Size
 	// uint64_t segFileSize;  // Size in bytes of the segment in the file image
 	// 32-bit Processor
 	if (program_struct->processorType == ELF_H_CLASS_32)
@@ -2199,6 +2199,45 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	else
 	{
 		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment File Size not read!\n");
+	}
+
+	// 2.16. Segment Size in Memory
+	// uint64_t segMemSize;  // Size in bytes of the segment in memory	
+	// 32-bit Processor
+	if (program_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->segMemSize = tmpUint64;
+		}
+	}
+	// 64-bit Processor
+	else if (program_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->segMemSize = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Memory Size not read!\n");
 	}
 
 	/* CLEAN UP */
@@ -2352,12 +2391,12 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		// 32-bit Processor
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			fprintf(stream, "Segment Offset:\t0x%" PRIx32 "\n", program_struct->seg32off);
+			fprintf(stream, "Segment Offset:\t0x%" PRIx32 " (%" PRIu32 ")\n", program_struct->seg32off, program_struct->seg32off);
 		}
 		// 64-bit Processor
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			fprintf(stream, "Segment Offset:\t0x%" PRIx64 "\n", program_struct->seg64off);
+			fprintf(stream, "Segment Offset:\t0x%" PRIx64 " (%" PRIu64 ")\n", program_struct->seg64off, program_struct->seg64off);
 		}
 		// ??-bit Processor
 		else
@@ -2407,6 +2446,10 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		// uint64_t segFileSize;  // Size in bytes of the segment in the file image
 		// 32-bit Processor
 		fprintf(stream, "Seg File Size:\t%" PRIu64 " bytes\n", program_struct->segFileSize);
+
+		// Segment Size in Memory
+		// uint64_t segMemSize;  // Size in bytes of the segment in memory
+		fprintf(stream, "Seg Mem Size:\t%" PRIu64 " bytes\n", program_struct->segMemSize);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -2547,10 +2590,14 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			(*old_struct)->seg32physAddr |= ZEROIZE_VALUE;
 			(*old_struct)->seg64physAddr = 0;
 			(*old_struct)->seg64physAddr |= ZEROIZE_VALUE;
-			// Segment Size
+			// Segment File Size
 			// uint64_t segFileSize;  // Size in bytes of the segment in the file image
 			(*old_struct)->segFileSize = 0;
 			(*old_struct)->segFileSize |= ZEROIZE_VALUE;
+			// Segment Size in Memory
+			// uint64_t segMemSize;  // Size in bytes of the segment in memory
+			(*old_struct)->segMemSize = 0;
+			(*old_struct)->segMemSize |= ZEROIZE_VALUE;
 
 			
 			/* FREE THE STRUCT ITSELF */
