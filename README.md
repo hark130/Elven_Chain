@@ -29,9 +29,9 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Section Header Table Number of Entries
         [X] Index to Section Header Table with Section Names
     [/] Implement Program Header
-        [/] Segment Type
-        [ ] 64-bit Flags
-        [ ] Offset of the Segment
+        [X] Segment Type
+        [X] 64-bit Flags
+        [X] Offset of the Segment
         [ ] Virtual Address of the Segment
         [ ] Segment's Physical Address
         [ ] Size of the Segment in File Image (bytes)
@@ -59,10 +59,10 @@ This extremely light repository is made of very fine ELF links. This project is 
     [ ] Match allocation error handling from read_program_header() into read_elf() [see: "ERROR: Allocation..."]
 
 ## NOTES TO THE WORLD (and future Hark)
-### Implementing new members of the Elf_Details struct involves updating the following:
-* parse_elf()
-* print_elf_details()
-* kill_elf()
+### Implementing new members of the "Header"_Details struct involves updating the following:
+* parse_"header"()
+* print_"header"_details()
+* kill_"header"()
 ### Compilation
 ```
     clear

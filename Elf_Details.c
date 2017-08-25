@@ -1990,6 +1990,75 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		tmpInt = destroy_a_list(&prgrmHdrTypeDict);
 	}
 
+	// 2.11. int flags64bit;  // 64 bit flag segment
+	// Read data from Program Contents into struct
+	if (program_struct->processorType == ELF_H_CLASS_64)  // This field only exists in 64 bit ELFs
+	{
+		// Increase the offset
+		dataOffset += 4;
+
+		// Read the data
+		tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
+
+		// Store the data in the struct
+		if (tmpInt == ERROR_SUCCESS)
+		{
+			program_struct->flags64bit = (uint32_t)tmpUint;
+		}
+		else 
+		{
+			fprintf(stderr, "Failed to read 64-bit flags field from the program header.  Error Code:\t%d\n", tmpInt);
+			tmpNode = NULL;
+		}
+	}
+
+	// 2.12. Segment Offset
+	// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
+	// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image
+	// 32-bit Processor
+	if (program_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
+			if (tmpInt != ERROR_SUCCESS)
+			{
+				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+			}
+			else
+			{
+				program_struct->seg32off = tmpUint32;
+			}
+		}
+	}
+	// 64-bit Processor
+	else if (program_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->seg64off = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
+	}
+
 	/* CLEAN UP */
 	// Nothing to clean up... yet
 
@@ -2102,6 +2171,56 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		else
 		{
 			fprintf(stream, "PH Type:\t%s\n", notConfigured);
+		}
+
+		// 64-bit Flags
+		// int flags64bit;  // 64 bit flag segment
+		if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "64-bit Flags:\t");
+			// Binary printer
+			// Printing flags so endianness shouldn't matter
+			print_binary(stream, &(program_struct->flags64bit), sizeof(program_struct->flags64bit), TRUE);
+			fprintf(stream, "\n");
+			// If at least one known flag is set, tab over
+			if (!(program_struct->flags64bit && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
+			{
+				fprintf(stream, "\t\t\t");
+			}
+			// Read
+			if ((program_struct->flags64bit && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
+			{
+				fprintf(stream, "Read ");
+			}
+			// Write
+			if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+			{
+				fprintf(stream, "Write ");
+			}
+			// Execute
+			if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+			{
+				fprintf(stream, "Execute ");
+			}
+		}
+
+		// Program Header Offset
+		// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
+		// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image	
+		// 32-bit Processor
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "Segment Offset:\t0x%" PRIx32 "\n", program_struct->seg32off);
+		}
+		// 64-bit Processor
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "Segment Offset:\t0x%" PRIx64 "\n", program_struct->seg64off);
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "Segment Offset:\t%s\n", notConfigured);
 		}
 
 		// Section delineation
@@ -2219,7 +2338,16 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 					fprintf(stdout, "take_mem_back() successfully freed struct->prgmHdrType.\n");
 #endif // DEBUGLEROAD
 				}
-			}			
+			}
+			// uint32_t flags64bit;  // 64 bit flag segment
+			(*old_struct)->flags64bit = 0;
+			(*old_struct)->flags64bit |= ZEROIZE_VALUE;
+			// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
+			// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image
+			(*old_struct)->seg32off = 0;
+			(*old_struct)->seg32off |= ZEROIZE_VALUE;
+			(*old_struct)->seg64off = 0;
+			(*old_struct)->seg64off |= ZEROIZE_VALUE;
 			
 			/* FREE THE STRUCT ITSELF */
 #ifdef DEBUGLEROAD

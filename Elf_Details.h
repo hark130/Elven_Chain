@@ -185,6 +185,12 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 #define ELF_H_PT_HIOS 		0x6fffffff	// Reserved for OS-specific semantics
 #define ELF_H_PT_LOPROC 	0x70000000	// Reserved for processor-specific semantics
 #define ELF_H_PT_HIPROC 	0x7fffffff	// Reserved for processor-specific semantics
+
+// 64-bit Flags
+// http://www.sco.com/developers/gabi/latest/ch5.pheader.html#p_flags
+#define ELF_H_64_FLAG_X		0x1 		// Segment Flag - Execute 
+#define ELF_H_64_FLAG_W		0x2 		// Segment Flag - Write 
+#define ELF_H_64_FLAG_R		0x4 		// Segment Flag - Read 
 /********************************/
 /***** PROGRAM HEADER STOP ******/
 /********************************/
@@ -229,47 +235,50 @@ do { if (errnum) { printf("Error Number:\t%d\nError Description:\t%s\n", errnum,
 
 struct Elf_Details
 {
-	char* fileName;		// Absolute or relative path
-	char* magicNum;		// First four bytes of file
-	char* elfClass;		// 32 or 64 bit
-	int processorType;	// 32 or 64 bit
-	char* endianness;	// Little or Big
-	int bigEndian;		// If TRUE, bigEndian
-	int elfVersion;		// ELF version
-	char* targetOS;		// Target OS ABI
-	int ABIversion;		// Version of the ABI
-	char* pad;			// Unused portion
-	char* type;			// The type of ELF file
-	char* ISA;			// Specifies target Instruction Set Architecture
-	char* objVersion;	// Object File Version
-	uint32_t ePnt32;	// 32-bit memory address of the entry point from where the process starts executing
-	uint64_t ePnt64;	// 64-bit memory address of the entry point from where the process starts executing
-	uint32_t pHdr32;	// 32-bit address offset of the program header table
-	uint64_t pHdr64;	// 64-bit address offset of the program header table
-	uint32_t sHdr32;	// 32-bit address offset of the section header table
-	uint64_t sHdr64;	// 64-bit address offset of the section header table
-	unsigned int flags;	// Interpretation of this field depends on the target architecture
-	int elfHdrSize;		// ELF Header Size
-	int prgmHdrSize;	// Contains the size of a program header table entry
-	int prgmHdrEntrNum;	// Number of entries in the program header table
-	int sectHdrSize;	// Contains the size of a section header table entry
-	int sectHdrEntrNum;	// Number of entries in the section header table
-	int sectHdrSectNms;	// Index of the section header table entry with section names
+	char* fileName;				// Absolute or relative path
+	char* magicNum;				// First four bytes of file
+	char* elfClass;				// 32 or 64 bit
+	int processorType;			// 32 or 64 bit
+	char* endianness;			// Little or Big
+	int bigEndian;				// If TRUE, bigEndian
+	int elfVersion;				// ELF version
+	char* targetOS;				// Target OS ABI
+	int ABIversion;				// Version of the ABI
+	char* pad;					// Unused portion
+	char* type;					// The type of ELF file
+	char* ISA;					// Specifies target Instruction Set Architecture
+	char* objVersion;			// Object File Version
+	uint32_t ePnt32;			// 32-bit memory address of the entry point from where the process starts executing
+	uint64_t ePnt64;			// 64-bit memory address of the entry point from where the process starts executing
+	uint32_t pHdr32;			// 32-bit address offset of the program header table
+	uint64_t pHdr64;			// 64-bit address offset of the program header table
+	uint32_t sHdr32;			// 32-bit address offset of the section header table
+	uint64_t sHdr64;			// 64-bit address offset of the section header table
+	unsigned int flags;			// Interpretation of this field depends on the target architecture
+	int elfHdrSize;				// ELF Header Size
+	int prgmHdrSize;			// Contains the size of a program header table entry
+	int prgmHdrEntrNum;			// Number of entries in the program header table
+	int sectHdrSize;			// Contains the size of a section header table entry
+	int sectHdrEntrNum;			// Number of entries in the section header table
+	int sectHdrSectNms;			// Index of the section header table entry with section names
 };
 // All char* members should be dynamically allocated and later free()'d
 
 struct Prgrm_Hdr_Details
 {
-	char* fileName;		// Absolute or relative path
-	char* elfClass;		// 32 or 64 bit
-	int processorType;	// 32 or 64 bit
-	char* endianness;	// Little or Big
-	int bigEndian;		// If TRUE, bigEndian
-	uint32_t pHdr32;	// 32-bit address offset of the program header table
-	uint64_t pHdr64;	// 64-bit address offset of the program header table
-	int prgmHdrSize;	// Contains the size of a program header table entry
-	int prgmHdrEntrNum;	// Number of entries in the program header table
-	char* prgmHdrType;	// Identifies the type of the segment
+	char* fileName;				// Absolute or relative path
+	char* elfClass;				// 32 or 64 bit
+	int processorType;			// 32 or 64 bit
+	char* endianness;			// Little or Big
+	int bigEndian;				// If TRUE, bigEndian
+	uint32_t pHdr32;			// 32-bit address offset of the program header table
+	uint64_t pHdr64;			// 64-bit address offset of the program header table
+	int prgmHdrSize;			// Contains the size of a program header table entry
+	int prgmHdrEntrNum;			// Number of entries in the program header table
+	char* prgmHdrType;			// Identifies the type of the segment
+	uint32_t flags64bit;		// 64 bit flag segment
+	uint32_t seg32off;			// 32-bit offset of the segment's first byte in the file image
+	uint64_t seg64off;			// 64-bit offset of the segment's first byte in the file image	
 };
 // All char* members should be dynamically allocated and later free()'d
 
