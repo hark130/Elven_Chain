@@ -2042,7 +2042,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	else if (program_struct->processorType == ELF_H_CLASS_64)
 	{
 		dataOffset += 8;
-		fprintf(stdout, "Offset dataOffset:\t%d\n", dataOffset);  // DEBUGGING
+		// fprintf(stdout, "Offset dataOffset:\t%d\n", dataOffset);  // DEBUGGING
 		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
 
 		if (tmpInt != ERROR_SUCCESS)
@@ -2082,7 +2082,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 			}
 			else
 			{
-				program_struct->seg32addr = tmpUint32;
+				program_struct->seg32virAddr = tmpUint32;
 			}
 		}
 	}
@@ -2090,7 +2090,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	else if (program_struct->processorType == ELF_H_CLASS_64)
 	{
 		dataOffset += 8;
-		fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
+		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
 		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
 
 		if (tmpInt != ERROR_SUCCESS)
@@ -2099,7 +2099,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		}
 		else
 		{
-			program_struct->seg64addr = tmpUint64;
+			program_struct->seg64virAddr = tmpUint64;
 		}
 	}
 	// ??-bit Processor
@@ -2279,12 +2279,12 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		// 32-bit Processor
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			fprintf(stream, "Seg Virt Add:\t0x0%" PRIx32 "\n", program_struct->seg32addr);
+			fprintf(stream, "Seg Virt Add:\t0x0%" PRIx32 "\n", program_struct->seg32virAddr);
 		}
 		// 64-bit Processor
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			fprintf(stream, "Seg Virt Addr:\t0x0%" PRIx64 "\n", program_struct->seg64addr);
+			fprintf(stream, "Seg Virt Addr:\t0x0%" PRIx64 "\n", program_struct->seg64virAddr);
 		}
 		// ??-bit Processor
 		else
@@ -2421,10 +2421,10 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			// Segment Virtual Address
 			// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
 			// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
-			(*old_struct)->seg32addr = 0;
-			(*old_struct)->seg32addr |= ZEROIZE_VALUE;
-			(*old_struct)->seg64addr = 0;
-			(*old_struct)->seg64addr |= ZEROIZE_VALUE;
+			(*old_struct)->seg32virAddr = 0;
+			(*old_struct)->seg32virAddr |= ZEROIZE_VALUE;
+			(*old_struct)->seg64virAddr = 0;
+			(*old_struct)->seg64virAddr |= ZEROIZE_VALUE;
 			
 			/* FREE THE STRUCT ITSELF */
 #ifdef DEBUGLEROAD
