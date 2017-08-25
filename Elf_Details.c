@@ -2041,7 +2041,8 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// 64-bit Processor
 	else if (program_struct->processorType == ELF_H_CLASS_64)
 	{
-		dataOffset += 4;
+		dataOffset += 8;
+		fprintf(stdout, "Offset dataOffset:\t%d\n", dataOffset);  // DEBUGGING
 		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
 
 		if (tmpInt != ERROR_SUCCESS)
@@ -2058,6 +2059,55 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	{
 		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
 	}
+
+	// 2.13. Segment Virtual Address
+	// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
+	// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
+	// 32-bit Processor
+	if (program_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
+			if (tmpInt != ERROR_SUCCESS)
+			{
+				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+			}
+			else
+			{
+				program_struct->seg32addr = tmpUint32;
+			}
+		}
+	}
+	// 64-bit Processor
+	else if (program_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+		fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->seg64addr = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Section Header Virtual Address not read!\n");
+	}
+
 
 	/* CLEAN UP */
 	// Nothing to clean up... yet
@@ -2204,7 +2254,7 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 			}
 		}
 
-		// Program Header Offset
+		// Segment Offset
 		// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
 		// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image	
 		// 32-bit Processor
@@ -2222,6 +2272,26 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		{
 			fprintf(stream, "Segment Offset:\t%s\n", notConfigured);
 		}
+
+		// Segment Virtual Address
+		// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
+		// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
+		// 32-bit Processor
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "Seg Virt Add:\t0x0%" PRIx32 "\n", program_struct->seg32addr);
+		}
+		// 64-bit Processor
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "Seg Virt Addr:\t0x0%" PRIx64 "\n", program_struct->seg64addr);
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "Seg Virt Addr:\t%s\n", notConfigured);
+		}
+
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -2348,6 +2418,13 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			(*old_struct)->seg32off |= ZEROIZE_VALUE;
 			(*old_struct)->seg64off = 0;
 			(*old_struct)->seg64off |= ZEROIZE_VALUE;
+			// Segment Virtual Address
+			// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
+			// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
+			(*old_struct)->seg32addr = 0;
+			(*old_struct)->seg32addr |= ZEROIZE_VALUE;
+			(*old_struct)->seg64addr = 0;
+			(*old_struct)->seg64addr |= ZEROIZE_VALUE;
 			
 			/* FREE THE STRUCT ITSELF */
 #ifdef DEBUGLEROAD
