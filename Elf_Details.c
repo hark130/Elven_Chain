@@ -1994,8 +1994,14 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// Read data from Program Contents into struct
 	if (program_struct->processorType == ELF_H_CLASS_64)  // This field only exists in 64 bit ELFs
 	{
-		// Increase the offset
-		dataOffset += 4;
+		if (program_struct->processorType == ELF_H_CLASS_32)  // DEBUGGING
+		{
+			fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr32);  // DEBUGGING
+		}
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr64);  // DEBUGGING
+		}		
 
 		// Read the data
 		tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
