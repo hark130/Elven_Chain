@@ -286,6 +286,8 @@ struct Prgrm_Hdr_Details
 	uint64_t segFileSize;		// Size in bytes of the segment in the file image
 	uint64_t segMemSize;		// Size in bytes of the segment in memory
 	uint32_t flags32bit;		// 32 bit flag segment
+	uint32_t align32bit;		// 32 bit alignment
+	uint64_t align64bit;		// 64 bit alignment
 };
 // All char* members should be dynamically allocated and later free()'d
 
