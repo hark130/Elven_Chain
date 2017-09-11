@@ -32,12 +32,12 @@ This extremely light repository is made of very fine ELF links. This project is 
         [X] Segment Type
         [X] 64-bit Flags
         [X] Offset of the Segment
-        [ ] Virtual Address of the Segment
-        [ ] Segment's Physical Address
-        [ ] Size of the Segment in File Image (bytes)
-        [ ] Size of the Segment in Memory (bytes)
-        [ ] 32-bit Flags
-        [ ] Alignment
+        [X] Virtual Address of the Segment
+        [X] Segment's Physical Address
+        [X] Size of the Segment in File Image (bytes)
+        [X] Size of the Segment in Memory (bytes)
+        [X] 32-bit Flags
+        [/] Alignment
     [ ] Implement Section Header
     [ ] Implement Program Data
     [ ] Implement Section Data
@@ -45,6 +45,7 @@ This extremely light repository is made of very fine ELF links. This project is 
         [ ] ELF Header actually adds up to ELF Header Size
         [ ] Index to Section Header Table with Section Names <= Section Header Table Number of Entries
         [ ] Section Header type SHT_GROUP should only appear in relocatable objects (e_type == ET_REL)
+        [ ] Alignment should be 0, 1, or a positive integral power of 2, with p_vaddr equating p_offset modulus p_align
     [ ] Test sectionsToPrint
     [ ] If a previous function discovers an "ORC_FILE", ensure print_program_header() isn't called
     [ ] Better way to convert a char value to int?
