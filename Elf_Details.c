@@ -2258,7 +2258,46 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 			fprintf(stderr, "Failed to read 32-bit flags field from the program header.  Error Code:\t%d\n", tmpInt);
 		}
 	}
+	
+	// 2.18. Alignment
+	// uint32_t align32bit;		// 32 bit alignment
+	// 32-bit Processor
+	if (program_struct->processorType == ELF_H_CLASS_32)
+	{
+		dataOffset += 4;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
 
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->align32bit = tmpUint64;
+		}
+	}
+	// uint64_t align64bit;		// 64 bit alignment
+	// 64-bit Processor
+	else if (program_struct->processorType == ELF_H_CLASS_64)
+	{
+		dataOffset += 8;
+		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
+
+		if (tmpInt != ERROR_SUCCESS)
+		{
+			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+		}
+		else
+		{
+			program_struct->align64bit = tmpUint64;
+		}
+	}
+	// ??-bit Processor
+	else
+	{
+		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Memory Size not read!\n");
+	}
+	
 	/* CLEAN UP */
 	// Nothing to clean up... yet
 
