@@ -85,3 +85,6 @@ This extremely light repository is made of very fine ELF links. This project is 
     clear; make; ./Elf_Scout.exe Elf_Scout.exe
 
 ```
+### Great Sources
+* https://github.com/michalmalik/linux-re-101 (ELF RE collection)
+* http://imgur.com/a/JEObT (Graphical ELF representation)
