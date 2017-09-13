@@ -93,3 +93,4 @@ This extremely light repository is made of very fine ELF links. This project is 
     * prgrmHdrEntrNum - number of "segments"
     * sectHdrSectNms - index into the section header that contains string table
     * NOTE: For a program header segment, only "type" PT_LOAD gets loaded into memory
+    * If PH LOAD segment filesz == vmemsize, there's no BSS
