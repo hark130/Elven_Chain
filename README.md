@@ -88,3 +88,8 @@ This extremely light repository is made of very fine ELF links. This project is 
 ### Great Sources
 * https://github.com/michalmalik/linux-re-101 (ELF RE collection)
 * http://imgur.com/a/JEObT (Graphical ELF representation)
+* https://www.youtube.com/watch?v=O_Y-eQJGg9g (Open SecurityTraining: Life of Binaries)
+    * ePnt32/64 - start of executable code
+    * prgrmHdrEntrNum - number of "segments"
+    * sectHdrSectNms - index into the section header that contains string table
+    * NOTE: For a program header segment, only "type" PT_LOAD gets loaded into memory
