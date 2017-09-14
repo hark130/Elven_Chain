@@ -2295,7 +2295,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// ??-bit Processor
 	else
 	{
-		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Memory Size not read!\n");
+		fprintf(stderr, "Struct Processor Type invalid so Program Header Alignment not read!\n");
 	}
 	
 	/* CLEAN UP */
@@ -2540,6 +2540,25 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 				}
 				fprintf(stream, "\n");
 			}
+		}
+
+		// Alignment
+		// uint32_t align32bit;		// 32 bit alignment
+		// uint64_t align64bit;		// 64 bit alignment
+		// 32-bit Processor
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			fprintf(stream, "Seg Phys Addr:\t0x%016" PRIx32 "\n", program_struct->seg32physAddr);
+		}
+		// 64-bit Processor
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			fprintf(stream, "Seg Phys Addr:\t0x%032" PRIx64 "\n", program_struct->seg64physAddr);
+		}
+		// ??-bit Processor
+		else
+		{
+			fprintf(stream, "Seg Phys Addr:\t%s\n", notConfigured);
 		}
 
 		// Section delineation
