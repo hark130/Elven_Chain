@@ -2768,14 +2768,14 @@ struct HarkleDict* init_program_header_type_dict(void)
 	//	parallel.
 	// FUN FACT: The arrays were originally created with an old list of ISAs and later updated.
 	char* arrayOfNames[] = { \
-		"Unused", \
-		"Loadable segment, described by p_filesz and p_memsz", \
-		"Specifies dynamic linking information", \
-		"Location and size of interpreter's null-terminated path name", \
-		"Location and size of auxiliary information", \
-		"Reserved", \
-		"Location and size of the program header table", \
-		"Thread-Local Storage template", \
+		"ELF_H_PT_NULL - Unused", \
+		"ELF_H_PT_LOAD - Loadable segment, described by p_filesz and p_memsz", \
+		"ELF_H_PT_DYNAMIC - Specifies dynamic linking information", \
+		"ELF_H_PT_INTERP - Location and size of interpreter's null-terminated path name", \
+		"ELF_H_PT_NOTE - Location and size of auxiliary information", \
+		"ELF_H_PT_SHLIB - Reserved", \
+		"ELF_H_PT_PHDR - Location and size of the program header table", \
+		"ELF_H_PT_TLS - Thread-Local Storage template", \
 	};
 	size_t numNames = sizeof(arrayOfNames)/sizeof(*arrayOfNames);
 	int arrayOfValues[] = { \
