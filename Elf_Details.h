@@ -434,6 +434,14 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct);
 //			Be sure to properly type cast the void* based on the processor type
 int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct);
 
+// Purpose:	Print human-readable details about an ELF file's Program Header Segments
+// Input:
+//			program_struct - A Prgrm_Hdr_Details struct that contains data about an ELF file
+//			stream - A stream to send the information to (e.g., stdout, A file)
+// Output:	None
+// Note:	This function will print the relevant data from program_struct->segmentArray into stream
+void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FILE* stream)
+
 // Purpose:	Build a HarkleDict of Program Header Type definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
