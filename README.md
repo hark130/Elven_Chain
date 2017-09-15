@@ -95,3 +95,31 @@ This extremely light repository is made of very fine ELF links. This project is 
     * sectHdrSectNms - index into the section header that contains string table
     * NOTE: For a program header segment, only "type" PT_LOAD gets loaded into memory
     * If PH LOAD segment filesz == vmemsize, there's no BSS
+### Current Compile Errors
+gcc -g -o Elf_Scout.exe Elf_Details.c Elven_Chain.c Harklehash.c
+Elf_Details.c: In function ‘kill_program_header’:
+Elf_Details.c:2439:32: warning: dereferencing ‘void *’ pointer
+      retVal += take_mem_back(&(*(((*old_struct)->segmentArray) + i)), 1, sizeof(void*));
+                                ^
+Elf_Details.c: In function ‘allocate_segment_array’:
+Elf_Details.c:2609:7: warning: dereferencing ‘void *’ pointer
+      (*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
+       ^
+Elf_Details.c:2609:105: error: invalid use of void expression
+      (*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
+                                                                                                         ^
+Elf_Details.c:2624:7: warning: dereferencing ‘void *’ pointer
+      (*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
+       ^
+Elf_Details.c:2624:105: error: invalid use of void expression
+      (*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
+                                                                                                         ^
+Elf_Details.c: In function ‘print_program_header_segments’:
+Elf_Details.c:2683:23: warning: format ‘%u’ expects a matching ‘unsigned int’ argument [-Wformat=]
+       fprintf(stream, "\tOffset:\t\t0x%" PRIx32 " (%" PRIu32 ")\n", segment32_ptr->segOffset);
+                       ^
+Elf_Details.c:2761:23: warning: format ‘%lu’ expects a matching ‘long unsigned int’ argument [-Wformat=]
+       fprintf(stream, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset);
+                       ^
+Makefile:7: recipe for target 'all' failed
+make: *** [all] Error 1
