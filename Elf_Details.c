@@ -1883,7 +1883,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
 	struct HarkleDict* prgrmHdrTypeDict = NULL;
 	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
-	segmentCount = 0;			// Keeps track of how many program header segments have been read
+	int segmentCount = 0;		// Keeps track of how many program header segments have been read
 	struct Prgrm_Hdr_Segment_32* segment32_ptr = NULL;
 	struct Prgrm_Hdr_Segment_64* segment64_ptr = NULL;
 	struct Prgrm_Hdr_Segment_32** segmentArray32_ptr = NULL;
@@ -1988,17 +1988,17 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 							// Allocate and copy human readable string into the struct
 							if (tmpNode)  // Found it
 							{
-								program_struct->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
-								if (program_struct->prgmHdrType)
+								segment32_ptr->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+								if (segment32_ptr->prgmHdrType)
 								{
-									if (strncpy(program_struct->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != program_struct->prgmHdrType)
+									if (strncpy(segment32_ptr->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != segment32_ptr->prgmHdrType)
 									{
 										fprintf(stderr, "Program Header Type string '%s' not copied into Program Header Struct!\n", tmpNode->name);
 									}
 									else
 									{
 #ifdef DEBUGLEROAD
-										fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", program_struct->prgmHdrType);
+										fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", segment32_ptr->prgmHdrType);
 #endif // DEBUGLEROAD
 									}
 								}
@@ -2152,17 +2152,17 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 							// Allocate and copy human readable string into the struct
 							if (tmpNode)  // Found it
 							{
-								program_struct->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
-								if (program_struct->prgmHdrType)
+								segment64_ptr->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+								if (segment64_ptr->prgmHdrType)
 								{
-									if (strncpy(program_struct->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != program_struct->prgmHdrType)
+									if (strncpy(segment64_ptr->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != segment64_ptr->prgmHdrType)
 									{
 										fprintf(stderr, "Program Header Type string '%s' not copied into Program Header Struct!\n", tmpNode->name);
 									}
 									else
 									{
 #ifdef DEBUGLEROAD
-										fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", program_struct->prgmHdrType);
+										fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", segment64_ptr->prgmHdrType);
 #endif // DEBUGLEROAD
 									}
 								}
@@ -2650,6 +2650,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 	struct Prgrm_Hdr_Segment_32** segmentArray32_ptr = NULL;
 	struct Prgrm_Hdr_Segment_64** segmentArray64_ptr = NULL;
 	int segmentNum = 0;
+	int retVal = ERROR_SUCCESS;
 
 	/* INPUT VALIDATION */
 	if (!program_struct || !stream)
