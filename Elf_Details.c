@@ -2784,12 +2784,12 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 	{
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			retVal = (struct Prgrm_Hdr_Segment_32**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_32*));
-			if (retVal)
+			program_struct->segmentArray = (struct Prgrm_Hdr_Segment_32**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_32*));
+			if (program_struct->segmentArray)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					(*(retVal + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
+					(*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
 				}
 			}
 			else
@@ -2799,12 +2799,12 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 		}
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			retVal = (struct Prgrm_Hdr_Segment_64**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_64*));
-			if (retVal)
+			program_struct->segmentArray = (struct Prgrm_Hdr_Segment_64**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_64*));
+			if (program_struct->segmentArray)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					(*(retVal + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
+					(*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
 				}
 			}
 			else
