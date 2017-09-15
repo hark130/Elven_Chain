@@ -2406,164 +2406,8 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 		// Number of Program Header Entries
 		fprintf(stream, "# PH Entries:\t%d\n", program_struct->prgmHdrEntrNum);
 
-		// Program Header Type
-		if (program_struct->prgmHdrType)
-		{
-			fprintf(stream, "PH Type:\t%s\n", program_struct->prgmHdrType);
-		}
-		else
-		{
-			fprintf(stream, "PH Type:\t%s\n", notConfigured);
-		}
-
-		// 64-bit Flags
-		// int flags64bit;  // 64 bit flag segment
-		if (program_struct->processorType == ELF_H_CLASS_64)
-		{
-			fprintf(stream, "64-bit Flags:\t");
-			// Binary printer
-			// Printing flags so endianness shouldn't matter
-			print_binary(stream, &(program_struct->flags64bit), sizeof(program_struct->flags64bit), TRUE);
-			fprintf(stream, "\n");
-			// If at least one known flag is set, tab over
-			if (!(program_struct->flags64bit && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
-			{
-				fprintf(stream, "\t\t\t");
-				// Read
-				if ((program_struct->flags64bit && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
-				{
-					fprintf(stream, "Read ");
-				}
-				// Write
-				if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
-				{
-					fprintf(stream, "Write ");
-				}
-				// Execute
-				if ((program_struct->flags64bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
-				{
-					fprintf(stream, "Execute ");
-				}
-				fprintf(stream, "\n");
-			}
-		}
-
-		// Segment Offset
-		// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
-		// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image	
-		// 32-bit Processor
-		if (program_struct->processorType == ELF_H_CLASS_32)
-		{
-			fprintf(stream, "Segment Offset:\t0x%" PRIx32 " (%" PRIu32 ")\n", program_struct->seg32off, program_struct->seg32off);
-		}
-		// 64-bit Processor
-		else if (program_struct->processorType == ELF_H_CLASS_64)
-		{
-			fprintf(stream, "Segment Offset:\t0x%" PRIx64 " (%" PRIu64 ")\n", program_struct->seg64off, program_struct->seg64off);
-		}
-		// ??-bit Processor
-		else
-		{
-			fprintf(stream, "Segment Offset:\t%s\n", notConfigured);
-		}
-
-		// Segment Virtual Address
-		// uint32_t seg32virAddr;  // 32-bit Virtual address of the segment in memory
-		// uint64_t seg64virAddr;  // 64-bit Virtual address of the segment in memory
-		// 32-bit Processor
-		if (program_struct->processorType == ELF_H_CLASS_32)
-		{
-			fprintf(stream, "Seg Virt Addr:\t0x%016" PRIx32 "\n", program_struct->seg32virAddr);
-		}
-		// 64-bit Processor
-		else if (program_struct->processorType == ELF_H_CLASS_64)
-		{
-			fprintf(stream, "Seg Virt Addr:\t0x%032" PRIx64 "\n", program_struct->seg64virAddr);
-		}
-		// ??-bit Processor
-		else
-		{
-			fprintf(stream, "Seg Virt Addr:\t%s\n", notConfigured);
-		}
-
-		// Segment Physical Address
-		// uint32_t seg32physAddr;		// 32-bit Physical address of the segment in memory
-		// uint64_t seg64physAddr;		// 64-bit Physical address of the segment in memory
-		// 32-bit Processor
-		if (program_struct->processorType == ELF_H_CLASS_32)
-		{
-			fprintf(stream, "Seg Phys Addr:\t0x%016" PRIx32 "\n", program_struct->seg32physAddr);
-		}
-		// 64-bit Processor
-		else if (program_struct->processorType == ELF_H_CLASS_64)
-		{
-			fprintf(stream, "Seg Phys Addr:\t0x%032" PRIx64 "\n", program_struct->seg64physAddr);
-		}
-		// ??-bit Processor
-		else
-		{
-			fprintf(stream, "Seg Phys Addr:\t%s\n", notConfigured);
-		}
-
-		// Segment Size
-		// uint64_t segFileSize;  // Size in bytes of the segment in the file image
-		// 32-bit Processor
-		fprintf(stream, "Seg File Size:\t%" PRIu64 " bytes\n", program_struct->segFileSize);
-
-		// Segment Size in Memory
-		// uint64_t segMemSize;  // Size in bytes of the segment in memory
-		fprintf(stream, "Seg Mem Size:\t%" PRIu64 " bytes\n", program_struct->segMemSize);
-
-		// 32-bit Flag Field
-		// uint32_t flags32bit;  // 32 bit flag segment
-		if (program_struct->processorType == ELF_H_CLASS_32)
-		{
-			fprintf(stream, "32-bit Flags:\t");
-			// Binary printer
-			// Printing flags so endianness shouldn't matter
-			print_binary(stream, &(program_struct->flags32bit), sizeof(program_struct->flags32bit), TRUE);
-			fprintf(stream, "\n");
-			// If at least one known flag is set, tab over
-			if (!(program_struct->flags32bit && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
-			{
-				fprintf(stream, "\t\t\t");
-				// Read
-				if ((program_struct->flags32bit && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
-				{
-					fprintf(stream, "Read ");
-				}
-				// Write
-				if ((program_struct->flags32bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
-				{
-					fprintf(stream, "Write ");
-				}
-				// Execute
-				if ((program_struct->flags32bit && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
-				{
-					fprintf(stream, "Execute ");
-				}
-				fprintf(stream, "\n");
-			}
-		}
-
-		// Alignment
-		// uint32_t align32bit;		// 32 bit alignment
-		// uint64_t align64bit;		// 64 bit alignment
-		// 32-bit Processor
-		if (program_struct->processorType == ELF_H_CLASS_32)
-		{
-			fprintf(stream, "Alignment:\t%" PRIx32 "\n", program_struct->align32bit);
-		}
-		// 64-bit Processor
-		else if (program_struct->processorType == ELF_H_CLASS_64)
-		{
-			fprintf(stream, "Alignment:\t%" PRIx64 "\n", program_struct->align64bit);
-		}
-		// ??-bit Processor
-		else
-		{
-			fprintf(stream, "Alignment:\t%s\n", notConfigured);
-		}
+		// Print the Program Header Segments
+		print_program_header_segments(program_struct, stream);
 
 		// Section delineation
 		fprintf(stream, "\n\n");
@@ -2580,12 +2424,40 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 {
 	int retVal = ERROR_SUCCESS;
+	int i = 0;  // Iterating variable
 
 	if (old_struct)
 	{
 		if (*old_struct)
 		{
 			/* ZEROIZE AND FREE (as appropriate) STRUCT MEMBERS */
+			// void* segmentArray;  // Array of struct* (Prgrm_Hdr_Segment_32 or Prgrm_Hdr_Segment_64)
+			if ((*old_struct)->segmentArray)
+			{
+				for (i = 0; i < (*old_struct)->prgmHdrEntrNum; i++)
+				{
+					retVal += take_mem_back(&(*(((*old_struct)->segmentArray) + i)), 1, sizeof(void*));
+					if (retVal)
+					{
+						PERROR(errno);
+						fprintf(stderr, "take_mem_back() returned %d on struct->segmentStruct free!\n", retVal);
+						retVal = ERROR_SUCCESS;
+					}
+				}
+				retVal += take_mem_back(&((*old_struct)->segmentArray), 1, sizeof(void*));
+				if (retVal)
+				{
+					PERROR(errno);
+					fprintf(stderr, "take_mem_back() returned %d on struct->segmentArray free!\n", retVal);
+					retVal = ERROR_SUCCESS;
+				}
+				else
+				{
+#ifdef DEBUGLEROAD
+					fprintf(stdout, "take_mem_back() successfully freed struct->segmentArray.\n");
+#endif // DEBUGLEROAD
+				}
+			}
 			// char* fileName;		// Absolute or relative path
 			if ((*old_struct)->fileName)
 			{
@@ -2664,66 +2536,6 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			// int prgmHdrEntrNum;	// Number of entries in the program header table
 			(*old_struct)->prgmHdrEntrNum = 0;
 			(*old_struct)->prgmHdrEntrNum |= ZEROIZE_VALUE;
-			// char* prgmHdrType; // Identifies the type of the segment
-			if ((*old_struct)->prgmHdrType)
-			{
-				retVal += take_mem_back((void**)&((*old_struct)->prgmHdrType), strlen((*old_struct)->prgmHdrType), sizeof(char));
-				if (retVal)
-				{
-					PERROR(errno);
-					fprintf(stderr, "take_mem_back() returned %d on struct->prgmHdrType free!\n", retVal);
-					retVal = ERROR_SUCCESS;
-				}
-				else
-				{
-#ifdef DEBUGLEROAD
-					fprintf(stdout, "take_mem_back() successfully freed struct->prgmHdrType.\n");
-#endif // DEBUGLEROAD
-				}
-			}
-			// 64-bit Flag Field
-			// uint32_t flags64bit;  // 64 bit flag segment
-			(*old_struct)->flags64bit = 0;
-			(*old_struct)->flags64bit |= ZEROIZE_VALUE;
-			// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
-			// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image
-			(*old_struct)->seg32off = 0;
-			(*old_struct)->seg32off |= ZEROIZE_VALUE;
-			(*old_struct)->seg64off = 0;
-			(*old_struct)->seg64off |= ZEROIZE_VALUE;
-			// Segment Virtual Address
-			// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
-			// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
-			(*old_struct)->seg32virAddr = 0;
-			(*old_struct)->seg32virAddr |= ZEROIZE_VALUE;
-			(*old_struct)->seg64virAddr = 0;
-			(*old_struct)->seg64virAddr |= ZEROIZE_VALUE;
-			// Segment Physical Address
-			// uint32_t seg32physAddr;		// 32-bit Physical address of the segment in memory
-			// uint64_t seg64physAddr;		// 64-bit Physical address of the segment in memory
-			(*old_struct)->seg32physAddr = 0;
-			(*old_struct)->seg32physAddr |= ZEROIZE_VALUE;
-			(*old_struct)->seg64physAddr = 0;
-			(*old_struct)->seg64physAddr |= ZEROIZE_VALUE;
-			// Segment File Size
-			// uint64_t segFileSize;  // Size in bytes of the segment in the file image
-			(*old_struct)->segFileSize = 0;
-			(*old_struct)->segFileSize |= ZEROIZE_VALUE;
-			// Segment Size in Memory
-			// uint64_t segMemSize;  // Size in bytes of the segment in memory
-			(*old_struct)->segMemSize = 0;
-			(*old_struct)->segMemSize |= ZEROIZE_VALUE;
-			// 32-bit Flag Field
-			// uint32_t flags32bit;  // 32 bit flag segment
-			(*old_struct)->flags32bit = 0;
-			(*old_struct)->flags32bit |= ZEROIZE_VALUE;
-			// uint32_t align32bit;		// 32 bit alignment
-			(*old_struct)->align32bit = 0;
-			(*old_struct)->align32bit |= ZEROIZE_VALUE;
-			// uint64_t align64bit;		// 64 bit alignment
-			(*old_struct)->align32bit = 0;
-			(*old_struct)->align64bit |= ZEROIZE_VALUE;			
-
 			
 			/* FREE THE STRUCT ITSELF */
 #ifdef DEBUGLEROAD
@@ -2786,6 +2598,7 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 	}
 	else if (program_struct->prgmHdrEntrNum > 0)
 	{
+		/* ALLOCATE MEMORY */
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
 			program_struct->segmentArray = (struct Prgrm_Hdr_Segment_32**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_32*));
@@ -2822,6 +2635,147 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 	return retVal;
 }
 
+
+// Purpose:	Print human-readable details about an ELF file's Program Header Segments
+// Input:
+//			program_struct - A Prgrm_Hdr_Details struct that contains data about an ELF file
+//			stream - A stream to send the information to (e.g., stdout, A file)
+// Output:	None
+// Note:	This function will print the relevant data from program_struct->segmentArray into stream
+void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FILE* stream)
+{
+	/* LOCAL VARIABLES */
+	struct Prgrm_Hdr_Segment_32* segment32_ptr = NULL;
+	struct Prgrm_Hdr_Segment_64* segment64_ptr = NULL;
+	struct Prgrm_Hdr_Segment_32** segmentArray32_ptr = NULL;
+	struct Prgrm_Hdr_Segment_64** segmentArray64_ptr = NULL;
+	int segmentNum = 0;
+
+	/* INPUT VALIDATION */
+	if (!program_struct || !stream)
+	{
+		retVal = ERROR_NULL_PTR;
+	}
+	else if (program_struct->processorType != ELF_H_CLASS_32 && program_struct->processorType != ELF_H_CLASS_64)
+	{
+		retVal = ERROR_BAD_ARG;  // Invalid processor type
+	}
+	else if (program_struct->prgmHdrEntrNum < 0)
+	{
+		retVal = ERROR_BAD_ARG;  // Invalid processor type
+	}
+	else if (program_struct->prgmHdrEntrNum > 0)
+	{
+		// 32-bit Program Header Segments
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray;
+			if (segmentArray32_ptr)
+			{
+				for (segmentNum = 0; segmentNum < program_struct->prgmHdrEntrNum; segmentNum++)
+				{
+					segment32_ptr = (struct Prgrm_Hdr_Segment_32*)(*(segmentArray32_ptr + segmentNum));
+					if (segment32_ptr)
+					{
+						fprintf(stream, "\nSegment #%d\n", segmentNum + 1);
+						fprintf(stream, "\tType:\t\t%s\n", segment32_ptr->prgmHdrType);
+						fprintf(stream, "\tOffset:\t\t0x%" PRIx32 " (%" PRIu32 ")\n", segment32_ptr->segOffset);
+						fprintf(stream, "\tVirtual Addr:\t0x016%" PRIx32 "\n", segment32_ptr->segVirtualAddr);
+						fprintf(stream, "\tPhysical Addr:\t0x016%" PRIx32 "\n", segment32_ptr->segPhysicalAddr);
+						fprintf(stream, "\tFile Size:\t%" PRIu32 "\n", segment32_ptr->segFileSize);
+						fprintf(stream, "\tMem Size:\t%" PRIu32 "\n", segment32_ptr->segMemSize);
+						/* PRINT THE FLAGS */
+						fprintf(stream, "\tFlags:\t\t");
+						// Binary printer
+						// Printing flags so endianness shouldn't matter
+						print_binary(stream, &(segment32_ptr->flags), sizeof(segment32_ptr->flags), TRUE);
+						fprintf(stream, "\n");
+						// If at least one known flag is set, tab over
+						if (!(segment32_ptr->flags && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
+						{
+							fprintf(stream, "\t\t\t");
+							// Read
+							if ((segment32_ptr->flags && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
+							{
+								fprintf(stream, "Read ");
+							}
+							// Write
+							if ((segment32_ptr->flags && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+							{
+								fprintf(stream, "Write ");
+							}
+							// Execute
+							if ((segment32_ptr->flags && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+							{
+								fprintf(stream, "Execute ");
+							}
+							fprintf(stream, "\n");
+						}
+						/* DONE PRINTING FLAGS */
+						fprintf(stream, "\tAlignment:\t%" PRIu32 "\n", segment32_ptr->alignment);
+					}
+				}
+			}			
+		}
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray;
+			if (segmentArray64_ptr)
+			{
+				for (segmentNum = 0; segmentNum < program_struct->prgmHdrEntrNum; segmentNum++)
+				{
+					segment64_ptr = (struct Prgrm_Hdr_Segment_64*)(*(segmentArray64_ptr + segmentNum));
+					if (segment64_ptr)
+					{
+						fprintf(stream, "\nSegment #%d\n", segmentNum + 1);
+						fprintf(stream, "\tType:\t\t%s\n", segment64_ptr->prgmHdrType);
+						/* PRINT THE FLAGS */
+						fprintf(stream, "\tFlags:\t\t");
+						// Binary printer
+						// Printing flags so endianness shouldn't matter
+						print_binary(stream, &(segment64_ptr->flags), sizeof(segment64_ptr->flags), TRUE);
+						fprintf(stream, "\n");
+						// If at least one known flag is set, tab over
+						if (!(segment64_ptr->flags && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
+						{
+							fprintf(stream, "\t\t\t");
+							// Read
+							if ((segment64_ptr->flags && ELF_H_64_FLAG_R) == ELF_H_64_FLAG_R)
+							{
+								fprintf(stream, "Read ");
+							}
+							// Write
+							if ((segment64_ptr->flags && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+							{
+								fprintf(stream, "Write ");
+							}
+							// Execute
+							if ((segment64_ptr->flags && ELF_H_64_FLAG_W) == ELF_H_64_FLAG_W)
+							{
+								fprintf(stream, "Execute ");
+							}
+							fprintf(stream, "\n");
+						}
+						/* DONE PRINTING FLAGS */
+						fprintf(stream, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset);
+						fprintf(stream, "\tVirtual Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segVirtualAddr);
+						fprintf(stream, "\tPhysical Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
+						fprintf(stream, "\tFile Size:\t%" PRIu64 "\n", segment64_ptr->segFileSize);
+						fprintf(stream, "\tMem Size:\t%" PRIu64 "\n", segment64_ptr->segMemSize);
+						fprintf(stream, "\tAlignment:\t%" PRIu64 "\n", segment64_ptr->alignment);
+					}
+				}
+			}	
+		}
+		else
+		{
+			// How did we get here?
+			fprintf(stream, "print_program_header_segments: Unable to determine valid processor type.\n");
+		}
+	}
+
+	return;
+}
 
 
 // Purpose:	Build a HarkleDict of Program Header Type definitions
