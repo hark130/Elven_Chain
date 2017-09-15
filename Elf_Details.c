@@ -1671,7 +1671,7 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 	size_t elfSize = 0;					// Size of the file in bytes
 	char* elfGuts = NULL;				// Holds contents of binary file
 	char* tmpPtr = NULL;				// Holds return value from strstr()/strncpy()
-	int tmpRetVal = 0;					// Holds return value from parse_program_header()
+	int tmpRetVal = 0;					// Holds return value from parse_program_header()... and others
 	
     /* INPUT VALIDATION */
 	if (!elvenFilename)
@@ -1832,6 +1832,16 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 	// Copy ELF Header prgmHdrEntrNum into the Program Header prgmHdrEntrNum
 	retVal->prgmHdrEntrNum = elven_file->prgmHdrEntrNum;
 
+	/* ALLOCATE PROGRAM HEADER SEGMENT ARRAY */
+#ifdef DEBUGLEROAD
+	puts("Entering allocate_segment_array()");  // DEBUGGING
+#endif // DEBUGLEROAD
+	tmpRetVal = allocate_segment_array(retVal);
+	if (tmpRetVal != ERROR_SUCCESS)
+	{
+		fprintf(stderr, "ERROR: allocate_segment_array() returned error number %d\n", tmpRetVal);
+	}
+
 	/* PARSE PROGRAM HEADER INTO STRUCT */
 	// Initialize Remaining Struct Members
 #ifdef DEBUGLEROAD
@@ -1840,7 +1850,7 @@ struct Prgrm_Hdr_Details* read_program_header(char* elvenFilename, struct Elf_De
 	tmpRetVal = parse_program_header(retVal, elfGuts, elven_file);
 	if (tmpRetVal != ERROR_SUCCESS)
 	{
-		fprintf(stderr, "ERROR: parse_program_header() encountered error number %d\n", tmpRetVal);
+		fprintf(stderr, "ERROR: parse_program_header() returned error number %d\n", tmpRetVal);
 	}
 
 	/* FINAL CLEAN UP */
@@ -1865,6 +1875,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	int retVal = ERROR_SUCCESS;	// parse_elf() return value
 	char* tmpPtr = NULL;		// Holds return values from string functions
 	int tmpInt = 0;				// Holds various temporary return values
+	int i = 0;					// Iterating variable
 	unsigned int tmpUint = 0;	// Holds calculated values from convert_char_to_int()
 	uint32_t tmpUint32 = 0;		// Holds memory addresses on a 32-bit system
 	uint64_t tmpUint64 = 0;		// Holds memory addresses on a 64-bit system
@@ -1872,6 +1883,11 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// char* tmpBuff = NULL;		// Temporary buffer used to assist in slicing up elven_contents
 	struct HarkleDict* prgrmHdrTypeDict = NULL;
 	struct HarkleDict* tmpNode = NULL;	// Holds return values from lookup_* functions
+	segmentCount = 0;			// Keeps track of how many program header segments have been read
+	struct Prgrm_Hdr_Segment_32* segment32_ptr = NULL;
+	struct Prgrm_Hdr_Segment_64* segment64_ptr = NULL;
+	struct Prgrm_Hdr_Segment_32** segmentArray32_ptr = NULL;
+	struct Prgrm_Hdr_Segment_64** segmentArray64_ptr = NULL;
 
 	/* INPUT VALIDATION */
 	// Check for NULL pointers
@@ -1932,372 +1948,360 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 	// 2.7. pHdr64 should already be initialized by the calling function
 	// 2.8. prgmHdrSize
 	// 2.9. prgmHdrEntrNum
-	// 2.10. int prgmHdrType; // Identifies the type of the segment
+	// 2.10. Program Header Segments
 	// Prepare Harkledict of Program Header Types
 	prgrmHdrTypeDict = init_program_header_type_dict();
 #ifdef DEBUGLEROAD
 	puts("parse_program_header() made init_program_header_type_dict()");  // DEBUGGING
 #endif // DEBUGLEROAD
-	// Read data from Program Contents
-	tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
-	// Match data value to human readable string
-	if (tmpInt == ERROR_SUCCESS)
+
+	// Iterate through the array of segment structs
+	while (segmentCount < program_struct->prgmHdrEntrNum)
 	{
-		if (prgrmHdrTypeDict)
+		// 2.10.A. 32 bit
+		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
-		}
-		else
-		{
-			fprintf(stderr, "init_program_header_type_dict() failed to build a HarkleDict.\n");
-			tmpNode = NULL;
-		}
-	}
-	else 
-	{
-		fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
-		tmpNode = NULL;
-	}
-	// Allocate and copy human readable string into the struct
-	if (tmpNode)  // Found it
-	{
-		program_struct->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
-		if (program_struct->prgmHdrType)
-		{
-			if (strncpy(program_struct->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != program_struct->prgmHdrType)
+			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray;
+			if (segmentArray32_ptr)
 			{
-				fprintf(stderr, "Program Header Type string '%s' not copied into Program Header Struct!\n", tmpNode->name);
+				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
+				{
+					segment32_ptr = (struct Prgrm_Hdr_Segment_32*)(*(segmentArray32_ptr + i));
+					if (segment32_ptr)
+					{
+						// 2.10.A.1. uint32_t p_type;  // Segment type as number
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->p_type), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->p_type = tmpUint;
+							// 2.10.A.2. char* prgmHdrType;  // Identifies the type of the segment
+							if (prgrmHdrTypeDict)
+							{
+								tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
+							}
+							else
+							{
+								fprintf(stderr, "init_program_header_type_dict() failed to build a HarkleDict.\n");
+								tmpNode = NULL;
+							}
+
+							// Allocate and copy human readable string into the struct
+							if (tmpNode)  // Found it
+							{
+								program_struct->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+								if (program_struct->prgmHdrType)
+								{
+									if (strncpy(program_struct->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != program_struct->prgmHdrType)
+									{
+										fprintf(stderr, "Program Header Type string '%s' not copied into Program Header Struct!\n", tmpNode->name);
+									}
+									else
+									{
+#ifdef DEBUGLEROAD
+										fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", program_struct->prgmHdrType);
+#endif // DEBUGLEROAD
+									}
+								}
+								else
+								{
+									fprintf(stderr, "Error allocating memory for Program Header Struct Type!\n");
+								}
+							}
+							else
+							{
+								fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint);
+							}
+						}
+						else 
+						{
+							fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
+							tmpNode = NULL;
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->p_type);
+						
+						// 2.10.A.3. uint32_t segOffset;  // Offset of the segment's first byte in the file image
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->segOffset), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->segOffset = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->segOffset);
+
+						// 2.10.A.4. uint32_t segVirtualAddr;  // Virtual address of the segment in memory
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->segVirtualAddr), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->segVirtualAddr = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->segVirtualAddr);
+
+						// 2.10.A.5. uint32_t segPhysicalAddr;  // Physical address of the segment in memory
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->segPhysicalAddr), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->segPhysicalAddr = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->segPhysicalAddr);
+
+						// 2.10.A.6. uint32_t segFileSize;  // Size in bytes of the segment in the file image
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->segFileSize), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->segFileSize = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->segFileSize);
+
+						// 2.10.A.7. uint32_t segMemSize;  // Size in bytes of the segment in memory
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->segMemSize), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->segMemSize = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->segMemSize);
+
+						// 2.10.A.8. uint32_t flags;  // Segment flags
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->flags), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->flags = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->flags);
+
+						// 2.10.A.9. uint32_t alignment;  // Alignment
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment32_ptr->alignment), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment32_ptr->alignment = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment32_ptr->alignment);
+					}
+					else
+					{
+						fprintf(stderr, "The segment array of the Program Header struct contains a NULL Pointer.\n");
+					}
+				}
 			}
 			else
 			{
-#ifdef DEBUGLEROAD
-				fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", program_struct->prgmHdrType);
-#endif // DEBUGLEROAD
+				fprintf(stderr, "Program Header struct does not have a segment array.\n");
 			}
 		}
+		// 2.10.B. 64 bit
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray;
+			if (segmentArray64_ptr)
+			{
+				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
+				{
+					segment64_ptr = (struct Prgrm_Hdr_Segment_64*)(*(segmentArray64_ptr + i));
+					if (segment64_ptr)
+					{
+						// 2.10.A.1. uint32_t p_type;  // Segment type as number
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->p_type), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->p_type = tmpUint;
+							// 2.10.A.2. char* prgmHdrType;  // Identifies the type of the segment
+							if (prgrmHdrTypeDict)
+							{
+								tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
+							}
+							else
+							{
+								fprintf(stderr, "init_program_header_type_dict() failed to build a HarkleDict.\n");
+								tmpNode = NULL;
+							}
+
+							// Allocate and copy human readable string into the struct
+							if (tmpNode)  // Found it
+							{
+								program_struct->prgmHdrType = gimme_mem(strlen(tmpNode->name) + 1, sizeof(char));
+								if (program_struct->prgmHdrType)
+								{
+									if (strncpy(program_struct->prgmHdrType, tmpNode->name, strlen(tmpNode->name)) != program_struct->prgmHdrType)
+									{
+										fprintf(stderr, "Program Header Type string '%s' not copied into Program Header Struct!\n", tmpNode->name);
+									}
+									else
+									{
+#ifdef DEBUGLEROAD
+										fprintf(stdout, "Successfully copied '%s' into Program Header Struct!\n", program_struct->prgmHdrType);
+#endif // DEBUGLEROAD
+									}
+								}
+								else
+								{
+									fprintf(stderr, "Error allocating memory for Program Header Struct Type!\n");
+								}
+							}
+							else
+							{
+								fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint);
+							}
+						}
+						else 
+						{
+							fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
+							tmpNode = NULL;
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->p_type);
+						
+						// 2.10.A.3. uint32_t segOffset;  // Offset of the segment's first byte in the file image
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segOffset), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->segOffset = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->segOffset);
+
+						// 2.10.A.4. uint32_t segVirtualAddr;  // Virtual address of the segment in memory
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segVirtualAddr), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->segVirtualAddr = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->segVirtualAddr);
+
+						// 2.10.A.5. uint32_t segPhysicalAddr;  // Physical address of the segment in memory
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segPhysicalAddr), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->segPhysicalAddr = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->segPhysicalAddr);
+
+						// 2.10.A.6. uint32_t segFileSize;  // Size in bytes of the segment in the file image
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segFileSize), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->segFileSize = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->segFileSize);
+
+						// 2.10.A.7. uint32_t segMemSize;  // Size in bytes of the segment in memory
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segMemSize), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->segMemSize = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->segMemSize);
+
+						// 2.10.A.8. uint32_t flags;  // Segment flags
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->flags), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->flags = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->flags);
+						
+						// 2.10.A.9. uint32_t alignment;  // Alignment
+						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->alignment), program_struct->bigEndian, &tmpUint);
+						if (tmpInt == ERROR_SUCCESS)
+						{
+							segment64_ptr->alignment = tmpUint;
+						}
+						else
+						{
+							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+						}
+						// Advance to next struct member
+						dataOffset += sizeof(segment64_ptr->alignment);
+					}
+					else
+					{
+						fprintf(stderr, "The segment array of the Program Header struct contains a NULL Pointer.\n");
+					}
+				}
+			}
+			else
+			{
+				fprintf(stderr, "Program Header struct does not have a segment array.\n");
+			}
+		}
+		// How did we get here?!
 		else
 		{
-			fprintf(stderr, "Error allocating memory for Program Header Struct Type!\n");
+			fprintf(stderr, "Program Header struct hasn't been configured with a processor type.\n");
 		}
+
+		// 2.10.C. Finished reading a program header segment
+		segmentCount++;
 	}
-	else
-	{
-		fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint);
-	}
+
 	// Zeroize/Free/NULLify prgrmHdrTypeDict
 	if (prgrmHdrTypeDict)
 	{
 		tmpInt = destroy_a_list(&prgrmHdrTypeDict);
 	}
 
-	// 2.11. int flags64bit;  // 64 bit flag segment
-	// Read data from Program Contents into struct
-	if (program_struct->processorType == ELF_H_CLASS_64)  // This field only exists in 64 bit ELFs
-	{
-		// if (program_struct->processorType == ELF_H_CLASS_32)  // DEBUGGING
-		// {
-		// 	fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr32);  // DEBUGGING
-		// }
-		// else if (program_struct->processorType == ELF_H_CLASS_64)
-		// {
-		// 	fprintf(stdout, "64-bit Flags Relative Offset:\t%d\n", dataOffset - (unsigned int)program_struct->pHdr64);  // DEBUGGING
-		// }		
-
-		// Read the data
-		tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
-
-		// Store the data in the struct
-		if (tmpInt == ERROR_SUCCESS)
-		{
-			program_struct->flags64bit = (uint32_t)tmpUint;
-		}
-		else 
-		{
-			fprintf(stderr, "Failed to read 64-bit flags field from the program header.  Error Code:\t%d\n", tmpInt);
-		}
-	}
-
-	// 2.12. Segment Offset
-	// uint32_t seg32off;  // 32-bit offset of the segment's first byte in the file image
-	// uint64_t seg64off;  // 64-bit offset of the segment's first byte in the file image
-	// 32-bit Processor
-	if (program_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
-			if (tmpInt != ERROR_SUCCESS)
-			{
-				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-			}
-			else
-			{
-				program_struct->seg32off = tmpUint32;
-			}
-		}
-	}
-	// 64-bit Processor
-	else if (program_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		// fprintf(stdout, "Offset dataOffset:\t%d\n", dataOffset);  // DEBUGGING
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->seg64off = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Section Header Offset not read!\n");
-	}
-
-	// 2.13. Segment Virtual Address
-	// uint32_t seg32addr;  // 32-bit Virtual address of the segment in memory
-	// uint64_t seg64addr;  // 64-bit Virtual address of the segment in memory
-	// 32-bit Processor
-	if (program_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
-			if (tmpInt != ERROR_SUCCESS)
-			{
-				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-			}
-			else
-			{
-				program_struct->seg32virAddr = tmpUint32;
-			}
-		}
-	}
-	// 64-bit Processor
-	else if (program_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->seg64virAddr = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Virtual Address not read!\n");
-	}
-
-	// 2.14. Segment Physical Address
-	// uint32_t seg32physAddr;		// 32-bit Physical address of the segment in memory
-	// uint64_t seg64physAddr;		// 64-bit Physical address of the segment in memory
-	// 32-bit Processor
-	if (program_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			tmpInt = convert_uint64_to_uint32(tmpUint64, &tmpUint32);
-			if (tmpInt != ERROR_SUCCESS)
-			{
-				fprintf(stderr, "Failed to convert uint64_t to a uint32_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-			}
-			else
-			{
-				program_struct->seg32physAddr = tmpUint32;
-			}
-		}
-	}
-	// 64-bit Processor
-	else if (program_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->seg64physAddr = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Physical Address not read!\n");
-	}
-
-	// 2.15. Segment File Size
-	// uint64_t segFileSize;  // Size in bytes of the segment in the file image
-	// 32-bit Processor
-	if (program_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->segFileSize = tmpUint64;
-		}
-	}
-	// 64-bit Processor
-	else if (program_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->segFileSize = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment File Size not read!\n");
-	}
-
-	// 2.16. Segment Size in Memory
-	// uint64_t segMemSize;  // Size in bytes of the segment in memory	
-	// 32-bit Processor
-	if (program_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->segMemSize = tmpUint64;
-		}
-	}
-	// 64-bit Processor
-	else if (program_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		// fprintf(stdout, "Address dataOffset:\t%d\n", dataOffset);  // DEBUGGING
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->segMemSize = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Program Header Segment Memory Size not read!\n");
-	}
-
-	// 2.17. 32-bit Flag Field
-	// uint32_t flags32bit;  // 32 bit flag segment
-	// Read data from Program Contents into struct
-	if (program_struct->processorType == ELF_H_CLASS_32)  // This field only exists in 64 bit ELFs
-	{
-		dataOffset += 4;
-		// Read the data
-		tmpInt = convert_char_to_int(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint);
-
-		// Store the data in the struct
-		if (tmpInt == ERROR_SUCCESS)
-		{
-			program_struct->flags32bit = (uint32_t)tmpUint;
-		}
-		else 
-		{
-			fprintf(stderr, "Failed to read 32-bit flags field from the program header.  Error Code:\t%d\n", tmpInt);
-		}
-	}
-	
-	// 2.18. Alignment
-	// uint32_t align32bit;		// 32 bit alignment
-	// 32-bit Processor
-	if (program_struct->processorType == ELF_H_CLASS_32)
-	{
-		dataOffset += 4;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 4, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->align32bit = tmpUint64;
-		}
-	}
-	// uint64_t align64bit;		// 64 bit alignment
-	// 64-bit Processor
-	else if (program_struct->processorType == ELF_H_CLASS_64)
-	{
-		dataOffset += 8;
-		tmpInt = convert_char_to_uint64(program_contents, dataOffset, 8, program_struct->bigEndian, &tmpUint64);
-
-		if (tmpInt != ERROR_SUCCESS)
-		{
-			fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
-		}
-		else
-		{
-			program_struct->align64bit = tmpUint64;
-		}
-	}
-	// ??-bit Processor
-	else
-	{
-		fprintf(stderr, "Struct Processor Type invalid so Program Header Alignment not read!\n");
-	}
-	
 	/* CLEAN UP */
 	// Nothing to clean up... yet
 
