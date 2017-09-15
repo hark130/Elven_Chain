@@ -2753,6 +2753,73 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 }
 
 
+// Purpose:	Allocate memory for an array of Program Header Segment struct pointers and assign the array pointer
+// Input:	program_struct - A Prgrm_Hdr_Details struct pointer that contains data about an ELF file
+// Output:	ERROR_* as specified in Elf_Details.h
+// Note:
+//			program_struct->segmentArray will receive a pointer to an array of struct pointers
+//			The struct type segmentArray will be determined by program_struct->processorType
+//			The segmentArray will be of "program_struct->prgmHdrEntrNum" length
+//			Be sure to properly type cast the void* based on the processor type
+int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
+{
+	/* LOCAL VARIABLES */
+	int retVal = ERROR_SUCCESS;
+	int i = 0;  // Incrementing variable
+
+	/* INPUT VALIDATION */
+	if (!program_struct)
+	{
+		retVal = ERROR_NULL_PTR;
+	}
+	else if (program_struct->processorType != ELF_H_CLASS_32 && program_struct->processorType != ELF_H_CLASS_64)
+	{
+		retVal = ERROR_BAD_ARG;  // Invalid processor type
+	}
+	else if (program_struct->prgmHdrEntrNum < 0)
+	{
+		retVal = ERROR_BAD_ARG;  // Invalid processor type
+	}
+	else if (program_struct->prgmHdrEntrNum > 0)
+	{
+		if (program_struct->processorType == ELF_H_CLASS_32)
+		{
+			retVal = (struct Prgrm_Hdr_Segment_32**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_32*));
+			if (retVal)
+			{
+				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
+				{
+					(*(retVal + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
+				}
+			}
+			else
+			{
+				retVal = ERROR_NULL_PTR;
+			}
+		}
+		else if (program_struct->processorType == ELF_H_CLASS_64)
+		{
+			retVal = (struct Prgrm_Hdr_Segment_64**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_64*));
+			if (retVal)
+			{
+				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
+				{
+					(*(retVal + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
+				}
+			}
+			else
+			{
+				retVal = ERROR_NULL_PTR;
+			}
+		}
+		
+	}
+
+	return retVal;
+}
+
+
+
 // Purpose:	Build a HarkleDict of Program Header Type definitions
 // Input:	None
 // Output:	Pointer to the head node of a linked list of HarkleDicts
