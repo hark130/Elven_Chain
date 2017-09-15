@@ -440,7 +440,7 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct);
 //			stream - A stream to send the information to (e.g., stdout, A file)
 // Output:	None
 // Note:	This function will print the relevant data from program_struct->segmentArray into stream
-void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FILE* stream)
+void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FILE* stream);
 
 // Purpose:	Build a HarkleDict of Program Header Type definitions
 // Input:	None
