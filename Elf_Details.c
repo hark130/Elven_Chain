@@ -1,7 +1,7 @@
 #include "Elf_Details.h"
 #include "Harklehash.h"
 #include <assert.h>
-#include <inttypes.h>	// Print uint64_t variables
+#include <inttypes.h>	// Print uint??_t variables
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2682,7 +2682,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 					{
 						fprintf(stream, "\nSegment #%d\n", segmentNum + 1);
 						fprintf(stream, "\tType:\t\t%s\n", segment32_ptr->prgmHdrType);
-						fprintf(stream, "\tOffset:\t\t0x%" PRIx32 " (%" PRIu32 ")\n", segment32_ptr->segOffset);
+						fprintf(stream, "\tOffset:\t\t0x%" PRIx32 " (%" PRIu32 ")\n", segment32_ptr->segOffset, segment32_ptr->segOffset);
 						fprintf(stream, "\tVirtual Addr:\t0x016%" PRIx32 "\n", segment32_ptr->segVirtualAddr);
 						fprintf(stream, "\tPhysical Addr:\t0x016%" PRIx32 "\n", segment32_ptr->segPhysicalAddr);
 						fprintf(stream, "\tFile Size:\t%" PRIu32 "\n", segment32_ptr->segFileSize);
@@ -2760,7 +2760,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 							fprintf(stream, "\n");
 						}
 						/* DONE PRINTING FLAGS */
-						fprintf(stream, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset);
+						fprintf(stream, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset, segment64_ptr->segOffset);
 						fprintf(stream, "\tVirtual Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segVirtualAddr);
 						fprintf(stream, "\tPhysical Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
 						fprintf(stream, "\tFile Size:\t%" PRIu64 "\n", segment64_ptr->segFileSize);
