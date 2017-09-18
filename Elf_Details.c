@@ -2436,7 +2436,19 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 			{
 				for (i = 0; i < (*old_struct)->prgmHdrEntrNum; i++)
 				{
-					retVal += take_mem_back(&(*(((*old_struct)->segmentArray) + i)), 1, sizeof(void*));
+					if ((*old_struct)->processorType == ELF_H_CLASS_32)
+					{
+						retVal += take_mem_back(&(*((struct Prgrm_Hdr_Segment_32*)((*old_struct)->segmentArray) + i)), 1, sizeof((struct Prgrm_Hdr_Segment_32*)));
+					}
+					else if ((*old_struct)->processorType == ELF_H_CLASS_64)
+					{
+						retVal += take_mem_back(&(*((struct Prgrm_Hdr_Segment_64*)((*old_struct)->segmentArray) + i)), 1, sizeof((struct Prgrm_Hdr_Segment_64*)));
+					}
+					else
+					{
+						retVal += ERROR_BAD_ARG;	
+					}
+					
 					if (retVal)
 					{
 						PERROR(errno);
