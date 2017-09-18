@@ -123,3 +123,8 @@ Elf_Details.c:2761:23: warning: format ‘%lu’ expects a matching ‘long unsi
                        ^
 Makefile:7: recipe for target 'all' failed
 make: *** [all] Error 1
+
+### Research
+https://stackoverflow.com/questions/289329/solution-for-dereferencing-void-pointer-warning-in-struct-in-c
+http://www.c4learn.com/c-programming/c-dereferencing-void-pointers/
+
