@@ -2606,7 +2606,8 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					(*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
+					// 105: error: invalid use of void expression
+					(*(((struct Prgrm_Hdr_Segment_32*)program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
 				}
 			}
 			else
@@ -2621,7 +2622,8 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					(*((program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
+					// 105: error: invalid use of void expression
+					(*(((struct Prgrm_Hdr_Segment_64*)program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
 				}
 			}
 			else
