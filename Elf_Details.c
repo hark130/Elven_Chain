@@ -2719,7 +2719,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 						fprintf(stream, "\tFlags:\t\t");
 						// Binary printer
 						// Printing flags so endianness shouldn't matter
-						print_binary(stream, &(segment32_ptr->flags), sizeof(segment32_ptr->flags), segment32_ptr->bigEndian);
+						print_binary(stream, &(segment32_ptr->flags), sizeof(segment32_ptr->flags), program_struct->bigEndian);
 						fprintf(stream, "\n");
 						// If at least one known flag is set, tab over
 						if ((segment32_ptr->flags && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
@@ -2764,7 +2764,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 						fprintf(stream, "\tFlags:\t\t");
 						// Binary printer
 						// Printing flags so endianness shouldn't matter
-						print_binary(stream, &(segment64_ptr->flags), sizeof(segment64_ptr->flags), segment64_ptr->bigEndian);
+						print_binary(stream, &(segment64_ptr->flags), sizeof(segment64_ptr->flags), program_struct->bigEndian);
 						fprintf(stream, "\n");
 						// If at least one known flag is set, tab over
 						if ((segment64_ptr->flags && (ELF_H_64_FLAG_R || ELF_H_64_FLAG_W || ELF_H_64_FLAG_X)))
@@ -3462,8 +3462,8 @@ void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int 
 	/* START PRINTING */
 	if (bigEndian == TRUE)
 	{
-		for (i = (numBytesToPrint - 1); i >= 0; i--)
-		// for (i = 0; i < numBytesToPrint; i++)
+		// for (i = (numBytesToPrint - 1); i >= 0; i--)
+		for (i = 0; i < numBytesToPrint; i++)
 		{
 			printThis = (unsigned char)(*(unsigned char*)(valueToPrint + i));
 
@@ -3490,8 +3490,8 @@ void print_binary(FILE* stream, void* valueToPrint, size_t numBytesToPrint, int 
 	}
 	else if (bigEndian == FALSE)
 	{
-		for (i = 0; i < numBytesToPrint; i++)
-		// for (i = (numBytesToPrint - 1); i >= 0; i--)
+		// for (i = 0; i < numBytesToPrint; i++)
+		for (i = (numBytesToPrint - 1); i >= 0; i--)
 		{
 			printThis = (unsigned char)(*(unsigned char*)(valueToPrint + i));
 
