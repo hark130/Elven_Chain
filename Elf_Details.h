@@ -275,20 +275,22 @@ struct Prgrm_Hdr_Details
 	uint64_t pHdr64;			// 64-bit address offset of the program header table
 	int prgmHdrSize;			// Contains the size of a program header table entry
 	int prgmHdrEntrNum;			// Number of entries in the program header table
-	// char* prgmHdrType;			// Identifies the type of the segment
+	// char* prgmHdrType;		// Identifies the type of the segment
 	// uint32_t flags64bit;		// 64 bit flag segment
-	// uint32_t seg32off;			// 32-bit offset of the segment's first byte in the file image
-	// uint64_t seg64off;			// 64-bit offset of the segment's first byte in the file image
-	// uint32_t seg32virAddr;		// 32-bit Virtual address of the segment in memory
-	// uint64_t seg64virAddr;		// 64-bit Virtual address of the segment in memory
-	// uint32_t seg32physAddr;		// 32-bit Physical address of the segment in memory
-	// uint64_t seg64physAddr;		// 64-bit Physical address of the segment in memory
-	// uint64_t segFileSize;		// Size in bytes of the segment in the file image
+	// uint32_t seg32off;		// 32-bit offset of the segment's first byte in the file image
+	// uint64_t seg64off;		// 64-bit offset of the segment's first byte in the file image
+	// uint32_t seg32virAddr;	// 32-bit Virtual address of the segment in memory
+	// uint64_t seg64virAddr;	// 64-bit Virtual address of the segment in memory
+	// uint32_t seg32physAddr;	// 32-bit Physical address of the segment in memory
+	// uint64_t seg64physAddr;	// 64-bit Physical address of the segment in memory
+	// uint64_t segFileSize;	// Size in bytes of the segment in the file image
 	// uint64_t segMemSize;		// Size in bytes of the segment in memory
 	// uint32_t flags32bit;		// 32 bit flag segment
 	// uint32_t align32bit;		// 32 bit alignment
 	// uint64_t align64bit;		// 64 bit alignment
-	void* segmentArray;			// Array of struct* (Prgrm_Hdr_Segment_32 or Prgrm_Hdr_Segment_64)
+	// void** segmentArray;		// Array of struct* (Prgrm_Hdr_Segment_32 or Prgrm_Hdr_Segment_64)
+	struct Prgrm_Hdr_Segment_32** segmentArray32;
+	struct Prgrm_Hdr_Segment_64** segmentArray64;
 };
 // All char* members should be dynamically allocated and later free()'d
 

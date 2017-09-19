@@ -1961,7 +1961,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		// 2.10.A. 32 bit
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray;
+			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray32;
 			if (segmentArray32_ptr)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
@@ -2125,7 +2125,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		// 2.10.B. 64 bit
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray;
+			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray64;
 			if (segmentArray64_ptr)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
@@ -2432,23 +2432,24 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 		{
 			/* ZEROIZE AND FREE (as appropriate) STRUCT MEMBERS */
 			// void* segmentArray;  // Array of struct* (Prgrm_Hdr_Segment_32 or Prgrm_Hdr_Segment_64)
-			if ((*old_struct)->segmentArray)
+			if ((*old_struct)->segmentArray32 || (*old_struct)->segmentArray64)
 			{
+				// Release each struct * in the segmentArray
 				for (i = 0; i < (*old_struct)->prgmHdrEntrNum; i++)
 				{
 					if ((*old_struct)->processorType == ELF_H_CLASS_32)
 					{
-						retVal += take_mem_back(&(*((struct Prgrm_Hdr_Segment_32*)((*old_struct)->segmentArray) + i)), 1, sizeof((struct Prgrm_Hdr_Segment_32*)));
+						retVal += take_mem_back((void**)((*old_struct)->segmentArray32) + i, 1, sizeof(struct Prgrm_Hdr_Segment_32*));
 					}
 					else if ((*old_struct)->processorType == ELF_H_CLASS_64)
 					{
-						retVal += take_mem_back(&(*((struct Prgrm_Hdr_Segment_64*)((*old_struct)->segmentArray) + i)), 1, sizeof((struct Prgrm_Hdr_Segment_64*)));
+						retVal += take_mem_back((void**)((*old_struct)->segmentArray64) + i, 1, sizeof(struct Prgrm_Hdr_Segment_64*));
 					}
 					else
 					{
 						retVal += ERROR_BAD_ARG;	
 					}
-					
+					// Verify the return value					
 					if (retVal)
 					{
 						PERROR(errno);
@@ -2456,7 +2457,20 @@ int kill_program_header(struct Prgrm_Hdr_Details** old_struct)
 						retVal = ERROR_SUCCESS;
 					}
 				}
-				retVal += take_mem_back(&((*old_struct)->segmentArray), 1, sizeof(void*));
+				// Release the segmentArray
+				if ((*old_struct)->processorType == ELF_H_CLASS_32)
+				{
+					retVal += take_mem_back((void**)&((*old_struct)->segmentArray32), 1, sizeof((*old_struct)->segmentArray32));
+				}
+				else if ((*old_struct)->processorType == ELF_H_CLASS_64)
+				{
+					retVal += take_mem_back((void**)&((*old_struct)->segmentArray64), 1, sizeof((*old_struct)->segmentArray64));
+				}
+				else
+				{
+					retVal += ERROR_BAD_ARG;	
+				}
+				// Verify the return value
 				if (retVal)
 				{
 					PERROR(errno);
@@ -2613,13 +2627,12 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 		/* ALLOCATE MEMORY */
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			program_struct->segmentArray = (struct Prgrm_Hdr_Segment_32**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_32*));
-			if (program_struct->segmentArray)
+			program_struct->segmentArray32 = (struct Prgrm_Hdr_Segment_32**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, program_struct->prgmHdrEntrNum * sizeof(struct Prgrm_Hdr_Segment_32*));
+			if (program_struct->segmentArray32)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					// 105: error: invalid use of void expression
-					(*(((struct Prgrm_Hdr_Segment_32*)program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
+					(*(program_struct->segmentArray32 + i)) = (struct Prgrm_Hdr_Segment_32*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_32));
 				}
 			}
 			else
@@ -2629,13 +2642,12 @@ int allocate_segment_array(struct Prgrm_Hdr_Details* program_struct)
 		}
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			program_struct->segmentArray = (struct Prgrm_Hdr_Segment_64**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, sizeof(struct Prgrm_Hdr_Segment_64*));
-			if (program_struct->segmentArray)
+			program_struct->segmentArray64 = (struct Prgrm_Hdr_Segment_64**)gimme_mem((size_t)program_struct->prgmHdrEntrNum, program_struct->prgmHdrEntrNum * sizeof(struct Prgrm_Hdr_Segment_64*));
+			if (program_struct->segmentArray64)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					// 105: error: invalid use of void expression
-					(*(((struct Prgrm_Hdr_Segment_64*)program_struct->segmentArray) + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
+					(*(program_struct->segmentArray64 + i)) = (struct Prgrm_Hdr_Segment_64*)gimme_mem(1, sizeof(struct Prgrm_Hdr_Segment_64));
 				}
 			}
 			else
@@ -2684,7 +2696,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 		// 32-bit Program Header Segments
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray;
+			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray32;
 			if (segmentArray32_ptr)
 			{
 				for (segmentNum = 0; segmentNum < program_struct->prgmHdrEntrNum; segmentNum++)
@@ -2734,7 +2746,7 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 		}
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray;
+			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray64;
 			if (segmentArray64_ptr)
 			{
 				for (segmentNum = 0; segmentNum < program_struct->prgmHdrEntrNum; segmentNum++)
