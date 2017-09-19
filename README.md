@@ -6,6 +6,11 @@ This extremely light repository is made of very fine ELF links. This project is 
 2. prgrm_hdr - Current working branch, implementing the Program Header (future v0.2.0)
 
 ## TO DO
+    [ ] BUGS
+        [ ] convert_char_to_int() is returned garbage when called by convert_char_to_uint64() one byte at a time
+        [ ] Program Header Type 1685382480 not found in HarkleDict!
+        [ ] Program Header Type 1685382481 not found in HarkleDict!
+        [ ] Program Header Type 1685382482 not found in HarkleDict!
     [ ] Rename Harklehash to Harkledict
     [X] Implement ELF Header
         [X] Magic Number
