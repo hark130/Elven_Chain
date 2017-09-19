@@ -1961,12 +1961,12 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		// 2.10.A. 32 bit
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray32;
+			segmentArray32_ptr = program_struct->segmentArray32;
 			if (segmentArray32_ptr)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					segment32_ptr = (struct Prgrm_Hdr_Segment_32*)(*(segmentArray32_ptr + i));
+					segment32_ptr = (*(segmentArray32_ptr + i));
 					if (segment32_ptr)
 					{
 						// 2.10.A.1. uint32_t p_type;  // Segment type as number
@@ -2125,12 +2125,12 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 		// 2.10.B. 64 bit
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray64;
+			segmentArray64_ptr = program_struct->segmentArray64;
 			if (segmentArray64_ptr)
 			{
 				for (i = 0; i < program_struct->prgmHdrEntrNum; i++)
 				{
-					segment64_ptr = (struct Prgrm_Hdr_Segment_64*)(*(segmentArray64_ptr + i));
+					segment64_ptr = (*(segmentArray64_ptr + i));
 					if (segment64_ptr)
 					{
 						// 2.10.A.1. uint32_t p_type;  // Segment type as number
