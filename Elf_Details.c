@@ -2,6 +2,7 @@
 #include "Harklehash.h"
 #include <assert.h>
 #include <inttypes.h>    // Print uint??_t variables
+#include <limits.h>      // UINT_MAX
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -3183,7 +3184,8 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
     /* LOCAL VARIABLES */
     int retVal = ERROR_SUCCESS;    // Function return value
     unsigned int value = 0;        // Holds the current translated value prior to return
-    int i = 0;                    // Iterating variable
+    unsigned int mask = UINT_MAX;  // Bit mask to remove 'noise'
+    int i = 0;                     // Iterating variable
 
     /* INPUT VALIDATION */
     if (!buffToConvert || !translation)
@@ -3215,6 +3217,8 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
     {
         // Zeroize translation
         *translation = value;
+        // Setup the bitmask
+        mask >>= ((sizeof(value) - numBytesToConvert) * 8);
     }
 
     if (bigEndian == TRUE)
@@ -3233,9 +3237,6 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
     }
     else if (bigEndian == FALSE)
     {
-        // printf("buffToConvert[BUFF_SIZE - 2] == %d(0x%X)\n", (*(buffToConvert + 1024 - 2)), (*(buffToConvert + 1024 - 2)));  // DEBUGGING
-        // printf("buffToConvert[BUFF_SIZE - 1] == %d(0x%X)\n", (*(buffToConvert + 1024 - 1)), (*(buffToConvert + 1024 - 1)));  // DEBUGGING
-
         for (i = (dataOffset + numBytesToConvert - 1); i >= dataOffset ; i--)
         {
             value |= (unsigned int)(*(buffToConvert + i));
@@ -3257,8 +3258,12 @@ int convert_char_to_int(char* buffToConvert, int dataOffset, \
     // Done
     if (retVal == ERROR_SUCCESS)
     {
+        // Bit mask off the 'noise'
+        value &= mask;
+        // Assign the value to the 'out' parameter
         *translation = value;
     }
+    
     return retVal;
 }
 
