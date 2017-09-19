@@ -2237,9 +2237,14 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
                     dataOffset += sizeof(segment64_ptr->segPhysicalAddr);
 
                     // 2.10.A.6. uint64_t segFileSize;  // Size in bytes of the segment in the file image
+                    fprintf(stdout, "Data Offset is currently 0x%X (%d)\n", dataOffset, dataOffset);  // DEBUGGING
+                    fprintf(stdout, "Size of segment64_ptr->segFileSize is %d\n", sizeof(segment64_ptr->segFileSize));  // DEBUGGING
+                    fprintf(stdout, "############################# HERE IT COMES #############################\n");  // DEBUGGING
                     tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->segFileSize), program_struct->bigEndian, &tmpUint64);
+                    fprintf(stdout, "############################# THERE IT GOES #############################\n");  // DEBUGGING
                     if (tmpInt == ERROR_SUCCESS)
                     {
+                        fprintf(stdout, "tmpUint64 is currently %" PRIu64 "\n", tmpUint64);  // DEBUGGING
                         segment64_ptr->segFileSize = tmpUint64;
                     }
                     else
@@ -2275,12 +2280,12 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
                     // Advance to next struct member
                     dataOffset += sizeof(segment64_ptr->alignment);
                     /* DEBUGGING */
-                    fprintf(stdout, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset, segment64_ptr->segOffset);
-                    fprintf(stdout, "\tVirtual Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segVirtualAddr);
-                    fprintf(stdout, "\tPhysical Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
-                    fprintf(stdout, "\tFile Size:\t%" PRIu64 "\n", segment64_ptr->segFileSize);
-                    fprintf(stdout, "\tMem Size:\t%" PRIu64 "\n", segment64_ptr->segMemSize);
-                    fprintf(stdout, "\tAlignment:\t%" PRIu64 "\n", segment64_ptr->alignment);
+                    // fprintf(stdout, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset, segment64_ptr->segOffset);
+                    // fprintf(stdout, "\tVirtual Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segVirtualAddr);
+                    // fprintf(stdout, "\tPhysical Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
+                    // fprintf(stdout, "\tFile Size:\t%" PRIu64 "\n", segment64_ptr->segFileSize);
+                    // fprintf(stdout, "\tMem Size:\t%" PRIu64 "\n", segment64_ptr->segMemSize);
+                    // fprintf(stdout, "\tAlignment:\t%" PRIu64 "\n", segment64_ptr->alignment);
                 }
                 else
                 {
@@ -3282,10 +3287,11 @@ int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
                            uint64_t* translation)
 {
     /* LOCAL VARIABLES */
-    int retVal = ERROR_SUCCESS;    // Function return value
-    uint64_t value = 0;            // Holds the current translated value prior to return
-    int i = 0;                    // Iterating variable
-    unsigned int tmpValue = 0;    // Holds the value from successive calls to ccti()
+    int retVal = ERROR_SUCCESS;     // Function return value
+    int i = 0;                      // Iterating variable
+    unsigned int tmpValue = 0;      // Holds the value from successive calls to ccti()
+    unsigned int mask32bit = 0xFF;  // Mask to clear out any 32-bit noise
+    uint64_t value = 0;             // Holds the current translated value prior to return
 
     /* INPUT VALIDATION */
     if (!buffToConvert || !translation)
@@ -3333,6 +3339,7 @@ int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
             }
             else
             {
+                tmpValue &= mask32bit;  // Clear out any noise above the least-sig 8 bits
                 value |= tmpValue;
                 tmpValue = 0;
                 if ((i + 1) < (dataOffset + numBytesToConvert))
@@ -3356,12 +3363,31 @@ int convert_char_to_uint64(char* buffToConvert, int dataOffset, \
             }
             else
             {
+                // fprintf(stdout, "tmpValue before:\t%u\n", tmpValue);  // DEBBUGGING
+                tmpValue &= mask32bit;  // Clear out any noise above the least-sig 8 bits
+                // fprintf(stdout, "tmpValue after:\t%u\n", tmpValue);  // DEBBUGGING
+                // if (dataOffset == 0x60)  // DEBUGGING
+                // {
+                //     fprintf(stdout, "c_c_t_i() read in %u\n", tmpValue);  // DEBBUGGING
+                //     if (tmpValue)
+                //     {
+                //         fprintf(stdout, "As an signed value, it is %d (0x%X)", tmpValue, tmpValue);  // DEBUGGING
+                //         fprintf(stdout, " which, in binary, is:\n");  // DEBUGGING
+                //         print_binary(stdout, (void*)&tmpValue, sizeof(tmpValue), bigEndian);  // DEBUGGING
+                //         fprintf(stdout, "\n");  // DEBUGGING
+                //     }
+                // }
                 value |= tmpValue;
                 tmpValue = 0;
                 if (i > dataOffset)
                 {
                     value <<= 8;
                 }
+                // if (dataOffset == 0x60)  // DEBUGGING
+                // {
+                //     print_binary(stdout, (void*)&value, sizeof(value), bigEndian);  // DEBUGGING
+                //     fprintf(stdout, "\n");  // DEBUGGING
+                // }
             }
         }
         // We started at the bottom and now we're here
