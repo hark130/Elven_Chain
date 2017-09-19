@@ -2696,12 +2696,12 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 		// 32-bit Program Header Segments
 		if (program_struct->processorType == ELF_H_CLASS_32)
 		{
-			segmentArray32_ptr = (struct Prgrm_Hdr_Segment_32**)program_struct->segmentArray32;
+			segmentArray32_ptr = program_struct->segmentArray32;
 			if (segmentArray32_ptr)
 			{
 				for (segmentNum = 0; segmentNum < program_struct->prgmHdrEntrNum; segmentNum++)
 				{
-					segment32_ptr = (struct Prgrm_Hdr_Segment_32*)(*(segmentArray32_ptr + segmentNum));
+					segment32_ptr = (*(segmentArray32_ptr + segmentNum));
 					if (segment32_ptr)
 					{
 						fprintf(stream, "\nSegment #%d\n", segmentNum + 1);
@@ -2746,12 +2746,12 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
 		}
 		else if (program_struct->processorType == ELF_H_CLASS_64)
 		{
-			segmentArray64_ptr = (struct Prgrm_Hdr_Segment_64**)program_struct->segmentArray64;
+			segmentArray64_ptr = program_struct->segmentArray64;
 			if (segmentArray64_ptr)
 			{
 				for (segmentNum = 0; segmentNum < program_struct->prgmHdrEntrNum; segmentNum++)
 				{
-					segment64_ptr = (struct Prgrm_Hdr_Segment_64*)(*(segmentArray64_ptr + segmentNum));
+					segment64_ptr = (*(segmentArray64_ptr + segmentNum));
 					if (segment64_ptr)
 					{
 						fprintf(stream, "\nSegment #%d\n", segmentNum + 1);
