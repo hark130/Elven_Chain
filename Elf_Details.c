@@ -844,7 +844,7 @@ void print_elf_details(struct Elf_Details* elven_file, unsigned int sectionsToPr
 	fprintf(stream, "\n\n");
 
 	/* ELF HEADER */
-	if (sectionsToPrint & PRINT_ELF_HEADER || sectionsToPrint & PRINT_EVERYTHING)
+	if ((sectionsToPrint & PRINT_ELF_HEADER) || (sectionsToPrint & PRINT_EVERYTHING))
 	{
 		// Header
 		print_fancy_header(stream, "ELF HEADER", HEADER_DELIM);
@@ -2342,7 +2342,7 @@ void print_program_header(struct Prgrm_Hdr_Details* program_struct, unsigned int
 	}
 
 	/* PROGRAM HEADER */
-	if (sectionsToPrint & PRINT_ELF_PRGRM_HEADER || sectionsToPrint & PRINT_EVERYTHING)
+	if ((sectionsToPrint & PRINT_ELF_PRGRM_HEADER) || (sectionsToPrint & PRINT_EVERYTHING))
 	{
 		// Header
 		print_fancy_header(stream, "PROGRAM HEADER", HEADER_DELIM);
