@@ -2276,8 +2276,8 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
                     dataOffset += sizeof(segment64_ptr->alignment);
                     /* DEBUGGING */
                     fprintf(stdout, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset, segment64_ptr->segOffset);
-                    fprintf(stdout, "\tVirtual Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segVirtualAddr);
-                    fprintf(stdout, "\tPhysical Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
+                    fprintf(stdout, "\tVirtual Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segVirtualAddr);
+                    fprintf(stdout, "\tPhysical Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
                     fprintf(stdout, "\tFile Size:\t%" PRIu64 "\n", segment64_ptr->segFileSize);
                     fprintf(stdout, "\tMem Size:\t%" PRIu64 "\n", segment64_ptr->segMemSize);
                     fprintf(stdout, "\tAlignment:\t%" PRIu64 "\n", segment64_ptr->alignment);
@@ -2711,8 +2711,8 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
                         fprintf(stream, "\nSegment #%d\n", segmentNum + 1);
                         fprintf(stream, "\tType:\t\t%s\n", segment32_ptr->prgmHdrType);
                         fprintf(stream, "\tOffset:\t\t0x%" PRIx32 " (%" PRIu32 ")\n", segment32_ptr->segOffset, segment32_ptr->segOffset);
-                        fprintf(stream, "\tVirtual Addr:\t0x016%" PRIx32 "\n", segment32_ptr->segVirtualAddr);
-                        fprintf(stream, "\tPhysical Addr:\t0x016%" PRIx32 "\n", segment32_ptr->segPhysicalAddr);
+                        fprintf(stream, "\tVirtual Addr:\t0x%016" PRIx32 "\n", segment32_ptr->segVirtualAddr);
+                        fprintf(stream, "\tPhysical Addr:\t0x%016" PRIx32 "\n", segment32_ptr->segPhysicalAddr);
                         fprintf(stream, "\tFile Size:\t%" PRIu32 "\n", segment32_ptr->segFileSize);
                         fprintf(stream, "\tMem Size:\t%" PRIu32 "\n", segment32_ptr->segMemSize);
                         /* PRINT THE FLAGS */
@@ -2793,8 +2793,8 @@ void print_program_header_segments(struct Prgrm_Hdr_Details* program_struct, FIL
                         }
                         /* DONE PRINTING FLAGS */
                         fprintf(stream, "\tOffset:\t\t0x%" PRIx64 " (%" PRIu64 ")\n", segment64_ptr->segOffset, segment64_ptr->segOffset);
-                        fprintf(stream, "\tVirtual Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segVirtualAddr);
-                        fprintf(stream, "\tPhysical Addr:\t0x032%" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
+                        fprintf(stream, "\tVirtual Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segVirtualAddr);
+                        fprintf(stream, "\tPhysical Addr:\t0x%032" PRIx64 "\n", segment64_ptr->segPhysicalAddr);
                         fprintf(stream, "\tFile Size:\t%" PRIu64 "\n", segment64_ptr->segFileSize);
                         fprintf(stream, "\tMem Size:\t%" PRIu64 "\n", segment64_ptr->segMemSize);
                         fprintf(stream, "\tAlignment:\t%" PRIu64 "\n", segment64_ptr->alignment);
