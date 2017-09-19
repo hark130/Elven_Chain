@@ -2028,7 +2028,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->segOffset);
@@ -2041,7 +2041,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->segVirtualAddr);
@@ -2054,7 +2054,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->segPhysicalAddr);
@@ -2067,7 +2067,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->segFileSize);
@@ -2080,7 +2080,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->segMemSize);
@@ -2093,7 +2093,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->flags);
@@ -2106,7 +2106,7 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						}
 						else
 						{
-							fprintf(stderr, "Failed to convert char to an uint64_t.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
+							fprintf(stderr, "Failed to convert char to an unsigned int.  Error Code:\t%d\n", tmpInt);  // DEBUGGING
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment32_ptr->alignment);
@@ -2134,14 +2134,14 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 					if (segment64_ptr)
 					{
 						// 2.10.A.1. uint32_t p_type;  // Segment type as number
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->p_type), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->p_type), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->p_type = tmpUint;
+							segment64_ptr->p_type = tmpUint64;
 							// 2.10.A.2. char* prgmHdrType;  // Identifies the type of the segment
 							if (prgrmHdrTypeDict)
 							{
-								tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint);
+								tmpNode = lookup_value(prgrmHdrTypeDict, (int)tmpUint64);
 							}
 							else
 							{
@@ -2173,22 +2173,22 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 							}
 							else
 							{
-								fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint);
+								fprintf(stderr, "Program Header Type %d not found in HarkleDict!\n", (int)tmpUint64);
 							}
 						}
 						else 
 						{
-							fprintf(stderr, "Failed to convert to an unsigned int.  Error Code:\t%d\n", tmpInt);
+							fprintf(stderr, "Failed to convert to an uint64_t.  Error Code:\t%d\n", tmpInt);
 							tmpNode = NULL;
 						}
 						// Advance to next struct member
 						dataOffset += sizeof(segment64_ptr->p_type);
 						
 						// 2.10.A.3. uint32_t segOffset;  // Offset of the segment's first byte in the file image
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segOffset), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->segOffset), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->segOffset = tmpUint;
+							segment64_ptr->segOffset = tmpUint64;
 						}
 						else
 						{
@@ -2198,10 +2198,10 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						dataOffset += sizeof(segment64_ptr->segOffset);
 
 						// 2.10.A.4. uint32_t segVirtualAddr;  // Virtual address of the segment in memory
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segVirtualAddr), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->segVirtualAddr), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->segVirtualAddr = tmpUint;
+							segment64_ptr->segVirtualAddr = tmpUint64;
 						}
 						else
 						{
@@ -2211,10 +2211,10 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						dataOffset += sizeof(segment64_ptr->segVirtualAddr);
 
 						// 2.10.A.5. uint32_t segPhysicalAddr;  // Physical address of the segment in memory
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segPhysicalAddr), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->segPhysicalAddr), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->segPhysicalAddr = tmpUint;
+							segment64_ptr->segPhysicalAddr = tmpUint64;
 						}
 						else
 						{
@@ -2224,10 +2224,10 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						dataOffset += sizeof(segment64_ptr->segPhysicalAddr);
 
 						// 2.10.A.6. uint32_t segFileSize;  // Size in bytes of the segment in the file image
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segFileSize), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->segFileSize), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->segFileSize = tmpUint;
+							segment64_ptr->segFileSize = tmpUint64;
 						}
 						else
 						{
@@ -2237,10 +2237,10 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						dataOffset += sizeof(segment64_ptr->segFileSize);
 
 						// 2.10.A.7. uint32_t segMemSize;  // Size in bytes of the segment in memory
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->segMemSize), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->segMemSize), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->segMemSize = tmpUint;
+							segment64_ptr->segMemSize = tmpUint64;
 						}
 						else
 						{
@@ -2250,10 +2250,10 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						dataOffset += sizeof(segment64_ptr->segMemSize);
 
 						// 2.10.A.8. uint32_t flags;  // Segment flags
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->flags), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->flags), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->flags = tmpUint;
+							segment64_ptr->flags = tmpUint64;
 						}
 						else
 						{
@@ -2263,10 +2263,10 @@ int parse_program_header(struct Prgrm_Hdr_Details* program_struct, char* program
 						dataOffset += sizeof(segment64_ptr->flags);
 						
 						// 2.10.A.9. uint32_t alignment;  // Alignment
-						tmpInt = convert_char_to_int(program_contents, dataOffset, sizeof(segment64_ptr->alignment), program_struct->bigEndian, &tmpUint);
+						tmpInt = convert_char_to_uint64(program_contents, dataOffset, sizeof(segment64_ptr->alignment), program_struct->bigEndian, &tmpUint64);
 						if (tmpInt == ERROR_SUCCESS)
 						{
-							segment64_ptr->alignment = tmpUint;
+							segment64_ptr->alignment = tmpUint64;
 						}
 						else
 						{
